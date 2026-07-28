@@ -5,6 +5,7 @@ import '../providers/app_state.dart';
 import '../tournament/screens/tournament_list_screen.dart';
 import 'caddy_tips_screen.dart';
 import 'admin_moderation_screen.dart';
+import 'submit_tournament_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -72,6 +73,16 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SubmitTournamentScreen()),
+          ),
+        ),
+        child: const Icon(Icons.add),
+        tooltip: 'Submit New Tournament',
       ),
       body: Center(
         child: Column(
