@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/app_state.dart';
+import '../tournament/screens/tournament_list_screen.dart';
 import 'caddy_tips_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -62,15 +63,28 @@ class HomeScreen extends StatelessWidget {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text(
+          children: [
+            const Text(
               'KBVS Golf v1.0',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
-            Text(
+            const SizedBox(height: 16),
+            const Text(
               'Select a course to begin',
               style: TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 32),
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const TournamentListScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.golf_course),
+              label: const Text('Browse Tournaments'),
             ),
           ],
         ),
