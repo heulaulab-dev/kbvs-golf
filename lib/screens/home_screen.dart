@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import '../tournament/screens/tournament_list_screen.dart';
 import 'caddy_tips_screen.dart';
+import 'admin_moderation_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -19,7 +20,6 @@ class HomeScreen extends StatelessWidget {
               icon: app.caddyTipsEnabled ? const Icon(Icons.star) : const Icon(Icons.star_border),
               tooltip: 'Caddy Tips',
               onPressed: () {
-                // Navigate to Caddy Tips screen when star is tapped
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -28,6 +28,19 @@ class HomeScreen extends StatelessWidget {
                 );
               },
             ),
+          ),
+          // Admin moderation entry point
+          IconButton(
+            icon: const Icon(Icons.supervised_user_circle),
+            tooltip: 'Admin Moderation',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AdminModerationScreen(),
+                ),
+              );
+            },
           ),
           Consumer<AppState>(
             builder: (context, app, child) => PopupMenuButton<bool>(
