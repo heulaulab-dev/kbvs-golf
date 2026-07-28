@@ -8,10 +8,10 @@ import '../models/tournament.dart';
 import '../models/tournament_format.dart';
 import '../models/tournament_status.dart';
 import '../providers/changes_notifier_tournament_provider.dart';
-import '../widgets/avatar_stack.dart'; // NEW IMPORT for AvatarStack
+import '../widgets/avatar_stack.dart'; // Fixed import
 
 /// Screen showing detailed information about a single tournament.
-/// Polished UI: shimmer skeleton for hero image, avatar stack, tabs, collapsible caddy tips.
+/// Polished UI: shimmer skeleton for hero image, avatar stack, tabs, collapsible caddy tips, registration flow.
 class TournamentDetailScreen extends StatefulWidget {
   const TournamentDetailScreen({super.key});
 
@@ -22,6 +22,7 @@ class TournamentDetailScreen extends StatefulWidget {
 class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
   bool _showSkeleton = true;
   bool _isRegistered = false;
+  bool _registrationPending = false;
 
   @override
   void initState() {
@@ -49,7 +50,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
     }
   }
 
-  Widget _buildRegisterButton(Tournament tournament) {
+  Widget _buildRegisterButton(ChangesNotifierTournamentProvider provider, Tournament tournament) {
     if (tournament.isFull) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -81,14 +82,40 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: FilledButton.icon(
-        onPressed: () async {
-          setState(() => _isRegistered = true);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Successfully registered for ${tournament.name}!'), backgroundColor: Colors.green),
-          );
+        onPressed: _registrationPending ? null : () async {
+          setState(() => _registrationPending = true);
+          try {
+            await provider.registerToTournament(tournament.id);
+            setState(() => _isRegistered = true);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Successfully registered for ${tournament.name}!'), backgroundColor: Colors.green),
+            );
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Registration failed: $e'), backgroundColor: Colors.red),
+              );
+            }
+          } finally {
+            if (mounted) setState(() => _registrationPending = false);
+          }
         },
         icon: const Icon(Icons.person_add),
-        label: const Text('Register Now'),
+        label: _registrationPending
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Text('Register Now'),
+        style: ButtonStyle(
+          overlay: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) {
+              if (states.contains(MaterialState.pressed)) return Colors.blue.withOpacity(0.2);
+              return null;
+            },
+          ),
+        ),
       ),
     );
   }
@@ -168,14 +195,14 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
             const SizedBox(height: 16),
 
             // CTA button
-            _buildRegisterButton(tournament),
+            _buildRegisterButton(provider, tournament),
             const SizedBox(height: 16),
 
             // Tabs
             TabBar(
               tabs: const [Tab(text: 'Details'), Tab(text: 'Players'), Tab(text: 'Rules')],
             ),
-            SizedBox(height: -16), // Remove default spacing
+            SizedBox(height: -16),
             TabBarView(
               children: [
                 // Details tab
