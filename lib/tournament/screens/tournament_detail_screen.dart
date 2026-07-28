@@ -8,7 +8,7 @@ import '../models/tournament.dart';
 import '../models/tournament_format.dart';
 import '../models/tournament_status.dart';
 import '../providers/changes_notifier_tournament_provider.dart';
-import '../widgets/avatar_stack.dart'; // Fixed import
+import '../../widgets/avatar_stack.dart';
 
 /// Screen showing detailed information about a single tournament.
 /// Polished UI: shimmer skeleton for hero image, avatar stack, tabs, collapsible caddy tips, registration flow.
@@ -67,8 +67,8 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
           icon: const Icon(Icons.check),
           label: const Text("You're In"),
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.resolveTo<Color>(Colors.green.shade100),
-            foregroundColor: MaterialStateProperty.resolveTo<Color>(Colors.grey.shade900),
+            backgroundColor: WidgetStateProperty.all<Color>(Colors.green.shade100),
+            foregroundColor: WidgetStateProperty.all<Color>(Colors.grey.shade900),
           ),
         );
       );
@@ -105,8 +105,8 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
               )
             : const Text('Register Now'),
         style: ButtonStyle(
-          overlay: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-            if (states.contains(MaterialState.pressed)) return Colors.blue.withOpacity(0.2);
+          overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+            if (states.contains(WidgetState.pressed)) return Colors.blue.withOpacity(0.2);
             return null;
           }),
         ),

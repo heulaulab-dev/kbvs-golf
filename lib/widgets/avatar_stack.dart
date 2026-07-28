@@ -66,8 +66,8 @@ class AvatarStack extends StatelessWidget {
                   child: Center(
                     child: Text(
                       '+${remaining}',
-                      style: const TextStyle(
-                        fontSize: 11, // 11 px caption
+                      style: TextStyle(
+                        fontSize: 11, // 11 px caption
                         fontWeight: FontWeight.w600,
                         color: Colors.grey.shade900,
                       ),

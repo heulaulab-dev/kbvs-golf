@@ -138,7 +138,7 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
               padding: const EdgeInsets.only(top: 4),
               child: Text(
                 '${_dateFrom != null ? DateFormat('d MMM').format(_dateFrom!) : ''} – ${_dateTo != null ? DateFormat('d MMM').format(_dateTo!) : ''}',
-                style: const TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               ),
             ),
         ],
@@ -317,11 +317,11 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
             Container(width: double.infinity, height: 20, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), borderRadius: BorderRadius.circular(4)), margin: const EdgeInsets.only(bottom: 8)),
             Container(width: double.infinity, height: 12, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), borderRadius: BorderRadius.circular(4)), margin: const EdgeInsets.only(bottom: 16)),
             Row(children: [
-              const Icon(Icons.event, size: 14, color: Colors.grey.shade400),
+              Icon(Icons.event, size: 14, color: Colors.grey.shade400),
               const SizedBox(width: 4),
               Container(width: 100, height: 12, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), borderRadius: BorderRadius.circular(4))),
               const SizedBox(width: 12),
-              const Icon(Icons.sportsGolf, size: 14, color: Colors.grey.shade400),
+              Icon(Icons.sportsGolf, size: 14, color: Colors.grey.shade400),
               const SizedBox(width: 4),
               Container(width: 80, height: 12, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), borderRadius: BorderRadius.circular(4))),
             ]),
