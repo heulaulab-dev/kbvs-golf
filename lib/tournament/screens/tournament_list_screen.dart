@@ -10,6 +10,7 @@ import '../providers/changes_notifier_tournament_provider.dart';
 import 'tournament_detail_screen.dart';
 import '../widgets/avatar_stack.dart';
 
+import '../widgets/empty_state.dart';
 /// List of tournaments with search bar and filter controls.
 /// Polished UI: shimmer skeleton loaders, network awareness, filter bar.
 class TournamentListScreen extends StatefulWidget {
@@ -261,7 +262,7 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
     }
 
     if (filtered.isEmpty) {
-      return _EmptyState(isSearchResult: provider.searchQuery.isNotEmpty, message: provider.errorText.isEmpty ? 'No tournaments match your filters' : '');
+      return EmptyState(icon: Icons.golf_course, title:"No tournaments match your filters", subtitle: provider.errorText.isEmpty ? null : provider.errorText);
     }
 
     return ListView.separated(
@@ -355,22 +356,6 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
           OutlinedButton(onPressed: onRetry, icon: const Icon(Icons.replay), label: const Text('Retry')),
         ]),
       );
-    }
-  }
-
-  class _EmptyState extends StatelessWidget {
-    final bool isSearchResult;
-    final String message;
-
-    const _EmptyState({required this.isSearchResult, required this.message});
-
-    @override
-    Widget build(BuildContext context) {
-      return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        const Icon(Icons.golfCourse, size: 64, color: Colors.grey.shade400),
-        const SizedBox(height: 16),
-        Text(message, style: const TextStyle(fontSize: 16)),
-      ]));
     }
   }
 

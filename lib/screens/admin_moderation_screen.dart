@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../providers/changes_notifier_tournament_provider.dart';
 import '../models/tournament.dart';
 import '../models/tournament_status.dart';
+import '../widgets/empty_state.dart';
 
 class AdminModerationScreen extends StatefulWidget {
   const AdminModerationScreen({super.key});
@@ -105,7 +106,7 @@ class _AdminModerationScreenState extends State<AdminModerationScreen> {
         ],
       ),
       body: pending.isEmpty
-          ? const Center(child: Text('No tournaments pending.'))
+          ? EmptyState(icon: Icons.inbox, title: 'No tournaments pending')
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: pending.length,
