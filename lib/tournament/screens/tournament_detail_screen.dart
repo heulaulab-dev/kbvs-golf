@@ -8,9 +8,10 @@ import '../models/tournament.dart';
 import '../models/tournament_format.dart';
 import '../models/tournament_status.dart';
 import '../providers/changes_notifier_tournament_provider.dart';
+import '../widgets/avatar_stack.dart'; // NEW IMPORT for AvatarStack
 
 /// Screen showing detailed information about a single tournament.
-/// Polished UI: shimmer skeleton for hero image, loading feedback on register button.
+/// Polished UI: shimmer skeleton for hero image, avatar stack, tabs, collapsible caddy tips.
 class TournamentDetailScreen extends StatefulWidget {
   const TournamentDetailScreen({super.key});
 
@@ -19,78 +20,99 @@ class TournamentDetailScreen extends StatefulWidget {
 }
 
 class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
-  late final TextEditingController _searchCtrl;
   bool _showSkeleton = true;
+  bool _isRegistered = false;
 
   @override
   void initState() {
     super.initState();
-    _searchCtrl = TextEditingController();
-    // Show skeleton briefly to demonstrate loader pattern
     Timer(const Duration(milliseconds: 800), () {
       if (mounted) setState(() => _showSkeleton = false);
     });
   }
 
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
-  }
-
-  /// Format skill level to readable string.
-  String _formatSkill(SkillLevel level) {
-    switch (level) {
-      case SkillLevel.beginner: return 'Beginner';
-      case SkillLevel.casual: return 'Casual';
-      case SkillLevel.intermediate: return 'Intermediate';
-      case SkillLevel.advanced: return 'Advanced';
-      case SkillLevel.pro: return 'Professional';
-    }
-  }
-
-  /// Format tournament format to readable string.
-  String _formatFormat(TournamentFormat fmt) {
-    switch (fmt) {
-      case TournamentFormat.matchPlay: return 'Match Play';
-      case TournamentFormat.stableford: return 'Stableford';
-      case TournamentFormat.scramble: return 'Scramble';
-      case TournamentFormat.bestBall: return 'Best Ball';
-      case TournamentFormat.championship: return 'Championship';
-    }
-  }
-
-  /// Format tournament status to readable string.
-  String _formatStatus(TournamentStatus status) {
-    switch (status) {
-      case TournamentStatus.approved: return 'Approved';
-      case TournamentStatus.pending: return 'Pending';
-      case TournamentStatus.rejected: return 'Rejected';
-      case TournamentStatus.cancelled: return 'Cancelled';
-    }
-  }
-
-  Widget _buildInfoRow(String label, String value, {bool isSecondary = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: isSecondary ? Colors.grey.shade600 : null,
-                    fontWeight: isSecondary ? FontWeight.normal : FontWeight.w600,
-                  ),
-            ),
+  Widget _buildHero(Tournament tournament) {
+    if (_showSkeleton) {
+      return _HeroSkeleton();
+    } else {
+      return Container(
+        height: 250,
+        decoration: BoxDecoration(color: Colors.grey[50]),
+        borderRadius: BorderRadius.circular(16),
+        child: Center(
+          child: Text(
+            tournament.courseName,
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(color: Colors.grey.shade400),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildRegisterButton(Tournament tournament) {
+    if (tournament.isFull) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: OutlinedButton.icon(
+          onPressed: null,
+          icon: const Icon(Icons.people),
+          label: const Text('Full Capacity'),
+          style: OutlinedButton.styleFrom(foregroundColor: Colors.grey.shade500),
+        ),
+      );
+    }
+
+    if (_isRegistered) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: FilledButton.icon(
+          onPressed: () {},
+          icon: const Icon(Icons.check),
+          label: const Text("You're In"),
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.resolveTo<Color>(Colors.green.shade100),
+            foregroundColor: MaterialStateProperty.resolveTo<Color>(Colors.grey.shade900),
+          ),
+        ),
+      );
+    }
+
+    // Normal active register button
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: FilledButton.icon(
+        onPressed: () async {
+          setState(() => _isRegistered = true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Successfully registered for ${tournament.name}!'), backgroundColor: Colors.green),
+          );
+        },
+        icon: const Icon(Icons.person_add),
+        label: const Text('Register Now'),
+      ),
+    );
+  }
+
+  Widget _buildCaddyTipsCard() {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(side: BorderSide(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(12)),
+      child: ExpansionTile(
+        leading: const Icon(Icons.lightbulb_outline),
+        title: const Text('Caddy Tips'),
+        subtitle: const Text('Practical advice for your round'),
+        children: [
+          ListTile(
+            title: const Text('Check pin position on hole 7'),
+            subtitle: const Text('Avoid the water hazard on the right'),
+          ),
+          ListTile(
+            title: const Text('Wind direction matters today'),
+            subtitle: const Text('Club up by one on the long par-4'),
+          ),
+          ListTile(
+            title: const Text('Watch out for the green slope'),
+            subtitle: const Text('Ball runs towards the back left'),
           ),
         ],
       ),
@@ -101,21 +123,6 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
   Widget build(BuildContext context) {
     final tournament = ModalRoute.of(context)?.settings.arguments as Tournament;
     final provider = Provider.of<ChangesNotifierTournamentProvider>(context);
-
-    // Hero area – shimmer skeleton while loading, then placeholder
-    final heroWidget = _showSkeleton
-        ? _HeroSkeleton()
-        : Container(
-            height: 250,
-            decoration: BoxDecoration(color: Colors.grey[50]),
-            borderRadius: BorderRadius.circular(16),
-            child: Center(
-              child: Text(
-                tournament.courseName,
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(color: Colors.grey.shade400),
-              ),
-            ),
-          );
 
     return Scaffold(
       appBar: AppBar(
@@ -129,176 +136,89 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
             )
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          heroWidget,
-          const SizedBox(height: 16),
-          // Course info card
-          Card(
-            margin: const EdgeInsets.only(bottom: 16),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey.shade300),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Course Information',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInfoRow('Name', tournament.courseName),
-                  _buildInfoRow('Location', tournament.courseLocation,
-                      isSecondary: true),
-                ],
-              ),
-            ),
-          ),
+      body: DefaultTabController(
+        length: 3,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            // Hero area
+            _buildHero(tournament),
+            const SizedBox(height: 16),
 
-          // Details section
-          Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey.shade300),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Tournament Details',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInfoRow('Format', _formatFormat(tournament.format)),
-                  _buildInfoRow('Skill Level', _formatSkill(tournament.minSkill)),
-                  _buildInfoRow('Fee', tournament.feeLabel),
-                  _buildInfoRow('Start',
-                      DateFormat('d MMM yyyy, h:mm a').format(tournament.startDate)),
-                  _buildInfoRow('End',
-                      DateFormat('d MMM yyyy, h:mm a').format(tournament.endDate)),
-                  _buildInfoRow('Status', _formatStatus(tournament.status)),
-                ],
-              ),
-            ),
-          ),
+            // Tournament name
+            Text(tournament.name, style: Theme.of(context).textTheme.displayLarge?.copyWith(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 8),
 
-          // Participants section
-          Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey.shade300),
+            // Info row
+            Row(
+              children: [
+                Expanded(child: Text('${DateFormat('d MMM yyyy').format(tournament.startDate.toLocal())} – ${DateFormat('d MMM yyyy').format(tournament.endDate.toLocal())}', style: TextStyle(color: Colors.grey.shade600))),
+                const SizedBox(width: 16),
+                Expanded(child: Text(tournament.courseLocation, style: TextStyle(color: Colors.grey.shade600))),
+                const SizedBox(width: 16),
+                Expanded(child: Text(_formatFormat(tournament.format), style: TextStyle(color: Colors.grey.shade600))),
+                const SizedBox(width: 16),
+                Expanded(child: Text('Rp ${tournament.maxFeeIdr.toString()}', style: TextStyle(color: Colors.grey.shade600))),
+              ],
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Registration',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInfoRow('Registered',
-                      '${tournament.registeredCount} / ${tournament.maxCapacity} (${tournament.capacityLabel})'),
-                  _buildInfoRow('Full?', tournament.isFull ? 'Yes' : 'No'),
-                ],
-              ),
-            ),
-          ),
+            const SizedBox(height: 16),
 
-          // Register button (connected to provider) with loading state
-          _buildRegisterButton(provider, tournament),
-        ]),
+            // Avatar stack
+            AvatarStack(totalPlayers: tournament.registeredCount),
+            const SizedBox(height: 16),
+
+            // CTA button
+            _buildRegisterButton(tournament),
+            const SizedBox(height: 16),
+
+            // Tabs
+            TabBar(
+              tabs: const [Tab(text: 'Details'), Tab(text: 'Players'), Tab(text: 'Rules')],
+            ),
+            SizedBox(height: -16), // Remove default spacing
+            TabBarView(
+              children: [
+                // Details tab
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Description', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 8),
+                  Text('No description available.', style: Theme.of(context).textTheme.bodyMedium),
+                ]),
+                // Players tab
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Registered Players', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 8),
+                  AvatarStack(totalPlayers: tournament.registeredCount),
+                  const SizedBox(height: 8),
+                  if (tournament.registeredCount > 0)
+                    ListTile(leading: Icon(Icons.person), title: Text('Simulated player list...')),
+                ]),
+                // Rules tab
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Tournament Rules', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 8),
+                  Text('Rules will be displayed here.', style: Theme.of(context).textTheme.bodyMedium),
+                ]),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Caddy Tips collapsible card
+            _buildCaddyTipsCard(),
+          ]),
+        ),
       ),
     );
   }
 
-  Widget _buildRegisterButton(ChangesNotifierTournamentProvider provider,
-      Tournament tournament) {
-    bool isProcessing = provider.isLoading;
-    bool isAvailable = !tournament.isFull && !isProcessing;
-
-    if (tournament.isFull) {
-      // Full capacity state
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: OutlinedButton.icon(
-          onPressed: null,
-          icon: const Icon(Icons.people),
-          label: const Text('Full Capacity'),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.grey.shade500,
-          ),
-        ),
-      );
-    } else if (isAvailable) {
-      // Normal active register button
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: FilledButton.icon(
-          onPressed: () async {
-            try {
-              // Show loading feedback via snackbar
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Registering for ${tournament.name}...'),
-                  duration: const Duration(seconds: 3),
-                ),
-              );
-              await provider.registerToTournament(tournament.id);
-              // After reload, show success
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Successfully registered for ${tournament.name}!'),
-                  backgroundColor: Colors.green,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Registration failed: $e'),
-                  backgroundColor: Colors.red,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            }
-          },
-          icon: const Icon(Icons.person_add),
-          label: const Text('Register Now'),
-        ),
-      );
-    } else {
-      // Loading state – show spinner instead of button
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Center(
-          child: SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: Center(
-              child: CircularProgressIndicator(
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-          ),
-        ),
-      );
+  String _formatFormat(TournamentFormat fmt) {
+    switch (fmt) {
+      case TournamentFormat.matchPlay: return 'Match Play';
+      case TournamentFormat.stableford: return 'Stableford';
+      case TournamentFormat.scramble: return 'Scramble';
+      case TournamentFormat.bestBall: return 'Best Ball';
+      case TournamentFormat.championship: return 'Championship';
+      default: return '';
     }
   }
 }
@@ -319,9 +239,7 @@ class _HeroSkeletonState extends State<Heroskeleton> with SingleTickerProviderSt
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
-    _animation = Tween<double>(begin: -1.0, end: 2.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Cubic(0.4, 0.0, 0.2, 1)),
-    );
+    _animation = Tween<double>(begin: -1.0, end: 2.0).animate(CurvedAnimation(parent: _controller, curve: const Cubic(0.4, 0.0, 0.2, 1)));
     _controller.repeat(reverse: false);
   }
 

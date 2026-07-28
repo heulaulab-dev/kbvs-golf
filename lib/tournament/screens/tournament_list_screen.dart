@@ -8,6 +8,7 @@ import '../models/skill_level.dart';
 import '../models/tournament_status.dart';
 import '../providers/changes_notifier_tournament_provider.dart';
 import 'tournament_detail_screen.dart';
+import '../widgets/avatar_stack.dart';
 
 /// List of tournaments with search bar and filter controls.
 /// Polished UI: shimmer skeleton loaders, network awareness, filter bar.
@@ -46,9 +47,8 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
 
   // Build filter bar: location dropdown, skill chips, max fee slider, date range picker
   Widget _buildFilterBar(ChangesNotifierTournamentProvider provider) {
-    // Get unique locations from loaded tournaments (or fallback to empty list)
     final locations = <String>{... provider.tournaments.map((t) => t.courseLocation)};
-    locations.add(''); // for "All"
+    locations.add(''); 
     final locationList = locations.toList()..sort();
 
     return Padding(
@@ -56,7 +56,6 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Location dropdown
           Row(
             children: const [
               Expanded(child: Text('Location', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
@@ -76,7 +75,6 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
           ),
           const SizedBox(height: 12),
 
-          // Skill level chips
           Row(
             children: const [
               Expanded(child: Text('Skill Level', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
@@ -89,7 +87,7 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
             children: SkillLevel.values.map((skill) {
               final isSelected = _selectedSkills.contains(skill);
               return Chip(
-                label: Text(skill.toString().split('.').last), // e.g., Beginner
+                label: Text(skill.toString().split('.').last),
                 selected: isSelected,
                 onSelected: (selected) => setState(() {
                   if (selected) _selectedSkills.add(skill);
@@ -101,7 +99,6 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
           ),
           const SizedBox(height: 12),
 
-          // Max fee slider
           Row(
             children: const [
               Expanded(child: Text('Max Fee (IDR)', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
@@ -125,12 +122,11 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
           ),
           const SizedBox(height: 12),
 
-          // Date range button
           Row(
             children: [
               const Expanded(child: Text('Date Range', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
               IconButton(
-                icon: const Icon(Icons.calendar_view_day),
+                icon: const Icon(Icons.calendarViewDay),
                 onPressed: () => _showDateRangePicker(),
                 tooltip: 'Pick dates',
               ),
@@ -149,7 +145,6 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
     );
   }
 
-  // Show date range picker dialog
   void _showDateRangePicker() async {
     final from = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2100));
     final to = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2100));
@@ -169,7 +164,7 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
         actions: [
           Consumer<ChangesNotifierTournamentProvider>(
             builder: (context, provider, child) => IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.replay),
               tooltip: 'Refresh',
               onPressed: () => provider.refresh(),
             ),
@@ -181,10 +176,7 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
         builder: (context, provider, _) {
           return Column(
             children: [
-              // Filter bar
               _buildFilterBar(provider),
-
-              // Search bar
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: TextField(
@@ -197,15 +189,12 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
                   onChanged: (value) => provider.updateSearchQuery(value),
                 ),
               ),
-
-              // List area with refresh indicator
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: provider.refresh,
                   child: _buildBody(provider),
                 ),
               ),
-
               if (provider.hasNextPage)
                 Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -213,7 +202,7 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
                       ? const Center(child: CircularProgressIndicator())
                       : OutlinedButton.icon(
                           onPressed: provider.loadNextPage,
-                          icon: const Icon(Icons.plus),
+                          icon: const Icon(Icons.add),
                           label: const Text('Load More'),
                         ),
                 ),
@@ -225,9 +214,8 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
   }
 
   Widget _buildNetworkStatusIndicator() {
-    // Simple connectivity indicator - shows as online unless there's an error.
     return IconButton(
-      icon: const Icon(Icons.signal_cellular_alt_outlined, size: 24, color: Colors.grey.shade500),
+      icon: const Icon(Icons.signalCellularAltOutlined, size: 24, color: Colors.grey.shade500),
       tooltip: 'Online',
       onPressed: () {},
       splashRadius: 24,
@@ -235,25 +223,20 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
   }
 
   Widget _buildBody(ChangesNotifierTournamentProvider provider) {
-    // Apply filters to the current tournament list
     List<Tournament> filtered = List.from(provider.tournaments);
 
-    // Filter by location (if selected)
     if (_selectedLocation != null) {
       filtered = filtered.where((t) => t.courseLocation == _selectedLocation).toList();
     }
 
-    // Filter by skills (if any selected) – using min_skill matching
     if (_selectedSkills.isNotEmpty) {
       filtered = filtered.where((t) => _selectedSkills.contains(t.minSkill)).toList();
     }
 
-    // Filter by max fee
     if (_maxFee != null) {
       filtered = filtered.where((t) => t.maxFeeIdr <= _maxFee!).toList();
     }
 
-    // Filter by date range – assuming tournament start_date falls within range
     if (_dateFrom != null || _dateTo != null) {
       filtered = filtered.where((t) {
         final dt = t.startDate.toLocal();
@@ -263,7 +246,6 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
       }).toList();
     }
 
-    // Show shimmer skeleton while initial loading and filtered list empty? Keep existing logic.
     if (provider.isLoading && provider.tournaments.isEmpty) {
       return SizedBox(
         height: MediaQuery.of(context).size.height * 0.7,
@@ -289,10 +271,8 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
     );
   }
 
-  // Shimmering skeleton card with animated gradient overlay
   class _SkeletonCard extends StatefulWidget {
     const _SkeletonCard({super.key});
-
     @override
     State<SkeletonCard> createState() => _SkeletonCardState();
   }
@@ -340,7 +320,7 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
               const SizedBox(width: 4),
               Container(width: 100, height: 12, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), borderRadius: BorderRadius.circular(4))),
               const SizedBox(width: 12),
-              const Icon(Icons.sports_golf, size: 14, color: Colors.grey.shade400),
+              const Icon(Icons.sportsGolf, size: 14, color: Colors.grey.shade400),
               const SizedBox(width: 4),
               Container(width: 80, height: 12, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), borderRadius: BorderRadius.circular(4))),
             ]),
@@ -352,7 +332,6 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
     }
   }
 
-  // Basic error state (static)
   class _ErrorState extends StatelessWidget {
     final String message;
     final VoidCallback onRetry;
@@ -365,21 +344,20 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
       return Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red.shade400),
+          const Icon(Icons.errorOutline, size: 64, color: Colors.red.shade400),
           const SizedBox(height: 16),
           const Text('Something went wrong', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           if (hasNetworkIssue)
-            Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.wifi_off, size: 16, color: Colors.orange), const SizedBox(width: 6), Text('Check your connection', style: TextStyle(color: Colors.orange.shade700, fontSize: 14))])),
+            Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.wifiOff, size: 16, color: Colors.orange), const SizedBox(width: 6), Text('Check your connection', style: TextStyle(color: Colors.orange.shade700, fontSize: 14))])),
           Text(message, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade700, fontSize: 14)),
           const SizedBox(height: 24),
-          OutlinedButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: const Text('Retry')),
+          OutlinedButton(onPressed: onRetry, icon: const Icon(Icons.replay), label: const Text('Retry')),
         ]),
       );
     }
   }
 
-  // Empty state
   class _EmptyState extends StatelessWidget {
     final bool isSearchResult;
     final String message;
@@ -389,14 +367,13 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
     @override
     Widget build(BuildContext context) {
       return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        const Icon(Icons.golf_course, size: 64, color: Colors.grey.shade400),
+        const Icon(Icons.golfCourse, size: 64, color: Colors.grey.shade400),
         const SizedBox(height: 16),
         Text(message, style: const TextStyle(fontSize: 16)),
-      ]))));
+      ]));
     }
   }
 
-  // Tournament card (unchanged)
   class _TournamentCard extends StatelessWidget {
     final Tournament tournament;
 
@@ -407,24 +384,51 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
       final dateFmt = DateFormat('d MMM yyyy');
       return InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => TournamentDetailScreen(), settings: RouteSettings(arguments: tournament)))));
-        child: Card(margin: const EdgeInsets.symmetric(horizontal: 12), elevation: 0, shape: RoundedRectangleBorder(side: BorderSide(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(12)), child: Padding(padding: const EdgeInsets.all(16.0), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(tournament.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 4),
-          Text('${tournament.courseName} • ${tournament.courseLocation}', style: TextStyle(color: Colors.grey.shade700)),
-          const SizedBox(height: 8),
-          Row(children: [
-             const Icon(Icons.event, size: 14, color: Colors.grey.shade600),
-            const SizedBox(width: 4),
-            Text(dateFmt.format(tournament.startDate.toLocal()), style: const TextStyle(fontSize: 12, color: Colors.grey.shade700)),
-            const SizedBox(width: 12),
-            const Icon(Icons.sports_golf, size: 14, color: Colors.grey.shade600),
-            const SizedBox(width: 4),
-            Text(_formatLabel(tournament.format), style: const TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-          ]),
-          const SizedBox(height: 8),
-          Text('Rp ${tournament.maxFeeIdr.toString()}', style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.green.shade700)),
-        ])]),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => TournamentDetailScreen(),
+              settings: RouteSettings(arguments: tournament),
+            ),
+          );
+        },
+        child: Card(
+          margin: const EdgeInsets.symmetric(horizontal: 12),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(
+                tournament.name,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${tournament.courseName} • ${tournament.courseLocation}',
+                style: TextStyle(color: Colors.grey.shade700),
+              ),
+              const SizedBox(height: 8),
+              Row(children: [
+                const Icon(Icons.event, size: 14, color: Colors.grey.shade600),
+                const SizedBox(width: 4),
+                Text(dateFmt.format(tournament.startDate.toLocal()), style: const TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+                const SizedBox(width: 12),
+                const Icon(Icons.sportsGolf, size: 14, color: Colors.grey.shade600),
+                const SizedBox(width: 4),
+                Text(_formatLabel(tournament.format), style: const TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              ]),
+              const SizedBox(height: 8),
+              Text('Rp ${tournament.maxFeeIdr.toString()}', style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.green.shade700)),
+              const SizedBox(height: 8),
+              AvatarStack(totalPlayers: tournament.registeredCount),
+            ]),
+          ),
+        ),
       );
     }
 
