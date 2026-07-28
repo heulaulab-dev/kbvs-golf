@@ -9,8 +9,7 @@ import '../models/tournament_status.dart';
 import '../providers/changes_notifier_tournament_provider.dart';
 
 /// Screen showing detailed information about a single tournament.
-///
-/// Expects a [Tournament] object passed via navigation arguments.
+/// Polished UI: loading state feedback on register button.
 class TournamentDetailScreen extends StatefulWidget {
   const TournamentDetailScreen({super.key});
 
@@ -19,51 +18,37 @@ class TournamentDetailScreen extends StatefulWidget {
 }
 
 class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
-  late final ChangesNotifierTournamentProvider _provider;
+  late final TextEditingController _searchCtrl;
 
   /// Format skill level to readable string.
   String _formatSkill(SkillLevel level) {
     switch (level) {
-      case SkillLevel.beginner:
-        return 'Beginner';
-      case SkillLevel.casual:
-        return 'Casual';
-      case SkillLevel.intermediate:
-        return 'Intermediate';
-      case SkillLevel.advanced:
-        return 'Advanced';
-      case SkillLevel.pro:
-        return 'Professional';
+      case SkillLevel.beginner: return 'Beginner';
+      case SkillLevel.casual: return 'Casual';
+      case SkillLevel.intermediate: return 'Intermediate';
+      case SkillLevel.advanced: return 'Advanced';
+      case SkillLevel.pro: return 'Professional';
     }
   }
 
   /// Format tournament format to readable string.
   String _formatFormat(TournamentFormat fmt) {
     switch (fmt) {
-      case TournamentFormat.matchPlay:
-        return 'Match Play';
-      case TournamentFormat.stableford:
-        return 'Stableford';
-      case TournamentFormat.scramble:
-        return 'Scramble';
-      case TournamentFormat.bestBall:
-        return 'Best Ball';
-      case TournamentFormat.championship:
-        return 'Championship';
+      case TournamentFormat.matchPlay: return 'Match Play';
+      case TournamentFormat.stableford: return 'Stableford';
+      case TournamentFormat.scramble: return 'Scramble';
+      case TournamentFormat.bestBall: return 'Best Ball';
+      case TournamentFormat.championship: return 'Championship';
     }
   }
 
   /// Format tournament status to readable string.
   String _formatStatus(TournamentStatus status) {
     switch (status) {
-      case TournamentStatus.approved:
-        return 'Approved';
-      case TournamentStatus.pending:
-        return 'Pending';
-      case TournamentStatus.rejected:
-        return 'Rejected';
-      case TournamentStatus.cancelled:
-        return 'Cancelled';
+      case TournamentStatus.approved: return 'Approved';
+      case TournamentStatus.pending: return 'Pending';
+      case TournamentStatus.rejected: return 'Rejected';
+      case TournamentStatus.cancelled: return 'Cancelled';
     }
   }
 
@@ -206,59 +191,85 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
               ),
             ),
 
-            // Register button (connected to provider)
-            if (!tournament.isFull)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: FilledButton.icon(
-                  onPressed: tournament.isFull
-                      ? null
-                      : () async {
-                          try {
-                            // Show loading feedback via snackbar
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Registering for ${tournament.name}...'),
-                                duration: const Duration(seconds: 3),
-                              ),
-                            );
-                            await provider.registerToTournament(tournament.id);
-                            // After reload, show success
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Successfully registered for ${tournament.name}!'),
-                                backgroundColor: Colors.green,
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Registration failed: $e'),
-                                backgroundColor: Colors.red,
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.person_add),
-                          label: const Text('Register Now'),
-                        ),
-              )
-            else
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: OutlinedButton.icon(
-                  onPressed: null,
-                  icon: const Icon(Icons.people),
-                  label: const Text('Full Capacity'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.grey.shade500,
-                  ),
-                ),
-              ),
+            // Register button (connected to provider) with loading state
+            _buildRegisterButton(provider, tournament),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildRegisterButton(ChangesNotifierTournamentProvider provider,
+      Tournament tournament) {
+    bool isProcessing = provider.isLoading;
+    bool isAvailable = !tournament.isFull && !isProcessing;
+
+    if (tournament.isFull) {
+      // Full capacity state
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: OutlinedButton.icon(
+          onPressed: null,
+          icon: const Icon(Icons.people),
+          label: const Text('Full Capacity'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.grey.shade500,
+          ),
+        ),
+      );
+    } else if (isAvailable) {
+      // Normal active register button
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: FilledButton.icon(
+          onPressed: () async {
+            try {
+              // Show loading feedback via snackbar
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Registering for ${tournament.name}...'),
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+              await provider.registerToTournament(tournament.id);
+              // After reload, show success
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Successfully registered for ${tournament.name}!'),
+                  backgroundColor: Colors.green,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Registration failed: $e'),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          },
+          icon: const Icon(Icons.person_add),
+          label: const Text('Register Now'),
+        ),
+      );
+    } else {
+      // Loading state – show spinner instead of button
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Center(
+          child: SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: Center(
+              child: CircularProgressIndicator(
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
   }
 }
