@@ -10,7 +10,7 @@ import '../providers/changes_notifier_tournament_provider.dart';
 import 'tournament_detail_screen.dart';
 
 /// List of tournaments with search bar.
-/// Polished UI: skeleton loaders, animated error states, network awareness.
+/// Polished UI: shimmer skeleton loaders, network awareness.
 class TournamentListScreen extends StatefulWidget {
   const TournamentListScreen({super.key});
 
@@ -64,9 +64,7 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
                   decoration: InputDecoration(
                     hintText: 'Search tournaments',
                     prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   onChanged: (value) => provider.updateSearchQuery(value),
                 ),
@@ -96,14 +94,9 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
   }
 
   Widget _buildNetworkStatusIndicator() {
-    // Simple connectivity indicator - shows as online unless there's an error
-    // In production, integrate with connectivity_plus for real detection
+    // Simple connectivity indicator - shows as online unless there's an error.
     return IconButton(
-      icon: const Icon(
-        Icons.signal_cellular_alt_outlined,
-        size: 24,
-        color: Colors.grey.shade500,
-      ),
+      icon: const Icon(Icons.signal_cellular_alt_outlined, size: 24, color: Colors.grey.shade500),
       tooltip: 'Online',
       onPressed: () {},
       splashRadius: 24,
@@ -111,237 +104,135 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
   }
 
   Widget _buildBody(ChangesNotifierTournamentProvider provider) {
-    // Show skeleton cards while initial loading
+    // Show shimmer skeleton cards while initial loading
     if (provider.isLoading && provider.tournaments.isEmpty) {
       return SizedBox(
         height: MediaQuery.of(context).size.height * 0.7,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [_SkeletonCard(), _SkeletonCard(), _SkeletonCard()],
-          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [_SkeletonCard(), _SkeletonCard(), _SkeletonCard()]),
         ),
       );
     }
 
     if (provider.errorText.isNotEmpty) {
-      return _PolishedErrorState(
-        message: provider.errorText,
-        onRetry: () => provider.loadFirstPage(),
-        hasNetworkIssue: provider.errorText.toLowerCase().contains('network') ||
-            provider.errorText.toLowerCase().contains('connection') ||
-            provider.errorText.toLowerCase().contains('timeout'),
-      );
+      return _ErrorState(message: provider.errorText, onRetry: () => provider.loadFirstPage(), hasNetworkIssue: provider.errorText.toLowerCase().contains('network') || provider.errorText.toLowerCase().contains('connection') || provider.errorText.toLowerCase().contains('timeout'));
     }
 
     if (provider.tournaments.isEmpty) {
       return _EmptyState(isSearchResult: provider.searchQuery.isNotEmpty);
     }
 
-    return ListView.separated(
-      itemCount: provider.tournaments.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (context, index) => _TournamentCard(
-        tournament: provider.tournaments[index],
-      ),
-    );
+    return ListView.separated(itemCount: provider.tournaments.length, separatorBuilder: (_, __) => const SizedBox(height: 8), itemBuilder: (context, index) => _TournamentCard(tournament: provider.tournaments[index]));
   }
 }
 
-// Simple skeleton card placeholder (no shimmer for stability)
-class _SkeletonCard extends StatelessWidget {
+// Shimmering skeleton card with animated gradient overlay
+class _SkeletonCard extends StatefulWidget {
   const _SkeletonCard({super.key});
 
   @override
+  State<SkeletonCard> createState() => _SkeletonCardState();
+}
+
+class _SkeletonCardState extends State<SkeletonCard> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
+    _animation = Tween<double>(begin: -1.0, end: 2.0).animate(CurvedAnimation(parent: _controller, curve: const Cubic(0.4, 0.0, 0.2, 1)));
+    _controller.repeat(reverse: false);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        side: BorderSide(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title placeholder
-            Container(
-              width: double.infinity,
-              height: 20,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              margin: const EdgeInsets.only(bottom: 8),
-            ),
-            // Subtitle placeholder
-            Container(
-              width: double.infinity,
-              height: 12,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              margin: const EdgeInsets.only(bottom: 16),
-            ),
-            // Date/format row placeholders
-            Row(
-              children: [
-                Icon(Icons.event, size: 14, color: Colors.grey.shade400),
-                const SizedBox(width: 4),
-                Container(
-                  width: 100,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Icon(Icons.sports_golf, size: 14, color: Colors.grey.shade400),
-                const SizedBox(width: 4),
-                Container(
-                  width: 80,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Price placeholder
-            Container(
-              width: 60,
-              height: 16,
-              decoration: BoxDecoration(
-                color: Colors.green.shade200,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-          ],
+    final offset = _animation.value;
+    return ClipRect(
+      child: Container(
+        height: 140,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(12),
+          gradient: LinearGradient(
+            colors: [Colors.grey.shade200, Colors.grey.shade100, Colors.grey.shade200],
+            begin: Alignment(offset, 0),
+            end: Alignment(offset + 1, 0),
+            stops: const [0.0, 0.5, 1.0],
+          ),
         ),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SizedBox(height: 16),
+          Container(width: double.infinity, height: 20, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), borderRadius: BorderRadius.circular(4)), margin: const EdgeInsets.only(bottom: 8)),
+          Container(width: double.infinity, height: 12, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), borderRadius: BorderRadius.circular(4)), margin: const EdgeInsets.only(bottom: 16)),
+          Row(children: [
+            const Icon(Icons.event, size: 14, color: Colors.grey.shade400),
+            const SizedBox(width: 4),
+            Container(width: 100, height: 12, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), borderRadius: BorderRadius.circular(4))),
+            const SizedBox(width: 12),
+            const Icon(Icons.sports_golf, size: 14, color: Colors.grey.shade400),
+            const SizedBox(width: 4),
+            Container(width: 80, height: 12, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), borderRadius: BorderRadius.circular(4))),
+          ]),
+          const SizedBox(height: 16),
+          Container(width: 60, height: 16, decoration: BoxDecoration(color: Colors.green.shade200.withOpacity(0.4), borderRadius: BorderRadius.circular(4))),
+        ]),
       ),
     );
   }
 }
 
-// Empty state (unchanged)
+// Basic error state (static)
+class _ErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  final bool hasNetworkIssue;
+
+  const _ErrorState({required this.message, required this.onRetry, this.hasNetworkIssue = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        const Icon(Icons.error_outline, size: 64, color: Colors.red.shade400),
+        const SizedBox(height: 16),
+        const Text('Something went wrong', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 8),
+        if (hasNetworkIssue)
+          Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.wifi_off, size: 16, color: Colors.orange), const SizedBox(width: 6), Text('Check your connection', style: TextStyle(color: Colors.orange.shade700, fontSize: 14))])),
+        Text(message, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade700, fontSize: 14)),
+        const SizedBox(height: 24),
+        OutlinedButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: const Text('Retry')),
+      ]),
+    );
+  }
+}
+
+// Empty state
 class _EmptyState extends StatelessWidget {
   final bool isSearchResult;
   const _EmptyState({required this.isSearchResult});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.golf_course, size: 64, color: Colors.grey.shade400),
-          const SizedBox(height: 16),
-          Text(
-            isSearchResult ? 'No tournaments match your search' : 'No tournaments yet',
-            style: const TextStyle(fontSize: 16),
-          ),
-        ],
-      ),
-    );
+    return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        const Icon(Icons.golf_course, size: 64, color: Colors.grey.shade400),
+        const SizedBox(height: 16),
+        Text(isSearchResult ? 'No tournaments match your search' : 'No tournaments yet', style: const TextStyle(fontSize: 16)),
+    ])));
   }
 }
 
-// Polished error state with entrance animation
-class _PolishedErrorState extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-  final bool hasNetworkIssue;
-
-  const _PolishedErrorState({
-    required this.message,
-    required this.onRetry,
-    this.hasNetworkIssue = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SlideTransition(
-      position: Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
-        CurvedAnimation(
-          parent: AnimationController(
-            vsync: TickerProviderSeamless(),
-            duration: const Duration(milliseconds: 200),
-          ),
-          curve: Curves.easeOut,
-        ),
-      ),
-      child: FadeTransition(
-        opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(
-            parent: AnimationController(
-              vsync: TickerProviderSeamless(),
-              duration: const Duration(milliseconds: 200),
-            ),
-            curve: Curves.easeOut,
-          ),
-        ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.red.shade400,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Something went wrong',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                if (hasNetworkIssue)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.wifi_off, size: 16, color: Colors.orange),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Check your connection',
-                          style: TextStyle(
-                            color: Colors.orange.shade700,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
-                ),
-                const SizedBox(height: 24),
-                OutlinedButton.icon(
-                  onPressed: onRetry,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Retry'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Tournament card (unchanged, but made resilient to theme)
+// Tournament card (unchanged)
 class _TournamentCard extends StatelessWidget {
   final Tournament tournament;
   const _TournamentCard({required this.tournament});
@@ -351,74 +242,24 @@ class _TournamentCard extends StatelessWidget {
     final dateFmt = DateFormat('d MMM yyyy');
     return InkWell(
       borderRadius: BorderRadius.circular(12),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => TournamentDetailScreen(),
-            settings: RouteSettings(arguments: tournament),
-          ),
-        );
-      },
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 12),
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                tournament.name,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${tournament.courseName} • ${tournament.courseLocation}',
-                style: TextStyle(color: Colors.grey.shade700),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.event, size: 14, color: Colors.grey.shade600),
-                  const SizedBox(width: 4),
-                  Text(
-                    dateFmt.format(tournament.startDate.toLocal()),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Icon(Icons.sports_golf, size: 14, color: Colors.grey.shade600),
-                  const SizedBox(width: 4),
-                  Text(
-                    _formatLabel(tournament.format),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Rp ${tournament.maxFeeIdr.toString()}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.green.shade700,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => TournamentDetailScreen(), settings: RouteSettings(arguments: tournament)))));
+      child: Card(margin: const EdgeInsets.symmetric(horizontal: 12), elevation: 0, shape: RoundedRectangleBorder(side: BorderSide(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(12)), child: Padding(padding: const EdgeInsets.all(16.0), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(tournament.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 4),
+        Text('${tournament.courseName} • ${tournament.courseLocation}', style: TextStyle(color: Colors.grey.shade700)),
+        const SizedBox(height: 8),
+        Row(children: [
+          const Icon(Icons.event, size: 14, color: Colors.grey.shade600),
+          const SizedBox(width: 4),
+          Text(dateFmt.format(tournament.startDate.toLocal()), style: const TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+          const SizedBox(width: 12),
+          const Icon(Icons.sports_golf, size: 14, color: Colors.grey.shade600),
+          const SizedBox(width: 4),
+          Text(_formatLabel(tournament.format), style: const TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+        ]),
+        const SizedBox(height: 8),
+        Text('Rp ${tournament.maxFeeIdr.toString()}', style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.green.shade700)),
+      ])]),
     );
   }
 
