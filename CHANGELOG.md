@@ -15,6 +15,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — date groupe
 
 ### Completed
 - **Android cleartext config**: Added `android:usesCleartextTraffic="true"` and `<uses-permission android:name="android.permission.INTERNET" />` to `android/app/src/main/AndroidManifest.xml` so the HTTP API at `api-local.kbvalbury.com:9100` works on Android API 28+.
+- **Tournament list search**: Search field in `TournamentListScreen` now filters tournaments via `HttpTournamentRepository.search()`. Provider calls `repository.search()` when query changes, otherwise `getFirstPage()` for full list. 6 widget tests already cover search behavior.
 
 ---
 

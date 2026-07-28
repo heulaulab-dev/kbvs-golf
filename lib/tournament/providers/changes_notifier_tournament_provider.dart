@@ -69,13 +69,28 @@ class ChangesNotifierTournamentProvider extends ChangeNotifier {
     _setState(_state.copyWith(isLoading: true, errorText: ''));
 
     try {
-      final (items, total, hasNext) = await repository.getFirstPage();
+      List<Tournament> items;
+      int total = 0;
+      bool hasNext = false;
+
+      if (_state.searchQuery.isNotEmpty) {
+        final result = await repository.search(_state.searchQuery);
+        items = result.$1;
+        total = result.$2;
+        hasNext = result.$3;
+      } else {
+        final (itemsFull, totalFull, hasNextFull) = await repository.getFirstPage();
+        items = itemsFull;
+        total = totalFull;
+        hasNext = hasNextFull;
+      }
+
       _setState(_state.copyWith(
         tournaments: items,
         isLoading: false,
         errorText: '',
         hasNextPage: hasNext,
-        hasFirstPage: !hasNext, // mock returns hasNext=false → first page only
+        hasFirstPage: !hasNext,
       ));
     } catch (e) {
       _setState(_state.copyWith(
@@ -92,6 +107,8 @@ class ChangesNotifierTournamentProvider extends ChangeNotifier {
     final cleaned = query.trim();
     if (cleaned == _state.searchQuery) return;
     _setState(_state.copyWith(searchQuery: cleaned));
+    // Reload data with the new search query
+    loadFirstPage();
   }
 
   void _setState(TournamentProviderState next) {
