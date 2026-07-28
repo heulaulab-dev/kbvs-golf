@@ -101,14 +101,36 @@ class ChangesNotifierTournamentProvider extends ChangeNotifier {
     }
   }
 
-  /// Update the current search query. The next page load will
-  /// filter by this query string via the underlying repository.
-  void updateSearchQuery(String query) {
-    final cleaned = query.trim();
-    if (cleaned == _state.searchQuery) return;
-    _setState(_state.copyWith(searchQuery: cleaned));
-    // Reload data with the new search query
-    loadFirstPage();
+  /// Load next page of tournaments (appends to existing list).
+  /// Only available when there is a next page and not currently loading.
+  Future<void> loadNextPage() async {
+    if (!_state.hasNextPage || _state.isLoading) return;
+
+    _setState(_state.copyWith(isLoading: true));
+
+    try {
+      // Since we don't store cursor in state yet, use the repo's nextPage without cursor
+      // (the backend returns continuation token in response; for now simple approach)
+      final (items, total, hasNext) = await repository.nextPage();
+      // Append new items to existing list
+      final updatedTournaments = List<Tournament>.from(_state.tournaments)..addAll(items);
+      _setState(_state.copyWith(
+        tournaments: updatedTournaments,
+        isLoading: false,
+        hasNextPage: hasNext,
+      ));
+    } catch (e) {
+      _setState(_state.copyWith(
+        isLoading: false,
+        errorText: 'Failed to load more: $e',
+      ));
+    }
+  }
+
+  /// Refresh the first page (clears current list and reloads).
+  Future<void> refresh() async {
+    _setState(_state.copyWith(tournaments: const [], isLoading: true, errorText: ''));
+    await loadFirstPage();
   }
 
   void _setState(TournamentProviderState next) {

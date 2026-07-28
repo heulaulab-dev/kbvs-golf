@@ -41,7 +41,18 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tournaments')),
+      appBar: AppBar(
+        title: const Text('Tournaments'),
+        actions: [
+          Consumer<ChangesNotifierTournamentProvider>(
+            builder: (context, provider, child) => IconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip: 'Refresh',
+              onPressed: () => provider.refresh(),
+            ),
+          ),
+        ],
+      ),
       body: Consumer<ChangesNotifierTournamentProvider>(
         builder: (context, provider, _) {
           // Search field at top
@@ -62,7 +73,24 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
                       provider.updateSearchQuery(value),
                 ),
               ),
-              Expanded(child: _buildBody(provider)),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: provider.refresh,
+                  child: _buildBody(provider),
+                ),
+              ),
+              // Load More bar at bottom if hasNextPage
+              if (provider.hasNextPage)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: provider.isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : OutlinedButton.icon(
+                          onPressed: provider.loadNextPage,
+                          icon: const Icon(Icons.plus),
+                          label: const Text('Load More'),
+                        ),
+                ),
             ],
           );
         },
