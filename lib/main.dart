@@ -7,7 +7,7 @@ import 'tournament/providers/changes_notifier_tournament_provider.dart';
 import 'tournament/repositories/http_tournament_repository.dart';
 
 void main() {
-  runApp(const KbVsGolfApp());
+  const runApp(const KbVsGolfApp());
 }
 
 class KbVsGolfApp extends StatelessWidget {
@@ -28,9 +28,12 @@ class KbVsGolfApp extends StatelessWidget {
         title: 'KBVS Golf',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          primarySwatch: Colors.blue,
           useMaterial3: true,
-          fontFamily: 'SFPro',
+          primarySwatch: Colors.green,
+          fontFamily: null, // system default
+          errorTheme: ErrorThemeData(
+            color: Colors.red.shade700,
+          ),
         ),
         home: const HomeScreen(),
       ),
