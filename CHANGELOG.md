@@ -8,9 +8,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — date groupe
 ## [Unreleased]
 
 ### Known discrepancies (NOT yet fixed)
-- `README.md` describes the project as "Flutter Project Setup Complete" and lists only `main.dart`, `app_state.dart`, `home_screen.dart`. **README is stale** — it predates Phases 2, 3, and 4A. Caddy tips calculator UI, tournament list, models, repositories, HTTP client, and 53 additional tests are not mentioned. README rewrite tracked separately.
-- `lib/main.dart` still wires only `AppState` and shows `HomeScreen`. **`TournamentListScreen` and `ChangesNotifierTournamentProvider` are not yet injected into the app entry point** — Phase 4A built them but did not wire them in. Real `HttpTournamentRepository` is not wired in either.
+- `README.md` describes the project as "Flutter Project Setup Complete" and lists only `main.dart`, `app_state.dart`, `home_screen.dart`. **README is stale** — it predates Phases 2, 3, 4A, and 4B. Caddy tips calculator UI, tournament list, models, repositories, HTTP client, wiring, and 53 additional tests are not mentioned. README rewrite tracked separately.
 - `lib/screens/home_screen.dart` AppBar has a menu icon (lines 32–59) whose `onSelected` handler unconditionally calls `app.toggleCaddyTips()` — passing the menu's `value: true`/`value: false` into `toggleCaddyTips(bool)` would misread as a void. Currently works only because the value is ignored.
+- **Network security**: `HttpTournamentRepository` default `baseUrl = 'api-local.kbvalbury.com:9100'` is **HTTP (not HTTPS)**. Will fail on Android API 28+ and iOS by default without `android:usesCleartextTraffic="true"` / NSAppTransportSecurity exception. Local dev only; production must move to HTTPS or configure allowlist.
+
+---
+
+## [0.4.0] — 2026-07-28 — Phase 4B: Wire Tournament List + Real Repo
+
+Closed the Phase 4A gap. The app now reaches the live API on first navigation.
+
+### Changed
+- `lib/main.dart` — `Single ChangeNotifierProvider` → `MultiProvider`. Now injects both `AppState` and `ChangesNotifierTournamentProvider`. The tournament provider is constructed with `HttpTournamentRepository()` (default `baseUrl = 'api-local.kbvalbury.com:9100'`, real `DioHttpClient`).
+- `lib/screens/home_screen.dart` — body kept the v1.0 splash copy but added a `FilledButton.icon` ("Browse Tournaments") below that pushes `TournamentListScreen`.
+
+### Added
+- Navigation path: `HomeScreen` → `TournamentListScreen` (via the new button) → calls `loadFirstPage()` in `addPostFrameCallback`.
+
+### Test impact
+- `test/screens/tournament_list_screen_test.dart` (6 tests) **unaffected** — tests inject their own `ChangesNotifierTournamentProvider` via `ChangeNotifierProvider.value` with local `MaterialApp`, not the global `KbVsGolfApp`.
+- No new tests added. Wiring is integration glue; the underlying provider + screen are already covered.
+- Total: 59/59 ✅ (unchanged)
 
 ---
 
