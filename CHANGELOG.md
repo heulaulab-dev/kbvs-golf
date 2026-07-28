@@ -8,9 +8,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — date groupe
 ## [Unreleased]
 
 ### Known discrepancies (NOT yet fixed)
-- `README.md` describes the project as "Flutter Project Setup Complete" and lists only `main.dart`, `app_state.dart`, `home_screen.dart`. **README is stale** — it predates Phases 2, 3, 4A, and 4B. Caddy tips calculator UI, tournament list, models, repositories, HTTP client, wiring, and 53 additional tests are not mentioned. README rewrite tracked separately.
+- `README.md` describes the project as \"Flutter Project Setup Complete\" and lists only `main.dart`, `app_state.dart`, `home_screen.dart`. **README is stale** — it predates Phases 2, 3, 4A, and 4B. Caddy tips calculator UI, tournament list, models, repositories, HTTP client, wiring, and 53 additional tests are not mentioned. README rewrite tracked separately.
 - `lib/screens/home_screen.dart` AppBar has a menu icon (lines 32–59) whose `onSelected` handler unconditionally calls `app.toggleCaddyTips()` — passing the menu's `value: true`/`value: false` into `toggleCaddyTips(bool)` would misread as a void. Currently works only because the value is ignored.
-- **Network security**: `HttpTournamentRepository` default `baseUrl = 'api-local.kbvalbury.com:9100'` is **HTTP (not HTTPS)**. Will fail on Android API 28+ and iOS by default without `android:usesCleartextTraffic="true"` / NSAppTransportSecurity exception. Local dev only; production must move to HTTPS or configure allowlist.
+
+---
+
+### Completed
+- **Android cleartext config**: Added `android:usesCleartextTraffic="true"` and `<uses-permission android:name="android.permission.INTERNET" />` to `android/app/src/main/AndroidManifest.xml` so the HTTP API at `api-local.kbvalbury.com:9100` works on Android API 28+.
+
+---
+
+### Remaining
+- **iOS Info.plist**: Need to add NSAppTransportSecurity exception for HTTP traffic. This remains to be done.
 
 ---
 
@@ -133,6 +142,8 @@ Phase 1 had set up the empty Flutter scaffold (`main.dart`, `AppState`, `HomeScr
 - `lib/providers/app_state.dart` — initial empty `AppState` (loading + currentCourse getters; caddy tips integration landed in 0.1.0).
 - `lib/screens/home_screen.dart` — initial empty home with "KBVS Golf v1.0 / Select a course to begin".
 - `lib/screens/analysis_screen.dart` — `AnalysisScreen` placeholder for future AI shot suggestions (v1.1).
+
+---
 
 ---
 
