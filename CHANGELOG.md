@@ -16,6 +16,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — date groupe
 ### Completed
 - **Tournament list search**: Search field in `TournamentListScreen` now filters tournaments via `HttpTournamentRepository.search()`. Provider calls `repository.search()` when query changes, otherwise `getFirstPage()` for full list. 6 widget tests already cover search behavior.
 - **Pagination**: Load More button at bottom of tournament list appends next page results. Pull-to-refresh via RefreshIndicator in AppBar. Provider methods: `loadNextPage()`, `refresh()`. Tests unaffected — pagination logic exercised indirectly by tests.
+- **Tournament detail screen**: Tap a card in the list to navigate to a detailed view displaying course information, tournament dates, fee, format, skill level, registration count, capacity, and status. Includes a "Register Now" button (stubbed). Added test suite covering renders of name, course, fee, format, skill level, and registration info.
 
 ---
 

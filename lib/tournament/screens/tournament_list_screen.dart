@@ -4,7 +4,10 @@ import 'package:provider/provider.dart';
 
 import '../models/tournament.dart';
 import '../models/tournament_format.dart';
+import '../models/skill_level.dart';
+import '../models/tournament_status.dart';
 import '../providers/changes_notifier_tournament_provider.dart';
+import 'tournament_detail_screen.dart';
 
 /// List of tournaments with a search bar at the top.
 ///
@@ -127,62 +130,74 @@ class _TournamentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFmt = DateFormat('d MMM yyyy');
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade300),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              tournament.name,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${tournament.courseName} • ${tournament.courseLocation}',
-              style: TextStyle(color: Colors.grey.shade700),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.event, size: 14, color: Colors.grey.shade600),
-                const SizedBox(width: 4),
-                Text(
-                  dateFmt.format(tournament.startDate.toLocal()),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Icon(Icons.sports_golf, size: 14, color: Colors.grey.shade600),
-                const SizedBox(width: 4),
-                Text(
-                  _formatLabel(tournament.format),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Rp ${tournament.maxFeeIdr.toString()}',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Colors.green.shade700,
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => TournamentDetailScreen(),
+            settings: RouteSettings(arguments: tournament),
+          ),
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.shade300),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                tournament.name,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                '${tournament.courseName} • ${tournament.courseLocation}',
+                style: TextStyle(color: Colors.grey.shade700),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.event, size: 14, color: Colors.grey.shade600),
+                  const SizedBox(width: 4),
+                  Text(
+                    dateFmt.format(tournament.startDate.toLocal()),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Icon(Icons.sports_golf, size: 14, color: Colors.grey.shade600),
+                  const SizedBox(width: 4),
+                  Text(
+                    _formatLabel(tournament.format),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Rp ${tournament.maxFeeIdr.toString()}',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.green.shade700,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
