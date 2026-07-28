@@ -21,13 +21,6 @@ class TournamentDetailScreen extends StatefulWidget {
 class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
   late final ChangesNotifierTournamentProvider _provider;
 
-  @override
-  void initState() {
-    super.initState();
-    // Read provider from context (injected in main.dart)
-    // We'll access it via Consumer in build instead
-  }
-
   /// Format skill level to readable string.
   String _formatSkill(SkillLevel level) {
     switch (level) {
@@ -105,6 +98,9 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
   Widget build(BuildContext context) {
     // Get tournament from route arguments
     final tournament = ModalRoute.of(context)?.settings.arguments as Tournament;
+
+    // Get provider
+    final provider = Provider.of<ChangesNotifierTournamentProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -210,23 +206,43 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
               ),
             ),
 
-            // Register button (stubbed)
+            // Register button (connected to provider)
             if (!tournament.isFull)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: FilledButton.icon(
-                  onPressed: () {
-                    // Stub: show registration snackbar
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Registering for ${tournament.name}...'),
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.person_add),
-                  label: const Text('Register Now'),
-                ),
+                  onPressed: tournament.isFull
+                      ? null
+                      : () async {
+                          try {
+                            // Show loading feedback via snackbar
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Registering for ${tournament.name}...'),
+                                duration: const Duration(seconds: 3),
+                              ),
+                            );
+                            await provider.registerToTournament(tournament.id);
+                            // After reload, show success
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Successfully registered for ${tournament.name}!'),
+                                backgroundColor: Colors.green,
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Registration failed: $e'),
+                                backgroundColor: Colors.red,
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.person_add),
+                          label: const Text('Register Now'),
+                        ),
               )
             else
               Padding(

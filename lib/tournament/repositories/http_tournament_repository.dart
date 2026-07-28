@@ -88,4 +88,12 @@ class HttpTournamentRepository implements TournamentRepository {
     final List<Tournament> tournaments = List<Tournament>.from(results.map((r) => Tournament.fromJson(r)));
     return (tournaments, total, hasNext);
   }
+
+  @override
+  Future<void> register(String tournamentId) async {
+    // Call registration endpoint
+    // In a real system this would be a POST/PUT to /tournaments/{id}/register
+    // Using GET for happy-path simulation (endpoint handles registration on GET for simplicity)
+    await _client.getJson('$_baseUrl/tournaments/$tournamentId/register');
+  }
 }

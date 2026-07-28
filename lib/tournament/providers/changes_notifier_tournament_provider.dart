@@ -137,4 +137,20 @@ class ChangesNotifierTournamentProvider extends ChangeNotifier {
     _state = next;
     notifyListeners();
   }
+
+  /// Registers the user for the tournament with [tournamentId].
+  /// After registration, reloads the first page to reflect the change.
+  Future<void> registerToTournament(String tournamentId) async {
+    _setState(_state.copyWith(isLoading: true, errorText: ''));
+    try {
+      await repository.register(tournamentId);
+      // Reload to show updated registered counts
+      await loadFirstPage();
+    } catch (e) {
+      _setState(_state.copyWith(
+        isLoading: false,
+        errorText: 'Failed to register: $e',
+      ));
+    }
+  }
 }

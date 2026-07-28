@@ -22,4 +22,8 @@ abstract class TournamentRepository {
   /// Returns all tournaments matching [query] (empty string = all).
   /// Tuple: (tournaments, totalCount, hasMorePages)
   Future<(List<Tournament>, int, bool)> search(String query);
+
+  /// Registers the user for the tournament with given [id].
+  /// Updates the tournament's registered count.
+  Future<void> register(String tournamentId);
 }

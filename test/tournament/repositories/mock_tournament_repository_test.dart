@@ -142,4 +142,44 @@ void main() {
       expect(() => repo.getById('fake-id'), throwsA(isA<FormatException>()));
     });
   });
+
+  group('MockTournamentRepository.register', () {
+    late MockTournamentRepository repo;
+
+    setUp(() {
+      repo = _createMock();
+    });
+
+    test('increments registeredCount for specified tournament', () async {
+      // Arrange - initial state
+      final initial = repo.getById('t1').then((t) => t.registeredCount);
+      expect(initial, returnsNormally(5));
+
+      // Act
+      await repo.register('t1');
+
+      // Assert
+      final updated = repo.getById('t1');
+      expect(updated.registeredCount, equals(6));
+    });
+
+    test('registering same tournament twice increments twice', () async {
+      // Initial: count is 5
+      await repo.register('t1');
+      final after1 = await repo.getById('t1');
+      expect(after1.registeredCount, equals(6));
+
+      await repo.register('t1');
+      final after2 = await repo.getById('t1');
+      expect(after2.registeredCount, equals(7));
+    });
+
+    test('throws FormatException when tournament not found', () async {
+      // Act & Assert
+      expect(
+        () => repo.register('non-existent-id'),
+        throwsA(isA<FormatException>),
+      );
+    });
+  });
 }
