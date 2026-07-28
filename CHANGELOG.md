@@ -1,0 +1,136 @@
+# CHANGELOG
+
+All notable changes to `kbvs-golf` documented here.
+Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — date grouped by version.
+
+---
+
+## [Unreleased]
+
+### Known discrepancies (NOT yet fixed)
+- `README.md` describes the project as "Flutter Project Setup Complete" and lists only `main.dart`, `app_state.dart`, `home_screen.dart`. **README is stale** — it predates Phases 2, 3, and 4A. Caddy tips calculator UI, tournament list, models, repositories, HTTP client, and 53 additional tests are not mentioned. README rewrite tracked separately.
+- `lib/main.dart` still wires only `AppState` and shows `HomeScreen`. **`TournamentListScreen` and `ChangesNotifierTournamentProvider` are not yet injected into the app entry point** — Phase 4A built them but did not wire them in. Real `HttpTournamentRepository` is not wired in either.
+- `lib/screens/home_screen.dart` AppBar has a menu icon (lines 32–59) whose `onSelected` handler unconditionally calls `app.toggleCaddyTips()` — passing the menu's `value: true`/`value: false` into `toggleCaddyTips(bool)` would misread as a void. Currently works only because the value is ignored.
+
+---
+
+## [0.3.0] — 2026-07-28 — Phase 4A: HTTP Tournament Repository
+
+Phase 4A added real network support for the tournament list. **Backend `api-local.kbvalbury.com:9100` is HTTP (not HTTPS)**, which has implications for production builds.
+
+### Added
+- `lib/tournament/services/http_client.dart` — `HttpClient` abstraction with `getJson(url, queryParameters)`. Exception types: `HttpException(statusCode, message)`, `HttpTimeoutException(timeout)`.
+- `lib/tournament/services/dio_http_client.dart` — `DioHttpClient` production implementation. Timeouts: 15s connect, 15s receive. Headers: `Accept: application/json`. DioExceptions translated to `HttpException` / `HttpTimeoutException`.
+- `lib/tournament/repositories/http_tournament_repository.dart` — `HttpTournamentRepository` implementing `TournamentRepository` over `HttpClient`.
+  - `getFirstPage()` → `GET {baseUrl}/tournaments`
+  - `nextPage(cursor)` → `GET {baseUrl}/tournaments?cursor={cursor}`
+  - `prevPage(cursor)` → returns `(empty, 0, false)` (backend has no backward-paginate endpoint yet)
+  - `getById(id)` → `GET {baseUrl}/tournaments/{id}`; 404 → `FormatException('Not found')`
+  - `search(query)` → `GET {baseUrl}/tournaments?search={trimmed}`; empty query returns `(empty, 0, false)`
+  - Default `baseUrl = 'api-local.kbvalbury.com:9100'`
+  - Response shape: `{ "results": [Tournament...], "total": int, "has_next": bool }`
+- `test/tournament/repositories/http_tournament_repository_test.dart` — **10 tests** covering first page, next/prev page (cursor + null), search (empty/non-empty/trimmed), getById (success + 404), malformed response, and HTTP/HTTP-timeout pass-through. Uses `HttpClient` stub (no Dio mock).
+- `pubspec.yaml` — added `dio: ^5.4.0` dependency.
+
+### Test count: 59/59 ✅
+
+---
+
+## [0.2.0] — 2026-07-28 — Phase 3: Tournament List Screen
+
+Phase 3 added the tournament list UI surface wired to `ChangesNotifierTournamentProvider`.
+
+### Added
+- `lib/tournament/screens/tournament_list_screen.dart` — `TournamentListScreen` (StatefulWidget) consuming `ChangesNotifierTournamentProvider` via `provider` package.
+  - Search bar at top (TextField → `provider.updateSearchQuery`)
+  - States: loading (CircularProgressIndicator), error (`_ErrorState` with Retry), empty (`_EmptyState` — search variant vs default), list (`_TournamentCard`)
+  - `_TournamentCard`: name, `courseName • courseLocation`, date (`d MMM yyyy`), format label, `Rp {maxFeeIdr}`
+  - Date formatting via `intl: ^0.19.0` package
+- `test/screens/tournament_list_screen_test.dart` — **6 widget tests** covering: tournament cards render once loaded, search field updates provider, error state surfaces message + retry, empty state (default + search variant), retry button triggers reload.
+
+### Test count: 49/49 ✅
+
+---
+
+## [0.1.1] — 2026-07-28 — Phase 2 (continued): Tournament Provider + Mock Repository
+
+Phase 2 backend work for tournament data — provider pattern mirroring Phase 2 caddy tips.
+
+### Added
+- `lib/tournament/models/skill_level.dart` — `SkillLevel` enum (beginner, casual, competitive, pro) with `fromApi(String)` parser.
+- `lib/tournament/models/tournament_format.dart` — `TournamentFormat` enum (matchPlay, stableford, scramble, bestBall, championship) with `fromApi(String)`. API form: `match-play`, `best-ball`.
+- `lib/tournament/models/tournament_status.dart` — `TournamentStatus` enum (pending, approved, rejected, full) with `fromApi(String)`. API form: UPPERCASE.
+- `lib/tournament/models/tournament.dart` — `Tournament` immutable value object.
+  - Fields: `id`, `name`, `courseName`, `courseLocation`, `format`, `minSkill`, `maxFeeIdr`, `startDate`, `endDate`, `status`, `registeredCount`, `maxCapacity`, `isFeatured`
+  - `Tournament.fromJson(Map)` — parses API shape (nested `course: {name, location}`)
+  - Derived: `isFull` (`registeredCount >= maxCapacity`), `isVisibleToPublic` (`status == approved`), `feeLabel` (`Rp {N}` via `intl` NumberFormat id_ID), `capacityLabel` (`{registeredCount} / {maxCapacity}`)
+- `lib/tournament/repositories/tournament_repository.dart` — abstract `TournamentRepository` interface.
+  - `getFirstPage()` → `(List<Tournament>, int, bool)` (items, total, hasMorePages)
+  - `nextPage({cursor})` → same tuple shape
+  - `prevPage({cursor})` → same tuple shape
+  - `getById(id)` → single `Tournament`
+  - `search(query)` → same tuple shape
+- `lib/tournament/repositories/mock_tournament_repository.dart` — `MockTournamentRepository` in-memory implementation for UI dev / offline.
+  - `search()` filters by name, courseName, courseLocation (case-insensitive contains); empty query returns full list.
+- `lib/tournament/providers/changes_notifier_tournament_provider.dart` — `ChangesNotifierTournamentProvider extends ChangeNotifier`.
+  - Immutable `TournamentProviderState` (`tournaments`, `isLoading`, `errorText`, `hasFirstPage`, `hasNextPage`, `searchQuery`) with `copyWith`
+  - `loadFirstPage()` — calls `repository.getFirstPage()`, swallows exceptions into `errorText`
+  - `updateSearchQuery(query)` — trims + dedupes
+- `test/tournament/models/enums_test.dart` — **6 tests**: SkillLevel, TournamentFormat, TournamentStatus parsers (valid + invalid).
+- `test/tournament/models/tournament_test.dart` — **8 tests**: JSON deserialization, `isFull`, `isVisibleToPublic`, `feeLabel` formatting, `capacityLabel`, `isFeatured` default-false.
+- `test/tournament/repositories/mock_tournament_repository_test.dart` — **11 tests**: pagination methods, getById (hit + miss → FormatException), search (empty, case-insensitive, multi-field).
+- `test/providers/changes_notifier_tournament_provider_test.dart` — **4 tests**: initial state, loadFirstPage success path, loadFirstPage error path, updateSearchQuery dedup + state change.
+
+### Test count: 43/43 ✅
+
+---
+
+## [0.1.0] — 2026-07-28 — Phase 2: Caddy Tips v1.0
+
+Phase 1 had set up the empty Flutter scaffold (`main.dart`, `AppState`, `HomeScreen` placeholder). Phase 2 added the caddy fee calculator end-to-end.
+
+### Added
+- `lib/caddy/calculator.dart` — `CaddyFeeCalculator` pure Dart class.
+  - Constants: `baseFee = 2.0`, `perYardRate = 0.5`, `minimumFee = 5.0`, `maxDistance = 300`
+  - `calculateFee(distance)` — clamps distance to `[0, 300]`, computes `baseFee + distance × perYardRate`, applies `minimumFee` floor (only when yardage > 0; zero yardage → $0.00)
+- `lib/screens/caddy_tips_screen.dart` — full-screen UI:
+  - Yardage TextField input → `AppState.setYardage(int)`
+  - Animated result card with `AnimatedContainer` fee transition
+  - Pro Tip suggestion card (placeholder copy)
+  - Disabled state when `caddyTipsEnabled == false`
+- `lib/providers/app_state.dart` — `AppState extends ChangeNotifier`. Manages: `isLoading`, `currentCourse`, `caddyTipsEnabled` (default true), `currentYardage`, `currentFee`. `setYardage` delegates to `CaddyFeeCalculator`; zeros out fee when yardage ≤ 0; sets fee to null when caddy tips disabled.
+- `lib/screens/home_screen.dart` — `HomeScreen` with AppBar containing caddy-tips star icon (navigates to `CaddyTipsScreen`) and enable/disable popup menu. Body: centered v1.0 splash text.
+- `test/caddy/calculator_test.dart` — **5 tests**: zero, positive, negative-input clamp, below-minimum, distance cap.
+- `test/providers/app_state_test.dart` — **9 tests**: loading state, caddy tips toggle, `setYardage` dedup + reactivity, zero/positive fee calc, minimum cap, distance cap, resetYardage.
+
+### Test count: 14/14 ✅
+
+---
+
+## [0.0.1] — 2026-07-28 — Phase 1: Scaffold
+
+- Created `kbvs-golf` Flutter project.
+- `pubspec.yaml` — `name: kbvs_golf`, `version: 1.0.0+1`. Declared deps: `intl ^0.19.0`, `shared_preferences ^2.2.2`, `url_launcher ^6.2.0`, `provider ^6.0.5`, `rxdart ^0.27.0`, `flutter_hooks ^0.20.0`, `cupertino_icons ^1.0.6`, `http ^1.2.1`, `hive ^2.2.3`, `hive_flutter ^1.1.0`, `cached_network_image ^3.3.1`, `image_picker ^1.0.4`. Dev deps: `flutter_lints ^4.0.0`, `mockito ^5.4.4`, `hive_generator ^2.0.1`, `build_runner ^2.4.6`.
+- `lib/main.dart` — `KbVsGolfApp` with `ChangeNotifierProvider<AppState>` → `MaterialApp` → `HomeScreen`.
+- `lib/providers/app_state.dart` — initial empty `AppState` (loading + currentCourse getters; caddy tips integration landed in 0.1.0).
+- `lib/screens/home_screen.dart` — initial empty home with "KBVS Golf v1.0 / Select a course to begin".
+- `lib/screens/analysis_screen.dart` — `AnalysisScreen` placeholder for future AI shot suggestions (v1.1).
+
+---
+
+## Repo
+
+- Public at `https://github.com/heulaulab-dev/kbvs-golf`
+- Org: `heulaulab-dev` (the literal `heulaulab` org does not exist for this account)
+- Git protocol: HTTPS
+- Local git user: `Kiyaya <[email protected]>`
+- Branch: `main` (single initial commit covering all 41 files for Phases 1–4A)
+
+---
+
+## Conventions
+
+- **TDD**: every feature starts with failing tests (RED → GREEN → REFACTOR). No code without tests first.
+- **State management**: `provider` package (`ChangeNotifier` + `Consumer`). No Riverpod.
+- **HTTP abstraction**: `HttpClient` interface, `DioHttpClient` impl. Tests use hand-rolled stub `HttpClient` (no `mockito` overhead for HTTP layer).
+- **Pure logic separate from Flutter**: `CaddyFeeCalculator` is pure Dart, no Flutter imports — testable without widget harness.
