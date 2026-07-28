@@ -20,34 +20,30 @@ class TournamentDetailScreen extends StatefulWidget {
 }
 
 class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
-  bool _showSkeleton = true;
   bool _isRegistered = false;
   bool _registrationPending = false;
 
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(milliseconds: 800), () {
-      if (mounted) setState(() => _showSkeleton = false);
-    });
   }
 
   Widget _buildHero(Tournament tournament) {
-    if (_showSkeleton) {
-      return _HeroSkeleton();
-    } else {
-      return Container(
+    // Use network image for hero with shimmer loading fallback
+    return Image.network(
+      'https://picsum.photos/id/${tournament.id.hashCode % 100}/600/300',
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, progress) => _HeroSkeleton(),
+      errorBuilder: (context, error, stackTrace) => Container(
         height: 250,
-        decoration: BoxDecoration(color: Colors.grey[50]),
-        borderRadius: BorderRadius.circular(16),
-        child: Center(
-          child: Text(
-            tournament.courseName,
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(color: Colors.grey.shade400),
-          ),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(16),
         ),
-      );
-    }
+        child: const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
+      ),
+    );
   }
 
   Widget _buildRegisterButton(ChangesNotifierTournamentProvider provider, Tournament tournament) {
@@ -59,7 +55,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
           icon: const Icon(Icons.people),
           label: const Text('Full Capacity'),
           style: OutlinedButton.styleFrom(foregroundColor: Colors.grey.shade500),
-        ),
+        );
       );
     }
 
@@ -74,7 +70,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
             backgroundColor: MaterialStateProperty.resolveTo<Color>(Colors.green.shade100),
             foregroundColor: MaterialStateProperty.resolveTo<Color>(Colors.grey.shade900),
           ),
-        ),
+        );
       );
     }
 
@@ -109,12 +105,10 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
               )
             : const Text('Register Now'),
         style: ButtonStyle(
-          overlay: MaterialStateProperty.resolveWith<Color?>(
-            (Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed)) return Colors.blue.withOpacity(0.2);
-              return null;
-            },
-          ),
+          overlay: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+            if (states.contains(MaterialState.pressed)) return Colors.blue.withOpacity(0.2);
+            return null;
+          }),
         ),
       ),
     );
@@ -225,7 +219,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                   Text('Tournament Rules', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   Text('Rules will be displayed here.', style: Theme.of(context).textTheme.bodyMedium),
-                ]),
+                ],),
               ],
             ),
             const SizedBox(height: 16),
