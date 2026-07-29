@@ -5,17 +5,18 @@ import 'berita/providers/berita_provider.dart';
 import 'berita/repositories/berita_repository.dart';
 import 'berita/repositories/http_berita_repository.dart';
 import 'berita/repositories/mock_berita_repository.dart';
+import 'core/theme/golfie_theme.dart';
 import 'providers/app_state.dart';
 import 'screens/home_screen.dart';
 import 'tournament/providers/changes_notifier_tournament_provider.dart';
 import 'tournament/repositories/http_tournament_repository.dart';
 
 void main() {
-  runApp(const KbVsGolfApp());
+  runApp(const GolfieApp());
 }
 
-class KbVsGolfApp extends StatelessWidget {
-  const KbVsGolfApp({super.key});
+class GolfieApp extends StatelessWidget {
+  const GolfieApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +42,9 @@ class KbVsGolfApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'KBVS Golf',
+        title: 'Golfie',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          primarySwatch: Colors.green,
-          fontFamily: null, // system default
-        ),
+        theme: GolfieTheme.light(),
         home: const HomeScreen(),
       ),
     );

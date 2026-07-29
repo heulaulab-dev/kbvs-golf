@@ -15,7 +15,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('KBVS Golf'),
+        title: const Text('Golfie'),
         actions: [
           Consumer<AppState>(
             builder: (context, app, child) => IconButton(
@@ -90,7 +90,7 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              'KBVS Golf v1.0',
+              'Golfie v1.0',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
