@@ -1,5 +1,5 @@
 name: golfie
-description: A Flutter golf companion app for KBVS — caddy tips, shot analysis, tournament tracking.
+description: A Flutter golf companion app for Golfie — Jakarta golf tournament discovery, caddy tips, shot analysis, news.
 version: 1.0.0+1
 
 environment:
