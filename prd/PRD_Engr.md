@@ -1,4 +1,4 @@
-# KBVS Golf — Engineering PRD
+# Golfie — Engineering PRD
 
 Jakarta golf tournament app. Flutter mobile, Node.js backend, PostgreSQL. MVP locks discovery + registration flows with manual admin moderation. AI features live in §4.12 and §8 — present, scoped, not the centerpiece.
 

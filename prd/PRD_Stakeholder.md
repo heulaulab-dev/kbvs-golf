@@ -1,4 +1,4 @@
-# KBVS Golf — Product Requirements Document (Stakeholder / Pitch)
+# Golfie — Product Requirements Document (Stakeholder / Pitch)
 
 Jakarta golf tournament app. Mobile-first. Discovery + participation for the local golf community. No marketplace. No tee-time booking. Pure focus on local tournaments.
 
@@ -31,7 +31,7 @@ Reclub ada tapi:
 
 ## The solution
 
-KBVS Golf = mobile-first, golf-specific, Jakarta-tuned.
+Golfie = mobile-first, golf-specific, Jakarta-tuned.
 
 **Core MVP features:**
 
@@ -70,7 +70,7 @@ KBVS Golf = mobile-first, golf-specific, Jakarta-tuned.
 
 ## Differentiation (Visual Identity)
 
-| Aspect | Reclub | KBVS Golf |
+| Aspect | Reclub | Golfie |
 |--------|--------|-----------|
 | Sport focus | Generic multi-sport | Golf-coded specialist |
 | Visual identity | Blue/purple generic | Golf-green (`#2D7A5C`) + gold (`#D4A53A`) |
