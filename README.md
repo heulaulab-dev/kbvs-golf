@@ -1,16 +1,17 @@
 # KBVS Golf — Flutter Golf Companion App
 
-**Status:** Flutter app for caddy tips, shot analysis, and tournament tracking.
-Target: Android (no iOS project yet). <!-- test-count: 72 -->
+**Status:** Flutter app for caddy tips, shot analysis, tournament tracking, and golf news.
+Target: Android (no iOS project yet). <!-- test-count: 106 -->
 
 ## Current State
 
 - Flutter 3.44.8 (stable) installed at `/home/kiyaya/tools/flutter`
 - Caddy Tips calculator with yardage → fee computation (ECI/SCI caps applied)
 - Tournament list UI + real HTTP repository (HTTP backend at `api-local.kbvalbury.com:9100`)
+- **Golf News feed** (`lib/berita/`) — trending + search, in-app WebView reader, pluggable repo (mock or HTTP)
 - Shot analysis placeholder screen (AI integration pending — see `docs/backlog/AI_INTEGRATION.md`)
 - All providers wired via `MultiProvider` in `main.dart`
-- 72/72 tests passing across all layers <!-- test-count: 72 -->
+- 106/106 tests passing across all layers <!-- test-count: 106 -->
 
 ## Project Structure
 
@@ -47,10 +48,21 @@ kbvs-golf/
 │   │   └── services/
 │   │       ├── http_client.dart                   # Abstract HttpClient interface
 │   │       └── dio_http_client.dart               # Dio implementation
+│   ├── berita/                                    # Golf news feed
+│   │   ├── models/berita.dart
+│   │   ├── providers/berita_provider.dart
+│   │   ├── repositories/
+│   │   │   ├── berita_repository.dart             # Abstract
+│   │   │   ├── mock_berita_repository.dart        # Seed in-memory
+│   │   │   └── http_berita_repository.dart        # Talks to golfie-api
+│   │   ├── screens/
+│   │   │   ├── berita_list_screen.dart            # Trending + search
+│   │   │   └── berita_webview_screen.dart         # In-app article reader
+│   │   └── widgets/berita_tile.dart
 │   └── widgets/
 │       ├── avatar_stack.dart
 │       └── empty_state.dart
-└── test/                                          # 72 total tests — coverage mirrors lib structure
+└── test/                                          # 106 total tests — coverage mirrors lib structure
     ├── caddy/calculator_test.dart
     ├── providers/
     │   ├── app_state_test.dart
@@ -58,13 +70,20 @@ kbvs-golf/
     ├── screens/
     │   ├── tournament_detail_screen_test.dart
     │   └── tournament_list_screen_test.dart
-    └── tournament/
-        ├── models/
-        │   ├── enums_test.dart
-        │   └── tournament_test.dart
-        └── repositories/
-            ├── http_tournament_repository_test.dart
-            └── mock_tournament_repository_test.dart
+    ├── tournament/
+    │   ├── models/
+    │   │   ├── enums_test.dart
+    │   │   └── tournament_test.dart
+    │   └── repositories/
+    │       ├── http_tournament_repository_test.dart
+    │       └── mock_tournament_repository_test.dart
+    └── berita/                                    # 34 tests across model, repo, provider, screens
+        ├── berita_model_test.dart
+        ├── mock_berita_repository_test.dart
+        ├── http_berita_repository_test.dart
+        ├── berita_provider_test.dart
+        ├── berita_list_screen_test.dart
+        └── berita_webview_screen_test.dart
 ```
 
 ## Design Framework
@@ -108,8 +127,26 @@ Implement remaining Phase 5+ features from PRD:
 cd /home/kiyaya/kiyadev/kbvs-golf
 flutter pub get
 flutter run # or flutter run -d <device>
-flutter test # 72/72 pass
+flutter test # 106/106 pass
+
+# Tell the app to use the news HTTP repo (otherwise mock is used):
+flutter run --dart-define=GOLFIE_API_BASE=http://api-local.kbvalbury.com:9200
 ```
+
+## News / Berita Feed
+
+The news surface is wired in `lib/berita/`. The home screen has a "Golf News" button
+that opens `BeritaListScreen`. Articles open in an in-app `WebView` (with a "Open in
+browser" fallback).
+
+- Repository is selected in `lib/main.dart` via `_ResolveBeritaRepository`:
+  - If `--dart-define=GOLFIE_API_BASE=<url>` is set at build, an `HttpBeritaRepository`
+    is used (talks to `golfie-api`).
+  - Otherwise the in-memory `MockBeritaRepository` is used (5 seed items).
+- `HttpBeritaRepository` calls `GET {baseUrl}/news/trending` and
+  `GET {baseUrl}/news/search?q=...`. Empty query short-circuits.
+
+The matching backend lives in `golfie-api/` (Sibling Node.js project).
 
 ## Test Count Drift Guard
 
@@ -120,3 +157,9 @@ CI will fail and the pre-commit hook will block the commit.
 - CI: `.github/workflows/test-count-guard.yml`
 - Hook installer: `bash tool/setup-pre-commit.sh`
 - Script: `tool/verify_test_count.sh`
+
+## Companion backend
+
+`golfie-api/` (sibling next to `kbvs-golf/`) implements the news API consumed by
+`HttpBeritaRepository`. Bring it up first (see its README) before running the app
+with `--dart-define=GOLFIE_API_BASE=http://localhost:9200`.

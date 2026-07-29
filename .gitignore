@@ -12,6 +12,9 @@
 .swiftpm/
 migrate_working_dir/
 
+# Sibling project — has its own git repo
+/golfie-api/
+
 # IntelliJ related
 *.iml
 *.ipr

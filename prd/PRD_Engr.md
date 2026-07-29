@@ -26,12 +26,12 @@ Controllers stay thin. Business logic lives in services. We port to Go in M4 —
 - Course directory with Google Maps embed
 - Player profile: username, skill, handicap, tournament history
 - Per-tournament leaderboard with top-3 trophies
-- 5-tab bottom nav: Home | Tournaments | Courses | Players | More
+- "Berita" tab — news aggregator (Google Custom Search + OpenGraph extraction), with hardcoded seed fallback for dev. Backed by golfie-api service mounted at `/news/*`.
+- 5-tab bottom nav: Home | Tournaments | Berita | Courses | Players | More
 
 ### Out (MVP)
 
 - Push notifications via FCM — poll client-side first
-- "Berita Turnamen" tab (news aggregator with Google CSE + OG extraction)
 - Admin web dashboard — in-app admin role + Prisma Studio for now
 - CSV import from partner clubs
 - Tournament discussion / chat
