@@ -6,6 +6,8 @@ import '../providers/berita_provider.dart';
 import '../repositories/berita_repository.dart';
 import '../widgets/berita_tile.dart';
 import 'berita_webview_screen.dart';
+import '../../widgets/golfie/golfie_index.dart';
+import '../../core/theme/golfie_colors.dart';
 
 /// The news / berita feed screen.
 ///
@@ -69,6 +71,7 @@ class _BeritaListScreenState extends State<BeritaListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('News'),
@@ -116,24 +119,14 @@ class _BeritaListScreenState extends State<BeritaListScreen> {
                   );
                 }
                 if (_provider.items.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.article_outlined,
-                            size: 64, color: Colors.grey.shade400),
-                        const SizedBox(height: 12),
-                        Text(
-                          _provider.hasSearched
-                              ? 'No results for "${_provider.searchQuery}"'
-                              : 'No news yet',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(color: Colors.grey.shade600),
-                        ),
-                      ],
-                    ),
+                  return GolfieEmptyState(
+                    icon: Icons.article_outlined,
+                    title: _provider.hasSearched
+                        ? 'No results for "${_provider.searchQuery}"'
+                        : 'No news yet',
+                    subtitle: _provider.hasSearched
+                        ? 'Try a different search term.'
+                        : 'Check back for fresh golf news.',
                   );
                 }
                 return RefreshIndicator(
@@ -166,28 +159,25 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline,
-                size: 64, color: Colors.grey.shade400),
+            Icon(Icons.error_outline, size: 64, color: GolfieColors.papaya),
             const SizedBox(height: 12),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: Colors.grey.shade700),
+              style: textTheme.bodyMedium?.copyWith(color: GolfieColors.stone),
             ),
             const SizedBox(height: 16),
-            FilledButton.icon(
+            GolfieGhostButton(
+              label: 'Retry',
+              icon: Icons.refresh,
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
             ),
           ],
         ),
