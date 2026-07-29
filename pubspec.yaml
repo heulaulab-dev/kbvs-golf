@@ -20,6 +20,7 @@ dependencies:
 
   # UI & widgets
   cupertino_icons: ^1.0.6
+  webview_flutter: ^4.5.0
 
   # Network & API
   dio: ^5.4.0

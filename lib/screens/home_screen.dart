@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/app_state.dart';
 import '../tournament/screens/tournament_list_screen.dart';
+import '../berita/screens/berita_list_screen.dart';
 import 'caddy_tips_screen.dart';
 import 'admin_moderation_screen.dart';
 import 'submit_tournament_screen.dart';
@@ -109,6 +110,19 @@ class HomeScreen extends StatelessWidget {
               },
               icon: const Icon(Icons.golf_course),
               label: const Text('Browse Tournaments'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const BeritaListScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.article_outlined),
+              label: const Text('Golf News'),
             ),
           ],
         ),
