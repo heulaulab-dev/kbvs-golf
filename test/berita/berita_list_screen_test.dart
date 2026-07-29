@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kbvs_golf/berita/models/berita.dart';
-import 'package:kbvs_golf/berita/repositories/berita_repository.dart';
-import 'package:kbvs_golf/berita/screens/berita_list_screen.dart';
+import 'package:golfie/berita/models/berita.dart';
+import 'package:golfie/berita/repositories/berita_repository.dart';
+import 'package:golfie/berita/screens/berita_list_screen.dart';
 
 class _StubRepo implements BeritaRepository {
   final List<Berita> trending;

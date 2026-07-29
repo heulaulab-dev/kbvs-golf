@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kbvs_golf/caddy/calculator.dart';
+import 'package:golfie/caddy/calculator.dart';
 
 void main() {
   group('CaddyFeeCalculator', () {

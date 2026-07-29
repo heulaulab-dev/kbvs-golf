@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kbvs_golf/berita/repositories/mock_berita_repository.dart';
+import 'package:golfie/berita/repositories/mock_berita_repository.dart';
 
 void main() {
   group('MockBeritaRepository', () {

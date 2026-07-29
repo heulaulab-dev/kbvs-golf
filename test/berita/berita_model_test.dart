@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kbvs_golf/berita/models/berita.dart';
+import 'package:golfie/berita/models/berita.dart';
 
 void main() {
   group('Berita.fromJson', () {
