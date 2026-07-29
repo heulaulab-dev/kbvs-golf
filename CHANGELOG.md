@@ -77,7 +77,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — date groupe
     Fails loudly with the exact fix command.
   - `.github/workflows/test-count-guard.yml` runs the guard on push/PR to main.
   - `tool/setup-pre-commit.sh` installs a git pre-commit hook for local enforcement.
-  - README now declares `<!-- test-count: 105 -->` matching the real pass count. <!-- test-count: 105 -->
+  - README now declares `<!-- test-count: 106 -->` matching the real pass count. <!-- test-count: 106 -->
   This prevents the previous drift (README claimed 59 while tests were 72).
 - **README rewrite** to reflect current project tree (lib/ subdirs, all screens,
   test layout, asset state, networking notes, roadmap).
