@@ -610,7 +610,7 @@ AI opt-in matters — if users turn it off en masse, that's signal that the AI f
 
 ## References
 
-- `docs/VISUAL_DIRECTION.md` — color, typography, components, motion (source of truth)
+- `docs/backlog/VISUAL_DIRECTION.md` — color, typography, components, motion (source of truth; design reference only, not implemented in v1)
 - `docs/UI_STACK.md` — Flutter library list and patterns
 - `docs/RESEARCH.md` — Jakarta market + Reclub analysis
 - `prd/PRD_Stakeholder.md` — pitch version of this PRD

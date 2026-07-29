@@ -263,7 +263,7 @@ The section on AI features mirrors Kowalski's principle "Agents don't have great
 
 ## References
 
-- `docs/VISUAL_DIRECTION.md` — color palette, typography, components, motion, imagery (source of truth)
+- `docs/backlog/VISUAL_DIRECTION.md` — color palette, typography, components, motion, imagery (source of truth; design reference only, not implemented in v1)
 - `docs/UI_STACK.md` — Flutter packages, card/button specs, Lottie implementation details
 - `docs/RESEARCH.md` — Jakarta market, Reclub analysis, golf data landscape
 - `prd/PRD_Engr.md` — detailed technical implementation spec

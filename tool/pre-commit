@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Git pre-commit hook: verify test count matches docs before allowing commit.
+# Install with: cp tool/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# Or:          bash tool/setup-pre-commit.sh
+#
+# Skip with:   git commit --no-verify
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+bash "$REPO_ROOT/tool/verify_test_count.sh"

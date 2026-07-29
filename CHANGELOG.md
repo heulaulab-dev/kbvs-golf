@@ -7,6 +7,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — date groupe
 
 ## [Unreleased]
 
+### Repository cleanup (audit follow-up)
+
+- **Removed dead dependencies** from `pubspec.yaml`: `http`, `rxdart`, `flutter_hooks`,
+  `cached_network_image`, `image_picker`. Zero imports in `lib/` or `test/` for any of
+  them. Lock file regenerated, 72/72 tests still pass.
+- **Removed Hive persistence scaffolding** (`lib/persistence/mock_data_store.dart`,
+  `MockTournamentRepository.persistent()`, `hive`/`hive_flutter`/`hive_generator`/
+  `build_runner` deps). The persistent mode had zero callers and no wired-up UI.
+  In-memory `MockTournamentRepository(seedData)` — which every test and screen
+  depends on — is unchanged.
+- **Relocated design-only docs** to `docs/backlog/`: `AI_INTEGRATION.md`,
+  `VISUAL_DIRECTION.md`. Each now carries a `STATUS: Not implemented — design
+  reference only` banner. Stale references in `docs/UI_STACK.md`, `prd/PRD_Engr.md`,
+  and `prd/PRD_Stakeholder.md` updated.
+- **Added test-count drift guard**:
+  - `tool/verify_test_count.sh` runs `flutter test`, parses pass count, compares
+    against `<!-- test-count: N -->` markers in `README.md` / `CHANGELOG.md`.
+    Fails loudly with the exact fix command.
+  - `.github/workflows/test-count-guard.yml` runs the guard on push/PR to main.
+  - `tool/setup-pre-commit.sh` installs a git pre-commit hook for local enforcement.
+  - README now declares `<!-- test-count: 72 -->` matching the real pass count.
+  This prevents the previous drift (README claimed 59 while tests were 72).
+- **README rewrite** to reflect current project tree (lib/ subdirs, all screens,
+  test layout, asset state, networking notes, roadmap).
+- **No iOS changes**: there is no `ios/` project in this repo. `Info.plist` ATS
+  config is N/A. Android already has `android:usesCleartextTraffic="true"` set
+  globally on `<application>`. Production should narrow this via a
+  `network_security_config.xml` scoped to dev hosts.
+
 ### Known discrepancies (NOT yet fixed)
 - `README.md` describes the project as \"Flutter Project Setup Complete\" and lists only `main.dart`, `app_state.dart`, `home_screen.dart`. **README is stale** — it predates Phases 2, 3, 4A, and 4B. Caddy tips calculator UI, tournament list, models, repositories, HTTP client, wiring, and 53 additional tests are not mentioned. README rewrite tracked separately.
 - `lib/screens/home_screen.dart` AppBar has a menu icon (lines 32–59) whose `onSelected` handler unconditionally calls `app.toggleCaddyTips()` — passing the menu's `value: true`/`value: false` into `toggleCaddyTips(bool)` would misread as a void. Currently works only because the value is ignored.

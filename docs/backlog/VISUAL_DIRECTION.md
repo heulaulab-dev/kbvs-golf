@@ -1,3 +1,5 @@
+<!-- STATUS: Not implemented — design reference only. -->
+
 # KBVS Golf — Visual Direction
 
 > Inspired by Reclub's clean UX + Apple design principles, optimized for Gen Z golf players in Jakarta.

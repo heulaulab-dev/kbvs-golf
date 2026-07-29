@@ -1,3 +1,5 @@
+<!-- STATUS: Not implemented — design reference only. -->
+
 # KBVS Golf — AI Integration Architecture
 
 **Project:** kbvs-golf (Flutter + Node.js/FastAPI backend)  

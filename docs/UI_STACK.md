@@ -1,6 +1,6 @@
 # KBVS Golf – Flutter UI Library Stack Recommendation
 
-**Scope:** Build a modern, Gen Z–friendly Flutter app focused on Jakarta golf tournaments. Based on the visual direction in `VISUAL_DIRECTION.md`.  
+**Scope:** Build a modern, Gen Z–friendly Flutter app focused on Jakarta golf tournaments. Based on the visual direction in `docs/backlog/VISUAL_DIRECTION.md` (design reference, not yet implemented).  
 **Target Flutter version:** 3.x+ (Material 3 enabled)  
 
 ---
@@ -34,7 +34,7 @@ ThemeData.useMaterial3 = true;
 ```
 
 - Provides dynamic color theming, light/dark modes automatically paired, typography scales, spacing units — all zero-dependency.
-- Customize tokens to match the VISUAL_DIRECTION.md palette:
+- Customize tokens to match the `docs/backlog/VISUAL_DIRECTION.md` palette:
 
 ```dart
  ThemeData(
@@ -435,7 +435,7 @@ Run `flutter pub get` after adding.
 
 1. Run `flutter create kbvs_golf` (or use existing project template)
 2. Paste the dependency block above into `pubspec.yaml` and run `flutter pub get`
-3. Create `lib/theme.dart` with Material 3 theme customization matching the VISUAL_DIRECTION.md colors
+3. Create `lib/theme.dart` with Material 3 theme customization matching the `docs/backlog/VISUAL_DIRECTION.md` colors
 4. Set up `go_router` routes matching the 5-tab bottom nav pattern
 5. Prototype one tournament card using the recommended Card + Avatar + Button components
 6. Implement a single Lottie animation (ball-drop or golf-swing) to verify the asset pipeline

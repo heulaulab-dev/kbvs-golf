@@ -9,43 +9,30 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
+
   # Core utilities
   intl: ^0.19.0
   shared_preferences: ^2.2.2
   url_launcher: ^6.2.0
-  
+
   # State management
   provider: ^6.0.5
-  rxdart: ^0.27.0
-  
+
   # UI & widgets
-  flutter_hooks: ^0.20.0
   cupertino_icons: ^1.0.6
-  
+
   # Network & API
-  http: ^1.2.1
   dio: ^5.4.0
-  
-  # Local database
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
-  
-  # Image handling
-  cached_network_image: ^3.3.1
-  image_picker: ^1.0.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
   mockito: ^5.4.4
-  hive_generator: ^2.0.1
-  build_runner: ^2.4.6
 
 flutter:
   uses-material-design: true
-  
+
   assets:
     - assets/images/
     - assets/fonts/
