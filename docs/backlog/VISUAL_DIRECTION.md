@@ -1,6 +1,6 @@
 <!-- STATUS: Not implemented — design reference only. -->
 
-# KBVS Golf — Visual Direction
+# Golfie — Visual Direction
 
 > Inspired by Reclub's clean UX + Apple design principles, optimized for Gen Z golf players in Jakarta.
 
@@ -193,7 +193,7 @@ No walls of text. No long legal disclaimers upfront. Inline them later.
 
 ## 10. What Makes Us Different from Reclub
 
-| Aspect | Reclub | KBVS Golf |
+| Aspect | Reclub | Golfie |
 |--------|--------|-----------|
 | Sport focus | Multi-sport (generic) | Golf-specific (specialist) |
 | Visual identity | Blue/purple, generic sport | Green/gold, golf-coded |

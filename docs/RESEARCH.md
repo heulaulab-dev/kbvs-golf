@@ -1,4 +1,4 @@
-# KBVS Golf — Research
+# Golfie — Research
 
 > Scope: Jakarta-focused golf club app. Flutter frontend, basic auth + OAuth2, competition data discovery, competitor analysis (reclub.co/id).
 
