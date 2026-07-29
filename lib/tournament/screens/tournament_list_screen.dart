@@ -6,7 +6,7 @@ import '../models/tournament.dart';
 import '../models/tournament_format.dart';
 import '../models/skill_level.dart';
 import '../providers/changes_notifier_tournament_provider.dart';
-import '../../widgets/avatar_stack.dart';
+import '../../widgets/golfie/golfie_avatar_stack.dart';
 import '../../widgets/empty_state.dart';
 import 'tournament_detail_screen.dart';
 
@@ -459,7 +459,7 @@ class _TournamentCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text('Rp ${tournament.maxFeeIdr.toString()}', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.green.shade700)),
             const SizedBox(height: 8),
-            AvatarStack(totalPlayers: tournament.registeredCount),
+            GolfieAvatarStack(totalPlayers: tournament.registeredCount),
           ]),
         ),
       ),

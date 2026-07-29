@@ -8,7 +8,7 @@ import '../models/tournament.dart';
 import '../models/tournament_format.dart';
 import '../models/tournament_status.dart';
 import '../providers/changes_notifier_tournament_provider.dart';
-import '../../widgets/avatar_stack.dart';
+import '../../widgets/golfie/golfie_avatar_stack.dart';
 
 /// Screen showing detailed information about a single tournament.
 /// Polished UI: shimmer skeleton for hero image, avatar stack, tabs, collapsible caddy tips, registration flow.
@@ -187,7 +187,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
             const SizedBox(height: 16),
 
             // Avatar stack
-            AvatarStack(totalPlayers: tournament.registeredCount),
+            GolfieAvatarStack(totalPlayers: tournament.registeredCount),
             const SizedBox(height: 16),
 
             // CTA button
@@ -212,7 +212,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text('Registered Players', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
-                    AvatarStack(totalPlayers: tournament.registeredCount),
+                    GolfieAvatarStack(totalPlayers: tournament.registeredCount),
                     const SizedBox(height: 8),
                     if (tournament.registeredCount > 0)
                       const ListTile(leading: Icon(Icons.person), title: Text('Simulated player list...')),
