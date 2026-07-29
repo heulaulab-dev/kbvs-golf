@@ -71,6 +71,6 @@ class _ResolveBeritaRepository {
     if (base.isNotEmpty) {
       return HttpBeritaRepository(baseUrl: base);
     }
-    return const MockBeritaRepository();
+    return MockBeritaRepository();
   }
 }

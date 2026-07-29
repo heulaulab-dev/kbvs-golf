@@ -97,8 +97,9 @@ class _SubmitTournamentScreenState extends State<SubmitTournamentScreen> {
       if (_format == null) missing.add('format');
       if (_minSkill == null) missing.add('min skill');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill all required fields: ${missing.join(', ')}')),
-        backgroundColor: Colors.red,
+        SnackBar(
+          content: Text('Please fill all required fields: ${missing.join(', ')}'),
+        ),
       );
     }
   }

@@ -80,8 +80,8 @@ class HomeScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const SubmitTournamentScreen()),
-          ),
-        ),
+          );
+        },
         child: const Icon(Icons.add),
         tooltip: 'Submit New Tournament',
       ),
