@@ -152,14 +152,14 @@ void main() {
 
     test('increments registeredCount for specified tournament', () async {
       // Arrange - initial state
-      final initial = repo.getById('t1').then((t) => t.registeredCount);
-      expect(initial, returnsNormally(5));
+      final initial = await repo.getById('t1');
+      expect(initial.registeredCount, equals(5));
 
       // Act
       await repo.register('t1');
 
       // Assert
-      final updated = repo.getById('t1');
+      final updated = await repo.getById('t1');
       expect(updated.registeredCount, equals(6));
     });
 
@@ -176,9 +176,9 @@ void main() {
 
     test('throws FormatException when tournament not found', () async {
       // Act & Assert
-      expect(
+      await expectLater(
         () => repo.register('non-existent-id'),
-        throwsA(isA<FormatException>),
+        throwsA(isA<FormatException>()),
       );
     });
   });

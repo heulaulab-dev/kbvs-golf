@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../tournament/models/tournament.dart';
 
 /// Persistent data store for mock tournament data using Hive.
@@ -10,9 +10,8 @@ class MockDataStore {
 
   Future<void> init() async {
     if (_initialized) return;
-    await Hive.init();
-    await Hive.openBox(_boxName);
-    _box = Hive.box(_boxName);
+    await Hive.initFlutter();
+    _box = await Hive.openBox(_boxName);
     _initialized = true;
   }
 

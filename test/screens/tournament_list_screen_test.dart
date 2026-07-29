@@ -132,7 +132,10 @@ void main() {
 
     // Tap retry — it calls loadFirstPage again, which still throws but
     // updates the errorText to a new exception instance (non-empty still).
-    await tester.tap(retryBtn);
+    // Scroll Retry into view so the tap actually lands on a visible widget.
+    await tester.scrollUntilVisible(retryBtn, 200, scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(retryBtn, warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(screenProvider.errorText, isNotEmpty);
     // Sanity: the provider we kept around is still functional.
@@ -162,4 +165,7 @@ class _ThrowingRepository implements TournamentRepository {
   @override
   Future<(List<Tournament>, int, bool)> search(String query) async =>
       (<Tournament>[], 0, false);
+
+  @override
+  Future<void> register(String tournamentId) async {}
 }

@@ -55,7 +55,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
           icon: const Icon(Icons.people),
           label: const Text('Full Capacity'),
           style: OutlinedButton.styleFrom(foregroundColor: Colors.grey.shade500),
-        );
+        ),
       );
     }
 
@@ -70,7 +70,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
             backgroundColor: WidgetStateProperty.all<Color>(Colors.green.shade100),
             foregroundColor: WidgetStateProperty.all<Color>(Colors.grey.shade900),
           ),
-        );
+        ),
       );
     }
 
@@ -82,10 +82,12 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
           setState(() => _registrationPending = true);
           try {
             await provider.registerToTournament(tournament.id);
-            setState(() => _isRegistered = true);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Successfully registered for ${tournament.name}!'), backgroundColor: Colors.green),
-            );
+            if (mounted) {
+              setState(() => _isRegistered = true);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Successfully registered for ${tournament.name}!'), backgroundColor: Colors.green),
+              );
+            }
           } catch (e) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -118,22 +120,22 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(side: BorderSide(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(12)),
-      child: ExpansionTile(
-        leading: const Icon(Icons.lightbulb_outline),
-        title: const Text('Caddy Tips'),
-        subtitle: const Text('Practical advice for your round'),
+      child: const ExpansionTile(
+        leading: Icon(Icons.lightbulb_outline),
+        title: Text('Caddy Tips'),
+        subtitle: Text('Practical advice for your round'),
         children: [
           ListTile(
-            title: const Text('Check pin position on hole 7'),
-            subtitle: const Text('Avoid the water hazard on the right'),
+            title: Text('Check pin position on hole 7'),
+            subtitle: Text('Avoid the water hazard on the right'),
           ),
           ListTile(
-            title: const Text('Wind direction matters today'),
-            subtitle: const Text('Club up by one on the long par-4'),
+            title: Text('Wind direction matters today'),
+            subtitle: Text('Club up by one on the long par-4'),
           ),
           ListTile(
-            title: const Text('Watch out for the green slope'),
-            subtitle: const Text('Ball runs towards the back left'),
+            title: Text('Watch out for the green slope'),
+            subtitle: Text('Ball runs towards the back left'),
           ),
         ],
       ),
@@ -154,7 +156,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
               icon: const Icon(Icons.star, color: Colors.amber),
               tooltip: 'Featured',
               onPressed: () {},
-            )
+            ),
         ],
       ),
       body: DefaultTabController(
@@ -193,34 +195,36 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
             const SizedBox(height: 16),
 
             // Tabs
-            TabBar(
-              tabs: const [Tab(text: 'Details'), Tab(text: 'Players'), Tab(text: 'Rules')],
+            const TabBar(
+              tabs: [Tab(text: 'Details'), Tab(text: 'Players'), Tab(text: 'Rules')],
             ),
-            SizedBox(height: -16),
-            TabBarView(
-              children: [
-                // Details tab
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Description', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
-                  Text('No description available.', style: Theme.of(context).textTheme.bodyMedium),
-                ]),
-                // Players tab
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Registered Players', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
-                  AvatarStack(totalPlayers: tournament.registeredCount),
-                  const SizedBox(height: 8),
-                  if (tournament.registeredCount > 0)
-                    ListTile(leading: Icon(Icons.person), title: Text('Simulated player list...')),
-                ]),
-                // Rules tab
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Tournament Rules', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
-                  Text('Rules will be displayed here.', style: Theme.of(context).textTheme.bodyMedium),
-                ],),
-              ],
+            SizedBox(
+              height: 200,
+              child: TabBarView(
+                children: [
+                  // Details tab
+                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('Description', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8),
+                    Text('No description available.', style: Theme.of(context).textTheme.bodyMedium),
+                  ]),
+                  // Players tab
+                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('Registered Players', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8),
+                    AvatarStack(totalPlayers: tournament.registeredCount),
+                    const SizedBox(height: 8),
+                    if (tournament.registeredCount > 0)
+                      const ListTile(leading: Icon(Icons.person), title: Text('Simulated player list...')),
+                  ]),
+                  // Rules tab
+                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('Tournament Rules', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8),
+                    Text('Rules will be displayed here.', style: Theme.of(context).textTheme.bodyMedium),
+                  ]),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -239,7 +243,6 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
       case TournamentFormat.scramble: return 'Scramble';
       case TournamentFormat.bestBall: return 'Best Ball';
       case TournamentFormat.championship: return 'Championship';
-      default: return '';
     }
   }
 }
@@ -249,10 +252,10 @@ class _HeroSkeleton extends StatefulWidget {
   const _HeroSkeleton({super.key});
 
   @override
-  State<Heroskeleton> createState() => _HeroSkeletonState();
+  State<_HeroSkeleton> createState() => _HeroSkeletonState();
 }
 
-class _HeroSkeletonState extends State<Heroskeleton> with SingleTickerProviderStateMixin {
+class _HeroSkeletonState extends State<_HeroSkeleton> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 

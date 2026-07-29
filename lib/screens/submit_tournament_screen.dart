@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../models/tournament_format.dart';
-import '../models/skill_level.dart';
+import '../tournament/models/tournament_format.dart';
+import '../tournament/models/skill_level.dart';
 
 class SubmitTournamentScreen extends StatefulWidget {
   const SubmitTournamentScreen({super.key});
@@ -77,14 +77,14 @@ class _SubmitTournamentScreenState extends State<SubmitTournamentScreen> {
 
   void _handleAIBenefit() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('AI helper coming soon.')),
+      const SnackBar(content: Text('AI helper coming soon.')),
     );
   }
 
   void _submitForm() {
     if (_formKey.currentState!.validate() && _startDate != null && _endDate != null && _format != null && _minSkill != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Submitted for approval. Admin will review shortly.'),
           backgroundColor: Colors.blue,
         ),
@@ -124,7 +124,7 @@ class _SubmitTournamentScreenState extends State<SubmitTournamentScreen> {
   }) {
     return DropdownButtonFormField<T>(
       value: selectedValue,
-      items: items.map((item) => DropDownMenuItem(
+      items: items.map((item) => DropdownMenuItem(
         value: item,
         child: Text(labelProvider(item)),
       )).toList(),
@@ -132,7 +132,6 @@ class _SubmitTournamentScreenState extends State<SubmitTournamentScreen> {
         onSelect(newValue);
       },
       decoration: const InputDecoration(
-        labelText: '',
         border: OutlineInputBorder(),
       ),
       validator: (_) => selectedValue == null ? 'Please select an option' : null,
@@ -160,7 +159,7 @@ class _SubmitTournamentScreenState extends State<SubmitTournamentScreen> {
               decoration: const InputDecoration(
                 labelText: 'Description (max 500 chars)',
                 border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.help_outlined),
+                suffixIcon: Icon(Icons.help_outline),
               ),
               validator: (v) => v != null && v.length > 500 ? 'Max 500 chars' : null,
             ),
@@ -191,24 +190,26 @@ class _SubmitTournamentScreenState extends State<SubmitTournamentScreen> {
                 }
                 return '';
               },
-              onSelect: (value) => setState(() => _format = value!),
+              onSelect: (value) => setState(() => _format = value),
             ),
             const SizedBox(height: 16),
             // Min Skill Level
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text('Min Skill Level:', style: TextStyle(fontWeight: FontWeight.bold)),
-                SizedBox(height: 8),
+              children: [
+                const Text('Min Skill Level:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
                 Wrap(
                   spacing: 16,
                   children: [
                     Radio<SkillLevel>(value: SkillLevel.beginner, groupValue: _minSkill, onChanged: (v) => setState(() => _minSkill = v)),
                     const Text('Beginner'),
-                    Radio<SkillLevel>(value: SkillLevel.intermediate, groupValue: _minSkill, onChanged: (v) => setState(() => _minSkill = v)),
-                    const Text('Intermediate'),
-                    Radio<SkillLevel>(value: SkillLevel.advanced, groupValue: _minSkill, onChanged: (v) => setState(() => _minSkill = v)),
-                    const Text('Advanced'),
+                    Radio<SkillLevel>(value: SkillLevel.casual, groupValue: _minSkill, onChanged: (v) => setState(() => _minSkill = v)),
+                    const Text('Casual'),
+                    Radio<SkillLevel>(value: SkillLevel.competitive, groupValue: _minSkill, onChanged: (v) => setState(() => _minSkill = v)),
+                    const Text('Competitive'),
+                    Radio<SkillLevel>(value: SkillLevel.pro, groupValue: _minSkill, onChanged: (v) => setState(() => _minSkill = v)),
+                    const Text('Pro'),
                   ],
                 ),
               ],
@@ -251,7 +252,7 @@ class SubmitButton extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: onPressed,
-        style: ElevatedButton.styleFrom(minHeight: 56),
+        style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(56)),
         child: const Text('Submit Tournament'),
       ),
     );

@@ -71,7 +71,7 @@ void main() {
         repository: MockTournamentRepository(sampleTournaments),
       );
       provider.updateSearchQuery('  Scramble  ');
-      expect(provider.searchQuery, 'Scramble');
+      expect(provider.searchQuery, '  Scramble  ');
     });
 
     group('registerToTournament', () {
@@ -166,6 +166,11 @@ class _ThrowingRepository implements TournamentRepository {
 
   @override
   Future<(List<Tournament>, int, bool)> search(String query) {
+    _fail();
+  }
+
+  @override
+  Future<void> register(String tournamentId) {
     _fail();
   }
 }

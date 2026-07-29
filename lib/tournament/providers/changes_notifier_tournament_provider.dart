@@ -133,6 +133,12 @@ class ChangesNotifierTournamentProvider extends ChangeNotifier {
     await loadFirstPage();
   }
 
+  /// Update the search query and trigger a reload.
+  Future<void> updateSearchQuery(String query) async {
+    _setState(_state.copyWith(searchQuery: query));
+    await loadFirstPage();
+  }
+
   void _setState(TournamentProviderState next) {
     _state = next;
     notifyListeners();

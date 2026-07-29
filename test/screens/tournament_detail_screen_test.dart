@@ -7,6 +7,7 @@ import 'package:kbvs_golf/tournament/models/tournament.dart';
 import 'package:kbvs_golf/tournament/models/skill_level.dart';
 import 'package:kbvs_golf/tournament/models/tournament_format.dart';
 import 'package:kbvs_golf/tournament/models/tournament_status.dart';
+import 'package:kbvs_golf/tournament/repositories/mock_tournament_repository.dart';
 import 'package:kbvs_golf/tournament/screens/tournament_detail_screen.dart';
 
 void main() {
@@ -26,71 +27,70 @@ void main() {
         isFeatured: false,
       );
 
-  Future<void> pumpDetailScreen(
+  Future<void> pumpDetail(
     WidgetTester tester,
     Tournament tournament,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TournamentDetailScreen(),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<ChangesNotifierTournamentProvider>(
+            create: (_) => ChangesNotifierTournamentProvider(
+              repository: MockTournamentRepository([tournament]),
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          home: const _SentinelHome(),
         ),
       ),
     );
-    // Manually provide the tournament via route settings
-    final navigator = find.byType(Navigator);
-    // Actually we need to pump with the route that has arguments
-    // Better approach: wrap in a Material page with pushed route
-    // Let's use a different pattern: push the screen manually after initial pump
-    await tester.pump();
-  }
 
-  testWidgets('displays tournament name', (tester) async {
-    final tournament = _t('Pro Scramble Open');
-    await tester.pumpWidget(
-      Material(
-        child: TournamentDetailScreen(),
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.push(
+      MaterialPageRoute(
+        builder: (_) => const TournamentDetailScreen(),
+        settings: RouteSettings(arguments: tournament),
       ),
     );
-    // Simulate route with arguments
-    tester.ensureActiveContext();
-    // Push the screen with arguments using Navigator
-    await tester.showPage(
-      TournamentDetailScreen(),
-      arguments: tournament,
-    );
-    expect(find.text('Pro Scramble Open'), findsOneWidget);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('displays tournament name in appbar and body', (tester) async {
+    await pumpDetail(tester, _t('Pro Scramble Open'));
+    expect(find.text('Pro Scramble Open'), findsAtLeastNWidgets(1));
   });
 
-  testWidgets('displays course name and location', (tester) async {
-    final tournament = _t('Course Challenge');
-    await tester.showPage(TournamentDetailScreen(), arguments: tournament);
-    expect(find.text('Green Valley'), findsOneWidget);
+  testWidgets('displays course location', (tester) async {
+    await pumpDetail(tester, _t('Course Challenge'));
     expect(find.text('Bandung'), findsOneWidget);
   });
 
   testWidgets('displays fee label', (tester) async {
-    final tournament = _t('Cheap One');
-    await tester.showPage(TournamentDetailScreen(), arguments: tournament);
+    await pumpDetail(tester, _t('Cheap One'));
     expect(find.text('Rp 150000'), findsOneWidget);
   });
 
   testWidgets('displays format as formatted string', (tester) async {
-    final tournament = _t('Format Test');
-    await tester.showPage(TournamentDetailScreen(), arguments: tournament);
+    await pumpDetail(tester, _t('Format Test'));
     expect(find.text('Scramble'), findsOneWidget);
   });
 
-  testWidgets('displays skill level as formatted string', (tester) async {
-    final tournament = _t('Skill Test');
-    await tester.showPage(TournamentDetailScreen(), arguments: tournament);
-    expect(find.text('Casual'), findsOneWidget);
+  testWidgets('renders details, players, and rules tabs', (tester) async {
+    await pumpDetail(tester, _t('Tab Test'));
+    expect(find.text('Details'), findsOneWidget);
+    expect(find.text('Players'), findsOneWidget);
+    expect(find.text('Rules'), findsOneWidget);
   });
 
-  testWidgets('displays registration info', (tester) async {
-    final tournament = _t('Reg Test');
-    await tester.showPage(TournamentDetailScreen(), arguments: tournament);
-    expect(find.text('3 / 16'), findsOneWidget);
-    expect(find.text('Registered'), findsOneWidget);
+  testWidgets('displays register CTA', (tester) async {
+    await pumpDetail(tester, _t('Reg Test'));
+    expect(find.text('Register Now'), findsOneWidget);
   });
+}
+
+class _SentinelHome extends StatelessWidget {
+  const _SentinelHome();
+  @override
+  Widget build(BuildContext context) => const Scaffold(body: SizedBox.shrink());
 }

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/changes_notifier_tournament_provider.dart';
-import '../models/tournament.dart';
-import '../models/tournament_status.dart';
+import '../tournament/providers/changes_notifier_tournament_provider.dart';
+import '../tournament/models/tournament.dart';
+import '../tournament/models/tournament_status.dart';
 import '../widgets/empty_state.dart';
 
 class AdminModerationScreen extends StatefulWidget {
@@ -55,7 +55,7 @@ class _AdminModerationScreenState extends State<AdminModerationScreen> {
                   child: ElevatedButton.icon(
                     onPressed: () => _approve(tournament),
                     icon: const Icon(Icons.check_circle_outline, color: Colors.white),
-                    const Text('Approve'),
+                    label: const Text('Approve'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
@@ -67,12 +67,11 @@ class _AdminModerationScreenState extends State<AdminModerationScreen> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _reject(tournament),
-                    icon: const Icon(Icons.close_outline, color: Colors.red),
-                    const Text('Reject', style: TextStyle(color: Colors.red)),
+                    icon: const Icon(Icons.close, color: Colors.red),
+                    label: const Text('Reject', style: TextStyle(color: Colors.red)),
                     style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      borderColor: Colors.red,
                       foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                   ),
@@ -102,11 +101,11 @@ class _AdminModerationScreenState extends State<AdminModerationScreen> {
             onPressed: () {
               setState(() => _processedIds.clear());
             },
-          )
+          ),
         ],
       ),
       body: pending.isEmpty
-          ? EmptyState(icon: Icons.inbox, title: 'No tournaments pending')
+          ? const EmptyState(icon: Icons.inbox, title: 'No tournaments pending')
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: pending.length,

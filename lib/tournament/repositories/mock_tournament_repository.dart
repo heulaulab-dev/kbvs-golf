@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/tournament.dart';
+import '../models/tournament_format.dart';
+import '../models/skill_level.dart';
+import '../models/tournament_status.dart';
 import 'tournament_repository.dart';
 import '../../persistence/mock_data_store.dart';
 
@@ -161,20 +164,8 @@ class MockTournamentRepository implements TournamentRepository {
       throw FormatException('Tournament not found: $tournamentId');
     }
     final tournament = _store[index];
-    _store[index] = Tournament(
-      id: tournament.id,
-      name: tournament.name,
-      courseName: tournament.courseName,
-      courseLocation: tournament.courseLocation,
-      format: tournament.format,
-      minSkill: tournament.minSkill,
-      maxFeeIdr: tournament.maxFeeIdr,
-      startDate: tournament.startDate,
-      endDate: tournament.endDate,
-      status: tournament.status,
+    _store[index] = tournament.copyWith(
       registeredCount: tournament.registeredCount + 1,
-      maxCapacity: tournament.maxCapacity,
-      isFeatured: tournament.isFeatured,
     );
     // Save back to persistent store if in persistent mode
     if (_persistentMode && _dataStore != null) {

@@ -54,6 +54,44 @@ class Tournament {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'course': {
+        'name': courseName,
+        'location': courseLocation,
+      },
+      'format': format.name,
+      'min_skill': minSkill.name,
+      'max_fee_idr': maxFeeIdr,
+      'start_date': startDate.toUtc().toIso8601String(),
+      'end_date': endDate.toUtc().toIso8601String(),
+      'status': status.name.toUpperCase(),
+      'registered_count': registeredCount,
+      'max_capacity': maxCapacity,
+      'is_featured': isFeatured,
+    };
+  }
+
+  Tournament copyWith({int? registeredCount}) {
+    return Tournament(
+      id: id,
+      name: name,
+      courseName: courseName,
+      courseLocation: courseLocation,
+      format: format,
+      minSkill: minSkill,
+      maxFeeIdr: maxFeeIdr,
+      startDate: startDate,
+      endDate: endDate,
+      status: status,
+      registeredCount: registeredCount ?? this.registeredCount,
+      maxCapacity: maxCapacity,
+      isFeatured: isFeatured,
+    );
+  }
+
   bool get isFull => registeredCount >= maxCapacity;
 
   bool get isVisibleToPublic => status == TournamentStatus.approved;
