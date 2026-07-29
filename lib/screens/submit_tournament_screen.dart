@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 
 import '../tournament/models/tournament_format.dart';
 import '../tournament/models/skill_level.dart';
+import '../core/theme/golfie_colors.dart';
+import '../widgets/golfie/golfie_index.dart';
 
 class SubmitTournamentScreen extends StatefulWidget {
   const SubmitTournamentScreen({super.key});
@@ -86,7 +88,7 @@ class _SubmitTournamentScreenState extends State<SubmitTournamentScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Submitted for approval. Admin will review shortly.'),
-          backgroundColor: Colors.blue,
+          backgroundColor: GolfieColors.ink,
         ),
       );
       _resetForm();
@@ -168,10 +170,10 @@ class _SubmitTournamentScreenState extends State<SubmitTournamentScreen> {
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton.icon(
+                  child: GolfieGhostButton(
+                    label: 'Generate Description',
+                    icon: Icons.create,
                     onPressed: _handleAIBenefit,
-                    icon: const Icon(Icons.create, color: Colors.amber),
-                    label: const Text('Generate Description'),
                   ),
                 ),
               ],
@@ -251,10 +253,9 @@ class SubmitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
+      child: GolfiePillButton(
+        label: 'Submit Tournament',
         onPressed: onPressed,
-        style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(56)),
-        child: const Text('Submit Tournament'),
       ),
     );
   }
