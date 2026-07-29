@@ -13,8 +13,8 @@ class GolfieGhostButton extends StatefulWidget {
     required this.label,
     required this.onPressed,
     this.icon,
-    this.borderColor = GolfieColors.midnight,
-    this.foregroundColor = GolfieColors.midnight,
+    this.borderColor = GolfieColors.ink,
+    this.foregroundColor = GolfieColors.ink,
   });
 
   final String label;
@@ -63,7 +63,7 @@ class _GolfieGhostButtonState extends State<GolfieGhostButton> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             decoration: BoxDecoration(
-              color: GolfieColors.cream,
+              color: GolfieColors.white,
               borderRadius: BorderRadius.circular(999),
               border: Border.all(color: widget.borderColor, width: 1.5),
             ),

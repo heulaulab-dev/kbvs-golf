@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../tournament/providers/changes_notifier_tournament_provider.dart';
 import '../tournament/models/tournament.dart';
 import '../tournament/models/tournament_status.dart';
-import '../widgets/empty_state.dart';
+import '../widgets/golfie/golfie_empty_state.dart';
 
 class AdminModerationScreen extends StatefulWidget {
   const AdminModerationScreen({super.key});
@@ -105,7 +105,7 @@ class _AdminModerationScreenState extends State<AdminModerationScreen> {
         ],
       ),
       body: pending.isEmpty
-          ? const EmptyState(icon: Icons.inbox, title: 'No tournaments pending')
+          ? const GolfieEmptyState(icon: Icons.inbox, title: 'No tournaments pending')
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: pending.length,

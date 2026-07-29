@@ -39,7 +39,7 @@ class GolfieTornPaperSection extends StatelessWidget {
           Text(
             title,
             style: GolfieTypography.titleLarge.copyWith(
-              color: GolfieColors.midnight,
+              color: GolfieColors.ink,
               fontWeight: FontWeight.w700,
               fontSize: 22,
             ),

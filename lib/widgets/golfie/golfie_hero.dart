@@ -31,7 +31,7 @@ class GolfieHero extends StatelessWidget {
           Text(
             title,
             style: GolfieTypography.displaySmall.copyWith(
-              color: GolfieColors.midnight,
+              color: GolfieColors.ink,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -39,7 +39,7 @@ class GolfieHero extends StatelessWidget {
           Text(
             subtitle,
             style: GolfieTypography.bodyMedium.copyWith(
-              color: GolfieColors.midnight.withValues(alpha: 0.7),
+              color: GolfieColors.ink.withValues(alpha: 0.7),
             ),
           ),
           if (action != null) ...[

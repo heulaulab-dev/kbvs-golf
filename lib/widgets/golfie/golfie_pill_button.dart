@@ -14,7 +14,7 @@ class GolfiePillButton extends StatefulWidget {
     required this.onPressed,
     this.icon,
     this.backgroundColor = GolfieColors.papaya,
-    this.foregroundColor = GolfieColors.midnight,
+    this.foregroundColor = GolfieColors.ink,
   });
 
   final String label;

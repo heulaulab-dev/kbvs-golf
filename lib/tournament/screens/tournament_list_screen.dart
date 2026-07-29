@@ -7,7 +7,7 @@ import '../models/tournament_format.dart';
 import '../models/skill_level.dart';
 import '../providers/changes_notifier_tournament_provider.dart';
 import '../../widgets/golfie/golfie_avatar_stack.dart';
-import '../../widgets/empty_state.dart';
+import '../../widgets/golfie/golfie_empty_state.dart';
 import 'tournament_detail_screen.dart';
 
 /// List of tournaments with search bar and filter controls.
@@ -282,7 +282,7 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
 
     if (filtered.isEmpty) {
       final hasQuery = provider.searchQuery.isNotEmpty;
-      return EmptyState(
+      return GolfieEmptyState(
         icon: Icons.golf_course,
         title: hasQuery
             ? 'No tournaments match your search'

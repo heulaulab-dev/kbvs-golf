@@ -31,7 +31,7 @@ class GolfieAvatarStack extends StatelessWidget {
     final children = <Widget>[];
 
     for (var i = 0; i < visibleCount; i++) {
-      children.add(_AvatarCircle(label: provided[i], color: GolfieColors.midnight));
+      children.add(_AvatarCircle(label: provided[i], color: GolfieColors.ink));
     }
     if (overflow > 0) {
       children.add(_AvatarCircle(
@@ -69,13 +69,13 @@ class _AvatarCircle extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: GolfieColors.cream, width: 2),
+        border: Border.all(color: GolfieColors.white, width: 2),
       ),
       alignment: Alignment.center,
       child: Text(
         label,
         style: const TextStyle(
-          color: GolfieColors.cream,
+          color: GolfieColors.white,
           fontWeight: FontWeight.w700,
           fontSize: 12,
         ),

@@ -41,11 +41,11 @@ class GolfieCollageCard extends StatelessWidget {
     return Container(
       margin: margin,
       decoration: BoxDecoration(
-        color: GolfieColors.cream,
+        color: GolfieColors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: GolfieColors.midnight.withValues(alpha: 0.06),
+            color: GolfieColors.ink.withValues(alpha: 0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
