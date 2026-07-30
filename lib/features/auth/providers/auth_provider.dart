@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// import '../widgets/supabase_wrapper.dart'; // unused
-
 /// Manages authentication state using Supabase Auth.
 ///
 /// Loads session on init, listens to auth state stream, and provides
@@ -30,11 +28,13 @@ class AuthProvider with ChangeNotifier {
     init();
   }
 
-  /// Initialize: load existing session from storage and set up state stream
+  /// Initialize: load existing session from storage and set up state stream.
   void init() {
-    // Get current user directly
+    _loading = true;
+    notifyListeners();
+
+    // Load initial user
     _user = _client.auth.currentUser;
-    _loading = false;
 
     // Listen for auth state changes (sign-in, sign-out, token refresh, etc.)
     _client.auth.onAuthStateChange.listen((AuthState state) {
@@ -43,6 +43,19 @@ class AuthProvider with ChangeNotifier {
       _hasError = false;
       _errorMessage = null;
       notifyListeners();
+    }).onError((error) {
+      _hasError = true;
+      _errorMessage = 'Auth stream error: $error';
+      _loading = false;
+      notifyListeners();
+    });
+
+    // Finalize loading state after this event loop tick
+    Future.microtask(() {
+      if (_loading) {
+        _loading = false;
+        notifyListeners();
+      }
     });
   }
 
@@ -124,15 +137,28 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// Resets the user's password using a token from the reset email
-  Future<void> resetPassword({required String email, required String newPassword}) async {
+  /// Resets the user's password using a token from the reset email.
+  ///
+  /// **IMPORTANT**: This method requires the OTP token extracted from the
+  /// reset email deep link (e.g., https://app.golfie.app/reset?token=xyz).
+  /// The flow should be:
+  ///   1. User clicks reset link in app → app opens with token in URL
+  ///   2. Token extracted and passed to this method
+  ///   3. First sign in with OTP: `_client.auth.signInWithOtp(token)`
+  ///   4. Then update password: `_client.auth.updateUser(UserAttributes(password:))`
+  Future<void> resetPassword({required String email, required String newPassword, required String token}) async {
     _resetErrorState();
     _loading = true;
     notifyListeners();
 
     try {
-      final userUpdate = UserAttributes(email: email, password: newPassword);
+      // Step 1: Sign in with the OTP token from the reset link
+      await _client.auth.signInWithOtp(token: token);
+
+      // Step 2: Update password after successful sign-in
+      final userUpdate = UserAttributes(password: newPassword);
       await _client.auth.updateUser(userUpdate);
+
       _user = _client.auth.currentUser;
     } catch (e) {
       _handleSupabaseError(e);
@@ -185,6 +211,6 @@ class AuthProvider with ChangeNotifier {
   /// Checks if the user is currently authenticated
   bool get isAuthenticated => _user != null;
 
-  /// Checks if the user's email is set (proxy for verification in absence of emailVerified)
+  /// Checks if the user's email is set
   bool get isEmailVerified => _user?.email != null;
 }

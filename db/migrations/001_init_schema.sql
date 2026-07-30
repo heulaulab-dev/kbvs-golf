@@ -59,11 +59,11 @@ CREATE TABLE courses (
     facility_notes TEXT,
     image_url VARCHAR(512),
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
-
-    INDEX idx_courses_location (location),
-    INDEX idx_courses_geo (latitude, longitude)
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE INDEX idx_courses_location ON courses (location);
+CREATE INDEX idx_courses_geo ON courses (latitude, longitude);
 
 -- ============================================================
 -- USERS TABLE
@@ -72,7 +72,7 @@ CREATE TABLE courses (
 CREATE TABLE users (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     username VARCHAR(12) UNIQUE NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL REFERENCES auth.users(email) ON DELETE CASCADE,
+    email VARCHAR(255) UNIQUE NOT NULL,
     skill_level skill_level DEFAULT 'beginner',
     handicap INT CHECK (handicap BETWEEN 0 AND 50),
     role user_role DEFAULT 'user',
@@ -107,17 +107,17 @@ CREATE TABLE tournaments (
     updated_at TIMESTAMPTZ DEFAULT NOW(),
 
     CONSTRAINT chk_dates_valid CHECK (end_date > start_date),
-    CONSTRAINT chk_fee_positive CHECK (max_fee_idr >= 0),
-
-    INDEX idx_tournaments_name (name),
-    INDEX idx_tournaments_course (course_id),
-    INDEX idx_tournaments_status (status),
-    INDEX idx_tournaments_start_date (start_date),
-    INDEX idx_tournaments_format (format),
-    INDEX idx_tournaments_min_skill (min_skill),
-    INDEX idx_tournaments_featured (is_featured),
-    INDEX idx_tournaments_search (to_tsvector('english', COALESCE(name, '') || ' ' || COALESCE(description, '')))
+    CONSTRAINT chk_fee_positive CHECK (max_fee_idr >= 0)
 );
+
+CREATE INDEX idx_tournaments_name ON tournaments (name);
+CREATE INDEX idx_tournaments_course ON tournaments (course_id);
+CREATE INDEX idx_tournaments_status ON tournaments (status);
+CREATE INDEX idx_tournaments_start_date ON tournaments (start_date);
+CREATE INDEX idx_tournaments_format ON tournaments (format);
+CREATE INDEX idx_tournaments_min_skill ON tournaments (min_skill);
+CREATE INDEX idx_tournaments_featured ON tournaments (is_featured);
+CREATE INDEX idx_tournaments_search ON tournaments USING GIN (to_tsvector('english', COALESCE(name, '') || ' ' || COALESCE(description, '')));
 
 -- ============================================================
 -- REGISTRATIONS TABLE
@@ -131,14 +131,12 @@ CREATE TABLE registrations (
     status registration_status DEFAULT 'CONFIRMED',
     updated_at TIMESTAMPTZ DEFAULT NOW(),
 
-    UNIQUE (tournament_id, user_id),
-
-    CHECK (registered_at < (SELECT end_date FROM tournaments WHERE id = tournament_id)),
-
-    INDEX idx_registrations_user (user_id),
-    INDEX idx_registrations_tournament (tournament_id),
-    INDEX idx_registrations_status (status)
+    UNIQUE (tournament_id, user_id)
 );
+
+CREATE INDEX idx_registrations_user ON registrations (user_id);
+CREATE INDEX idx_registrations_tournament ON registrations (tournament_id);
+CREATE INDEX idx_registrations_status ON registrations (status);
 
 -- ============================================================
 -- LEADERBOARD TABLE
@@ -154,12 +152,12 @@ CREATE TABLE leaderboard_entry (
     rank INT CHECK (rank > 0 OR rank IS NULL),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
 
-    UNIQUE (tournament_id, user_id),
-
-    INDEX idx_leaderboard_tournament (tournament_id),
-    INDEX idx_leaderboard_user (user_id),
-    INDEX idx_leaderboard_scores (total_score, rank)
+    UNIQUE (tournament_id, user_id)
 );
+
+CREATE INDEX idx_leaderboard_tournament ON leaderboard_entry (tournament_id);
+CREATE INDEX idx_leaderboard_user ON leaderboard_entry (user_id);
+CREATE INDEX idx_leaderboard_scores ON leaderboard_entry (total_score, rank);
 
 -- ============================================================
 -- TRIGGER: Auto-update updated_at column
@@ -217,12 +215,24 @@ CREATE POLICY courses_insert_policy ON courses
 CREATE POLICY courses_update_policy ON courses
   FOR UPDATE
   TO authenticated
-  USING ((SELECT auth.role()) = 'admin');
+  USING (
+    EXISTS (
+      SELECT 1 FROM users
+      WHERE users.id = auth.uid()
+      AND users.role = 'admin'
+    )
+  );
 
 CREATE POLICY courses_delete_policy ON courses
   FOR DELETE
   TO authenticated
-  USING ((SELECT auth.role()) = 'admin');
+  USING (
+    EXISTS (
+      SELECT 1 FROM users
+      WHERE users.id = auth.uid()
+      AND users.role = 'admin'
+    )
+  );
 
 -- -----------------------------------------------------------
 -- USERS RLS Policies
@@ -238,7 +248,13 @@ CREATE POLICY users_select_policy ON users
 CREATE POLICY users_admin_select_policy ON users
   FOR SELECT
   TO authenticated
-  USING ((SELECT auth.role()) = 'admin');
+  USING (
+    EXISTS (
+      SELECT 1 FROM users u
+      WHERE u.id = auth.uid()
+      AND u.role = 'admin'
+    )
+  );
 
 -- New users can only read/write their own record after signup
 CREATE POLICY users_insert_policy ON users
@@ -256,7 +272,13 @@ CREATE POLICY users_update_policy ON users
 CREATE POLICY users_admin_update_policy ON users
   FOR UPDATE
   TO authenticated
-  USING ((SELECT auth.role()) = 'admin')
+  USING (
+    EXISTS (
+      SELECT 1 FROM users u
+      WHERE u.id = auth.uid()
+      AND u.role = 'admin'
+    )
+  )
   WITH CHECK (auth.uid() = id);
 
 -- -----------------------------------------------------------
@@ -289,7 +311,13 @@ CREATE POLICY tournaments_delete_policy ON tournaments
 CREATE POLICY tournaments_admin_policy ON tournaments
   FOR ALL
   TO authenticated
-  USING ((SELECT auth.role()) = 'admin');
+  USING (
+    EXISTS (
+      SELECT 1 FROM users u
+      WHERE u.id = auth.uid()
+      AND u.role = 'admin'
+    )
+  );
 
 -- -----------------------------------------------------------
 -- REGISTRATIONS RLS Policies
@@ -305,7 +333,13 @@ CREATE POLICY registrations_select_policy ON registrations
 CREATE POLICY registrations_admin_select_policy ON registrations
   FOR SELECT
   TO authenticated
-  USING ((SELECT auth.role()) = 'admin');
+  USING (
+    EXISTS (
+      SELECT 1 FROM users u
+      WHERE u.id = auth.uid()
+      AND u.role = 'admin'
+    )
+  );
 
 -- Users can register for tournaments (check capacity via trigger/function)
 CREATE POLICY registrations_insert_policy ON registrations
@@ -323,7 +357,13 @@ CREATE POLICY registrations_update_policy ON registrations
 CREATE POLICY registrations_admin_policy ON registrations
   FOR ALL
   TO authenticated
-  USING ((SELECT auth.role()) = 'admin');
+  USING (
+    EXISTS (
+      SELECT 1 FROM users u
+      WHERE u.id = auth.uid()
+      AND u.role = 'admin'
+    )
+  );
 
 -- -----------------------------------------------------------
 -- LEADERBOARD RLS Policies
@@ -339,7 +379,13 @@ CREATE POLICY leaderboard_select_policy ON leaderboard_entry
 CREATE POLICY leaderboard_admin_select_policy ON leaderboard_entry
   FOR SELECT
   TO authenticated
-  USING ((SELECT auth.role()) = 'admin');
+  USING (
+    EXISTS (
+      SELECT 1 FROM users u
+      WHERE u.id = auth.uid()
+      AND u.role = 'admin'
+    )
+  );
 
 -- Users can update their own scores
 CREATE POLICY leaderboard_update_policy ON leaderboard_entry
@@ -352,7 +398,13 @@ CREATE POLICY leaderboard_update_policy ON leaderboard_entry
 CREATE POLICY leaderboard_admin_policy ON leaderboard_entry
   FOR ALL
   TO authenticated
-  USING ((SELECT auth.role()) = 'admin');
+  USING (
+    EXISTS (
+      SELECT 1 FROM users u
+      WHERE u.id = auth.uid()
+      AND u.role = 'admin'
+    )
+  );
 
 -- -----------------------------------------------------------
 -- VIEW RLS Policies

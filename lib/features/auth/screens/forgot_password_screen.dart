@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/golfie_colors.dart';
@@ -7,7 +8,6 @@ import '../providers/auth_provider.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
-
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
@@ -26,69 +26,81 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildCard(),
-            ],
+            children: [_buildCard(context)],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildCard() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(GolfieRadii.xxxl),
-        child: Container(
-          color: GolfieColors.white,
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Reset your password',
-                  style: GoogleFonts.lora(
-                    fontSize: 46,
-                    color: GolfieColors.ink,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Enter email to receive reset link',
-                  style: GoogleFonts.inter(),
-                ),
-                const SizedBox(height: 32),
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(GolfieRadii.xl),
-                      borderSide: BorderSide(color: GolfieColors.ash),
+  Widget _buildCard(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, auth, child) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 24),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(GolfieRadii.xxxl),
+            child: Container(
+              color: GolfieColors.white,
+              padding: const EdgeInsets.all(24),
+              child: Form(key: _formKey, child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Reset your password', style: GoogleFonts.lora(fontSize: 46, color: GolfieColors.ink)),
+                  const SizedBox(height: 8),
+                  Text('Enter email to receive reset link', style: GoogleFonts.inter()),
+                  const SizedBox(height: 32),
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(GolfieRadii.xl), borderSide: BorderSide(color: GolfieColors.ash)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(GolfieRadii.xl), borderSide: BorderSide(color: GolfieColors.ink, width: 1.5)),
+                      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(GolfieRadii.xl), borderSide: const BorderSide(color: Color(0xFFDD6B6B))),
+                      hintText: 'Email',
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return 'Enter email';
+                      if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) return 'Invalid email';
+                      return null;
+                    },
                   ),
-                ),
-                const SizedBox(height: 28),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size(double.infinity, 48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(GolfieRadii.pill),
+                  const SizedBox(height: 28),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(double.infinity, 48),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(GolfieRadii.pill)),
+                      backgroundColor: GolfieColors.ink,
+                      foregroundColor: GolfieColors.white,
                     ),
-                    backgroundColor: GolfieColors.ink,
+                    onPressed: auth.loading ? null : () async {
+                      if (_formKey.currentState!.validate()) {
+                        await auth.forgotPassword(_emailController.text.trim());
+                        if (!auth.hasError && mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Reset link sent to your email'), backgroundColor: GolfieColors.mint),
+                          );
+                          Future.delayed(const Duration(seconds: 3), () {
+                            if (mounted) Navigator.pop(context);
+                          });
+                        } else if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(auth.errorMessage ?? 'Could not send link'), backgroundColor: GolfieColors.marigold),
+                          );
+                        }
+                      }
+                    },
+                    child: auth.loading
+                        ? const CircularProgressIndicator(color: GolfieColors.white)
+                        : const Text('Send Link'),
                   ),
-                  onPressed: () {},
-                  child: const Text('Send Link'),
-                ),
-              ],
+                ],
+              )),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
