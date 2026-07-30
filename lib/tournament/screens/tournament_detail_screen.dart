@@ -106,24 +106,27 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
     final textTheme = Theme.of(context).textTheme;
     return GolfieCollageCard(
       padding: const EdgeInsets.all(0),
-      child: ExpansionTile(
-        leading: Icon(Icons.lightbulb_outline, color: GolfieColors.marigold),
-        title: Text('Caddy Tips', style: textTheme.titleMedium?.copyWith(color: GolfieColors.ink)),
-        subtitle: Text('Practical advice for your round', style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone)),
-        children: [
-          ListTile(
-            title: Text('Check pin position on hole 7', style: textTheme.bodyMedium?.copyWith(color: GolfieColors.ink)),
-            subtitle: Text('Avoid the water hazard on the right', style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone)),
-          ),
-          ListTile(
-            title: Text('Wind direction matters today', style: textTheme.bodyMedium?.copyWith(color: GolfieColors.ink)),
-            subtitle: Text('Club up by one on the long par-4', style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone)),
-          ),
-          ListTile(
-            title: Text('Watch out for the green slope', style: textTheme.bodyMedium?.copyWith(color: GolfieColors.ink)),
-            subtitle: Text('Ball runs towards the back left', style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone)),
-          ),
-        ],
+      child: Material(
+        type: MaterialType.transparency,
+        child: ExpansionTile(
+          leading: Icon(Icons.lightbulb_outline, color: GolfieColors.marigold),
+          title: Text('Caddy Tips', style: textTheme.titleMedium?.copyWith(color: GolfieColors.ink)),
+          subtitle: Text('Practical advice for your round', style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone)),
+          children: [
+            ListTile(
+              title: Text('Check pin position on hole 7', style: textTheme.bodyMedium?.copyWith(color: GolfieColors.ink)),
+              subtitle: Text('Avoid the water hazard on the right', style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone)),
+            ),
+            ListTile(
+              title: Text('Wind direction matters today', style: textTheme.bodyMedium?.copyWith(color: GolfieColors.ink)),
+              subtitle: Text('Club up by one on the long par-4', style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone)),
+            ),
+            ListTile(
+              title: Text('Watch out for the green slope', style: textTheme.bodyMedium?.copyWith(color: GolfieColors.ink)),
+              subtitle: Text('Ball runs towards the back left', style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone)),
+            ),
+          ],
+        ),
       ),
     );
   }

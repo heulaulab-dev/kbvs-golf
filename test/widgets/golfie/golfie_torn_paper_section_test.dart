@@ -11,7 +11,7 @@ void main() {
       title: 'Caddy Wisdom',
       child: Text('body'),
     )));
-    expect(find.text('Tips'), findsOneWidget);
+    expect(find.text('TIPS'), findsOneWidget);
     expect(find.text('Caddy Wisdom'), findsOneWidget);
     expect(find.text('body'), findsOneWidget);
   });

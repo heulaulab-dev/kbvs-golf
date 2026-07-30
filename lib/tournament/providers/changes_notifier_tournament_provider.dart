@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/tournament.dart';
+import '../models/skill_level.dart';
 import '../repositories/tournament_repository.dart';
 
 /// State for the [ChangesNotifierTournamentProvider].
@@ -17,6 +18,13 @@ class TournamentProviderState {
   final bool hasNextPage;
   final String searchQuery;
 
+  // Client-side filter state (applied in-memory after fetch)
+  final String? filterLocation;
+  final Set<SkillLevel> filterSkillLevels;
+  final int? filterMaxFee;
+  final DateTime? filterDateFrom;
+  final DateTime? filterDateTo;
+
   const TournamentProviderState({
     this.tournaments = const [],
     this.isLoading = true,
@@ -24,6 +32,11 @@ class TournamentProviderState {
     this.hasFirstPage = false,
     this.hasNextPage = false,
     this.searchQuery = '',
+    this.filterLocation,
+    this.filterSkillLevels = const {},
+    this.filterMaxFee,
+    this.filterDateFrom,
+    this.filterDateTo,
   });
 
   TournamentProviderState copyWith({
@@ -33,6 +46,15 @@ class TournamentProviderState {
     bool? hasFirstPage,
     bool? hasNextPage,
     String? searchQuery,
+    String? filterLocation,
+    bool clearFilterLocation = false,
+    Set<SkillLevel>? filterSkillLevels,
+    int? filterMaxFee,
+    bool clearFilterMaxFee = false,
+    DateTime? filterDateFrom,
+    bool clearFilterDateFrom = false,
+    DateTime? filterDateTo,
+    bool clearFilterDateTo = false,
   }) {
     return TournamentProviderState(
       tournaments: tournaments ?? this.tournaments,
@@ -41,6 +63,11 @@ class TournamentProviderState {
       hasFirstPage: hasFirstPage ?? this.hasFirstPage,
       hasNextPage: hasNextPage ?? this.hasNextPage,
       searchQuery: searchQuery ?? this.searchQuery,
+      filterLocation: clearFilterLocation ? null : (filterLocation ?? this.filterLocation),
+      filterSkillLevels: filterSkillLevels ?? this.filterSkillLevels,
+      filterMaxFee: clearFilterMaxFee ? null : (filterMaxFee ?? this.filterMaxFee),
+      filterDateFrom: clearFilterDateFrom ? null : (filterDateFrom ?? this.filterDateFrom),
+      filterDateTo: clearFilterDateTo ? null : (filterDateTo ?? this.filterDateTo),
     );
   }
 }
@@ -62,6 +89,40 @@ class ChangesNotifierTournamentProvider extends ChangeNotifier {
   bool get hasFirstPage => _state.hasFirstPage;
   bool get hasNextPage => _state.hasNextPage;
   String get searchQuery => _state.searchQuery;
+
+  /// Client-side filtered view of the current tournament list.
+  List<Tournament> get filteredTournaments {
+    var result = List<Tournament>.from(_state.tournaments);
+
+    // Filter by skill level
+    if (_state.filterSkillLevels.isNotEmpty) {
+      result = result.where((t) => _state.filterSkillLevels.contains(t.minSkill)).toList();
+    }
+
+    // Filter by max fee
+    if (_state.filterMaxFee != null) {
+      result = result.where((t) => t.maxFeeIdr <= _state.filterMaxFee!).toList();
+    }
+
+    // Filter by date range
+    if (_state.filterDateFrom != null) {
+      result = result.where((t) => !t.startDate.isBefore(_state.filterDateFrom!)).toList();
+    }
+    if (_state.filterDateTo != null) {
+      result = result.where((t) => !t.startDate.isAfter(_state.filterDateTo!)).toList();
+    }
+
+    // Filter by location (case-insensitive contains in courseName or courseLocation)
+    if (_state.filterLocation != null && _state.filterLocation!.isNotEmpty) {
+      final query = _state.filterLocation!.toLowerCase();
+      result = result.where((t) =>
+        t.courseName.toLowerCase().contains(query) ||
+        t.courseLocation.toLowerCase().contains(query)
+      ).toList();
+    }
+
+    return result;
+  }
 
   /// Pull current page from the repository. On exception, the
   /// [errorText] field is populated and [tournaments] is cleared.
@@ -137,6 +198,24 @@ class ChangesNotifierTournamentProvider extends ChangeNotifier {
   Future<void> updateSearchQuery(String query) async {
     _setState(_state.copyWith(searchQuery: query));
     await loadFirstPage();
+  }
+
+  /// Apply client-side filters to the current tournament list.
+  /// Filters are applied in-memory after fetch; no server call needed.
+  void updateFilters({
+    String? location,
+    Set<SkillLevel>? skillLevels,
+    int? maxFee,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+  }) {
+    _setState(_state.copyWith(
+      filterLocation: location,
+      filterSkillLevels: skillLevels ?? _state.filterSkillLevels,
+      filterMaxFee: maxFee,
+      filterDateFrom: dateFrom,
+      filterDateTo: dateTo,
+    ));
   }
 
   void _setState(TournamentProviderState next) {

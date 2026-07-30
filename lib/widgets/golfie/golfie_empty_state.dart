@@ -26,13 +26,13 @@ class GolfieEmptyState extends StatelessWidget {
         children: [
           Icon(icon, size: 60, color: GolfieColors.periwinkle),
           const SizedBox(height: 16),
-          Text(title, style: GolfieTypography.bodyMedium.copyWith(
+          Text(title, style: GolfieTypography.textTheme.bodyMedium!.copyWith(
             color: GolfieColors.ink,
             fontWeight: FontWeight.w700,
           )),
           if (subtitle != null) ...[
             const SizedBox(height: 6),
-            Text(subtitle!, style: GolfieTypography.bodySmall.copyWith(
+            Text(subtitle!, style: GolfieTypography.textTheme.bodySmall!.copyWith(
               color: GolfieColors.ink.withValues(alpha: 0.6),
             )),
           ],

@@ -1,0 +1,190 @@
+import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+// import '../widgets/supabase_wrapper.dart'; // unused
+
+/// Manages authentication state using Supabase Auth.
+///
+/// Loads session on init, listens to auth state stream, and provides
+/// methods for sign-in, sign-up, password reset, and sign-out.
+class AuthProvider with ChangeNotifier {
+  final SupabaseClient _client;
+  User? _user;
+  bool _loading = true;
+  bool _hasError = false;
+  String? _errorMessage;
+
+  /// Loading state while checking initial session
+  bool get loading => _loading;
+
+  /// Currently authenticated user (null if not logged in)
+  User? get user => _user;
+
+  /// True when an error has occurred during an auth operation
+  bool get hasError => _hasError;
+
+  /// Human-readable error message (for UI display)
+  String? get errorMessage => _errorMessage;
+
+  AuthProvider(this._client) {
+    init();
+  }
+
+  /// Initialize: load existing session from storage and set up state stream
+  void init() {
+    // Get current user directly
+    _user = _client.auth.currentUser;
+    _loading = false;
+
+    // Listen for auth state changes (sign-in, sign-out, token refresh, etc.)
+    _client.auth.onAuthStateChange.listen((AuthState state) {
+      _user = state.session?.user;
+      _loading = false;
+      _hasError = false;
+      _errorMessage = null;
+      notifyListeners();
+    });
+  }
+
+  /// Sign up a new user with email and password
+  Future<void> signUp({required String email, required String password}) async {
+    _resetErrorState();
+    _loading = true;
+    notifyListeners();
+
+    try {
+      await _client.auth.signUp(
+        email: email,
+        password: password,
+      );
+      _user = _client.auth.currentUser;
+    } catch (e) {
+      _handleSupabaseError(e);
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Existing user signs in with email/password
+  Future<void> signIn({required String email, required String password}) async {
+    _resetErrorState();
+    _loading = true;
+    notifyListeners();
+
+    try {
+      await _client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      _user = _client.auth.currentUser;
+    } catch (e) {
+      _handleSupabaseError(e);
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Signs out the current user and clears secure storage
+  Future<void> signOut() async {
+    _resetErrorState();
+    _loading = true;
+    notifyListeners();
+
+    try {
+      await _client.auth.signOut();
+      _user = null;
+    } catch (e) {
+      _user = null;
+      _handleSupabaseError(e);
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Sends a password reset link to the provided email
+  Future<void> forgotPassword(String email) async {
+    _resetErrorState();
+    _loading = true;
+    notifyListeners();
+
+    try {
+      await _client.auth.resend(
+        email: email,
+        type: OtpType.recovery,
+      );
+    } catch (e) {
+      _errorMessage = 'Could not send reset link. Please check your email and try again.';
+      _hasError = true;
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Resets the user's password using a token from the reset email
+  Future<void> resetPassword({required String email, required String newPassword}) async {
+    _resetErrorState();
+    _loading = true;
+    notifyListeners();
+
+    try {
+      final userUpdate = UserAttributes(email: email, password: newPassword);
+      await _client.auth.updateUser(userUpdate);
+      _user = _client.auth.currentUser;
+    } catch (e) {
+      _handleSupabaseError(e);
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Internal method to convert Supabase errors into user-friendly messages
+  void _handleSupabaseError(dynamic e) {
+    _hasError = true;
+
+    if (e is AuthException) {
+      switch (e.code) {
+        case 'invalid_credentials':
+          _errorMessage = 'Invalid email or password.';
+          break;
+        case 'email_exists':
+          _errorMessage = 'Account with this email already exists.';
+          break;
+        case 'not_found':
+          _errorMessage = 'No account with this email found.';
+          break;
+        case 'weak_password':
+          _errorMessage = 'Password is too weak. Try something longer and more complex.';
+          break;
+        case 'rate_limit_exceeded':
+          _errorMessage = 'Too many requests. Please try again later.';
+          break;
+        default:
+          _errorMessage = e.message;
+          if (_errorMessage == null) {
+            _errorMessage = 'Something went wrong.';
+          }
+      }
+    } else if (e is String) {
+      _errorMessage = e;
+    } else {
+      _errorMessage = 'Network error. Please check your connection and try again.';
+    }
+  }
+
+  /// Clears any previous error state before a new operation
+  void _resetErrorState() {
+    _hasError = false;
+    _errorMessage = null;
+  }
+
+  /// Checks if the user is currently authenticated
+  bool get isAuthenticated => _user != null;
+
+  /// Checks if the user's email is set (proxy for verification in absence of emailVerified)
+  bool get isEmailVerified => _user?.email != null;
+}

@@ -28,7 +28,7 @@ class GolfieTornPaperSection extends StatelessWidget {
         children: [
           Text(
             eyebrow.toUpperCase(),
-            style: GolfieTypography.bodyMedium.copyWith(
+            style: GolfieTypography.textTheme.bodyMedium!.copyWith(
               color: GolfieColors.periwinkle,
               letterSpacing: 1.5,
               fontWeight: FontWeight.w700,
@@ -38,7 +38,7 @@ class GolfieTornPaperSection extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             title,
-            style: GolfieTypography.titleLarge.copyWith(
+            style: GolfieTypography.textTheme.titleLarge!.copyWith(
               color: GolfieColors.ink,
               fontWeight: FontWeight.w700,
               fontSize: 22,

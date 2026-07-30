@@ -10,6 +10,16 @@ import '../../widgets/golfie/golfie_index.dart';
 import '../../core/theme/golfie_colors.dart';
 import 'tournament_detail_screen.dart';
 
+/// Skill level label helper — top-level so both screen and filter sheet can use it.
+String skillLevelLabel(SkillLevel level) {
+  switch (level) {
+    case SkillLevel.beginner: return 'Beginner';
+    case SkillLevel.casual: return 'Casual';
+    case SkillLevel.competitive: return 'Competitive';
+    case SkillLevel.pro: return 'Pro';
+  }
+}
+
 /// List of tournaments with search bar and filter controls.
 /// Polished UI: shimmer skeleton loaders, network awareness, filter bar.
 class TournamentListScreen extends StatefulWidget {
@@ -65,15 +75,6 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
     }
   }
 
-  String _skillLevelLabel(SkillLevel level) {
-    switch (level) {
-      case SkillLevel.beginner: return 'Beginner';
-      case SkillLevel.casual: return 'Casual';
-      case SkillLevel.competitive: return 'Competitive';
-      case SkillLevel.pro: return 'Pro';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,8 +90,41 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
           ),
         ],
       ),
-      body: Consumer<ChangesNotifierTournamentProvider>(
-        builder: (context, provider, child) => _buildBody(context, provider),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: TextField(
+              controller: _searchCtrl,
+              decoration: InputDecoration(
+                hintText: 'Search tournaments',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchCtrl.text.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          context.read<ChangesNotifierTournamentProvider>().updateSearchQuery('');
+                          setState(() {});
+                        },
+                      ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              ),
+              onChanged: (query) {
+                context.read<ChangesNotifierTournamentProvider>().updateSearchQuery(query);
+              },
+            ),
+          ),
+          Expanded(
+            child: Consumer<ChangesNotifierTournamentProvider>(
+              builder: (context, provider, child) => _buildBody(context, provider),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -102,13 +136,7 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
     final hasData = filtered.isNotEmpty;
 
     if (isLoading && !hasData) {
-      return SizedBox(
-        height: MediaQuery.of(context).size.height * 0.7,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [_SkeletonCard(), _SkeletonCard(), _SkeletonCard()]),
-        ),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (provider.errorText.isNotEmpty) {
@@ -230,7 +258,7 @@ class _FilterSheetState extends State<_FilterSheet> with AutomaticKeepAliveClien
               children: SkillLevel.values.map((level) {
                 final selected = widget.selectedSkills.contains(level);
                 return FilterChip(
-                  label: Text(_skillLevelLabel(level)),
+                  label: Text(skillLevelLabel(level)),
                   selected: selected,
                   onSelected: (v) {
                     final updated = Set<SkillLevel>.from(widget.selectedSkills);
