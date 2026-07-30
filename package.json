@@ -1,0 +1,6 @@
+{
+  "dependencies": {},
+  "devDependencies": {
+    "supabase": "^2.110.0"
+  }
+}

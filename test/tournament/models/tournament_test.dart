@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kbvs_golf/tournament/models/tournament.dart';
-import 'package:kbvs_golf/tournament/models/skill_level.dart';
-import 'package:kbvs_golf/tournament/models/tournament_format.dart';
-import 'package:kbvs_golf/tournament/models/tournament_status.dart';
+import 'package:golfie/tournament/models/tournament.dart';
+import 'package:golfie/tournament/models/skill_level.dart';
+import 'package:golfie/tournament/models/tournament_format.dart';
+import 'package:golfie/tournament/models/tournament_status.dart';
 
 void main() {
   group('Tournament.fromJson', () {

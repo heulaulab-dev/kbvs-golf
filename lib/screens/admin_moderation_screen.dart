@@ -5,7 +5,8 @@ import 'package:provider/provider.dart';
 import '../tournament/providers/changes_notifier_tournament_provider.dart';
 import '../tournament/models/tournament.dart';
 import '../tournament/models/tournament_status.dart';
-import '../widgets/empty_state.dart';
+import '../core/theme/golfie_colors.dart';
+import '../widgets/golfie/golfie_index.dart';
 
 class AdminModerationScreen extends StatefulWidget {
   const AdminModerationScreen({super.key});
@@ -20,66 +21,55 @@ class _AdminModerationScreenState extends State<AdminModerationScreen> {
   void _approve(Tournament tournament) {
     setState(() => _processedIds.add(tournament.id));
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Approved ${tournament.name}'), backgroundColor: Colors.green),
+      SnackBar(content: Text('Approved ${tournament.name}'), backgroundColor: GolfieColors.mint),
     );
   }
 
   void _reject(Tournament tournament) {
     setState(() => _processedIds.add(tournament.id));
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Rejected ${tournament.name}'), backgroundColor: Colors.red),
+      SnackBar(content: Text('Rejected ${tournament.name}'), backgroundColor: GolfieColors.papaya),
     );
   }
 
   Widget _buildPendingCard(Tournament tournament) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(tournament.name, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 4),
-            Text(tournament.courseLocation, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600)),
-            const SizedBox(height: 4),
-            Text(
-              '${DateFormat('d MMM yyyy').format(tournament.startDate.toLocal())} – ${DateFormat('d MMM yyyy').format(tournament.endDate.toLocal())}',
-              style: TextStyle(color: Colors.grey.shade500),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => _approve(tournament),
-                    icon: const Icon(Icons.check_circle_outline, color: Colors.white),
-                    label: const Text('Approve'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
+    final textTheme = Theme.of(context).textTheme;
+    return GolfieCollageCard(
+      accentCorner: GolfieAccentCorner.topRight,
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(tournament.name, style: textTheme.titleLarge?.copyWith(color: GolfieColors.ink)),
+          const SizedBox(height: 4),
+          Text(tournament.courseLocation, style: textTheme.bodyMedium?.copyWith(color: GolfieColors.stone)),
+          const SizedBox(height: 4),
+          Text(
+            '${DateFormat('d MMM yyyy').format(tournament.startDate.toLocal())} – ${DateFormat('d MMM yyyy').format(tournament.endDate.toLocal())}',
+            style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: GolfiePillButton(
+                  label: 'Approve',
+                  icon: Icons.check_circle_outline,
+                  onPressed: () => _approve(tournament),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _reject(tournament),
-                    icon: const Icon(Icons.close, color: Colors.red),
-                    label: const Text('Reject', style: TextStyle(color: Colors.red)),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      side: const BorderSide(color: Colors.red),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: GolfieGhostButton(
+                  label: 'Reject',
+                  icon: Icons.close,
+                  onPressed: () => _reject(tournament),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -105,7 +95,7 @@ class _AdminModerationScreenState extends State<AdminModerationScreen> {
         ],
       ),
       body: pending.isEmpty
-          ? const EmptyState(icon: Icons.inbox, title: 'No tournaments pending')
+          ? const GolfieEmptyState(icon: Icons.inbox, title: 'No tournaments pending')
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: pending.length,

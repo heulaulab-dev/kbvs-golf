@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../../core/theme/golfie_colors.dart';
+import '../../widgets/golfie/golfie_index.dart';
+
 /// Launch a [Uri] in an external browser.
 ///
 /// Top-level so widget tests can override [launchInBrowser] to avoid
@@ -135,7 +138,7 @@ class _WebviewErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_off, size: 64, color: Colors.grey.shade400),
+            Icon(Icons.cloud_off, size: 64, color: GolfieColors.stone),
             const SizedBox(height: 12),
             Text(
               'Could not load page',
@@ -148,7 +151,7 @@ class _WebviewErrorView extends StatelessWidget {
               style: Theme.of(context)
                   .textTheme
                   .bodySmall
-                  ?.copyWith(color: Colors.grey.shade600),
+                  ?.copyWith(color: GolfieColors.stone),
             ),
             const SizedBox(height: 16),
             Row(

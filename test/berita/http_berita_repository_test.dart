@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kbvs_golf/berita/repositories/http_berita_repository.dart';
-import 'package:kbvs_golf/tournament/services/http_client.dart';
+import 'package:golfie/berita/repositories/http_berita_repository.dart';
+import 'package:golfie/tournament/services/http_client.dart';
 
 class FakeHttpClient implements HttpClient {
   final dynamic Function(String url, Map<String, String>?)? handler;

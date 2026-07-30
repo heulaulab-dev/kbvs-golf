@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-import 'package:kbvs_golf/tournament/providers/changes_notifier_tournament_provider.dart';
-import 'package:kbvs_golf/tournament/repositories/mock_tournament_repository.dart';
-import 'package:kbvs_golf/tournament/repositories/tournament_repository.dart';
-import 'package:kbvs_golf/tournament/screens/tournament_list_screen.dart';
-import 'package:kbvs_golf/tournament/models/tournament.dart';
-import 'package:kbvs_golf/tournament/models/skill_level.dart';
-import 'package:kbvs_golf/tournament/models/tournament_format.dart';
-import 'package:kbvs_golf/tournament/models/tournament_status.dart';
+import 'package:golfie/tournament/providers/changes_notifier_tournament_provider.dart';
+import 'package:golfie/tournament/repositories/mock_tournament_repository.dart';
+import 'package:golfie/tournament/repositories/tournament_repository.dart';
+import 'package:golfie/tournament/screens/tournament_list_screen.dart';
+import 'package:golfie/widgets/golfie/golfie_index.dart';
+import 'package:golfie/tournament/models/tournament.dart';
+import 'package:golfie/tournament/models/skill_level.dart';
+import 'package:golfie/tournament/models/tournament_format.dart';
+import 'package:golfie/tournament/models/tournament_status.dart';
 
 void main() {
   Tournament _t(String id, String name) => Tournament(
@@ -40,7 +41,13 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    // Use pump() repeatedly instead of pumpAndSettle() to avoid
+    // overflow errors from transitional widget states being reported.
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
   }
 
   testWidgets('renders tournament cards once data is loaded', (tester) async {
@@ -127,7 +134,7 @@ void main() {
 
     await pumpScreen(tester, provider: screenProvider);
 
-    final retryBtn = find.widgetWithText(OutlinedButton, 'Retry');
+    final retryBtn = find.widgetWithText(GolfieGhostButton, 'Retry');
     expect(retryBtn, findsOneWidget);
 
     // Tap retry — it calls loadFirstPage again, which still throws but

@@ -1,4 +1,4 @@
-# KBVS Golf – Flutter UI Library Stack Recommendation
+# Golfie – Flutter UI Library Stack Recommendation
 
 **Scope:** Build a modern, Gen Z–friendly Flutter app focused on Jakarta golf tournaments. Based on the visual direction in `docs/backlog/VISUAL_DIRECTION.md` (design reference, not yet implemented).  
 **Target Flutter version:** 3.x+ (Material 3 enabled)  
@@ -433,7 +433,7 @@ Run `flutter pub get` after adding.
 
 ## 15. Next Steps
 
-1. Run `flutter create kbvs_golf` (or use existing project template)
+1. Run `flutter create golfie` (or use existing project template)
 2. Paste the dependency block above into `pubspec.yaml` and run `flutter pub get`
 3. Create `lib/theme.dart` with Material 3 theme customization matching the `docs/backlog/VISUAL_DIRECTION.md` colors
 4. Set up `go_router` routes matching the 5-tab bottom nav pattern

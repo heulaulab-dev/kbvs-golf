@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kbvs_golf/providers/app_state.dart';
+import 'package:golfie/providers/app_state.dart';
 
 void main() {
   group('AppState caddy tips integration', () {

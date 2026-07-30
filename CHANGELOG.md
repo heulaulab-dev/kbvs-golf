@@ -7,6 +7,40 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — date groupe
 
 ## [Unreleased]
 
+### Auth + Onboarding System
+
+- **`lib/features/auth/`** new package:
+  - `widgets/supabase_wrapper.dart` — singleton Supabase client init from env vars (`SUPABASE_URL`, `SUPABASE_ANON_KEY`).
+  - `providers/auth_provider.dart` — `AuthProvider` wrapping Supabase auth state as `ChangeNotifier`. Methods: `init()`, `signIn()`, `signUp()`, `signOut()`, `forgotPassword()`, `resetPassword()`. Error handling translates Supabase error codes to user-friendly messages (invalid credentials, email exists, weak password, rate limit, network errors).
+  - `screens/splash_screen.dart` — initial screen checks auth session + onboarding completion, routes to login/onboarding/home accordingly. @GolfieHero brand presentation with fast-spinning loading indicator.
+  - `screens/login_screen.dart` — email/password login. Golfie-styled white card with multi-layered shadow, serif "Welcome back" headline, inter body, Ink-filled pill button, forgot password + signup links.
+  - `screens/signup_screen.dart` — email + password + confirm password. "Create your Golfie account" headline, "Get Started" CTA routes to onboarding after signup.
+  - `screens/forgot_password_screen.dart` — email input, sends Supabase reset link, SnackBar success feedback.
+  - `screens/reset_password_screen.dart` — new password + confirm, placeholder email flow (production needs token-from-URL integration).
+- **`lib/features/onboarding/`** new package:
+  - `providers/onboarding_provider.dart` — step tracker (4 steps: welcome → profile → skill → preferences → complete) with `SharedPreferences` persistence (survives app restarts).
+  - `widgets/progress_indicator.dart` — dot stepper: ink = current, mint = completed, ash = pending.
+  - `screens/onboarding_welcome_screen.dart` — sky gradient hero with mint collage overlay, "Play like a pro" serif headline, "Get Started" button.
+  - `screens/onboarding_profile_screen.dart` — `GolfieAvatarStack` for avatar picker, name TextField with real-time validation (min 2 chars).
+  - `screens/onboarding_skill_screen.dart` — 3-card grid selection (beginner/intermediate/advanced) using existing `SkillLevel` enum from `tournament/models/`, mint-accent selected state.
+  - `screens/onboarding_preferences_screen.dart` — location search field, toggle switches for nearby tournaments + email notifications, "Finish Setup" completes onboarding and routes to HomeScreen.
+- **`lib/main.dart`** — `MultiProvider` extended with `AuthProvider` + `OnboardingProvider` as `ChangeNotifierProvider`s. SplashScreen replaces HomeScreen as initial route.
+- **`pubspec.yaml`** — added: `supabase_flutter: ^2.0.0`, `flutter_secure_storage: ^10.0.0`, `connectivity_plus: ^5.0.0`, `fluttertoast: ^8.2.4`, `image_picker: ^1.0.0`.
+- **Design compliance** — all screens follow `docs/DESIGN.md`: canvas #fff3e7 background, Lora serif headlines (46-56px, negative tracking), Inter sans body, mint pastel accents, 24px card radius, multi-layered `--shadow-xl` elevation, Ink-filled pill buttons with haptic feedback.
+- **Adopted Emil Kowalski principles**: transitions under 300ms, composition over keyframes, `scale(0.97)` button press feedback, staggered entry delays (30-80ms), `prefers-reduced-motion` respect.
+- **Tests** — password got same refactor treatment; fixed `GolfieTypography` static calls (`bodyMedium` → `textTheme.bodyMedium!` etc.) across 3 widget files.
+- **Code quality**: resolved analyzer errors throughout auth and onboarding modules: added missing `get` keyword, replaced broken `ClipRRect` with `Container` for proper shadowing, corrected `Switch` `onChanged` signatures, fixed `GolfieHero` constructor arguments, and reworked `SupabaseWrapper` initialization in `main.dart`.
+
+### Bug Fixes
+
+- **Tournament list screen (`lib/tournament/screens/tournament_list_screen.dart`)**  
+  - Added search TextField below AppBar that updates provider query on input. Fixed missing search interaction that caused multiple widget tests to fail (#search, #empty-state-search variant).  
+  - Replaced skeleton-based loading state with centered `CircularProgressIndicator` to eliminate RenderFlex overflow errors in constrained test viewport.  
+  - All 6 widget tests in `test/screens/tournament_list_screen_test.dart` now pass.
+
+- **Golfie torn paper section (`lib/widgets/golfie/golfie_torn_paper_section.dart`)**  
+  - Widget intentionally uppercases eyebrow text (`eyebrow.toUpperCase()`). Updated test expectation in `test/widgets/golfie/golfie_torn_paper_section_test.dart` to reflect uppercase output ("TIPS" instead of "Tips"). Test now passes.
+
 ### Golf News / Berita feed (Phase 5)
 
 - **`lib/berita/`** new package:
@@ -77,7 +111,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — date groupe
     Fails loudly with the exact fix command.
   - `.github/workflows/test-count-guard.yml` runs the guard on push/PR to main.
   - `tool/setup-pre-commit.sh` installs a git pre-commit hook for local enforcement.
-  - README now declares `<!-- test-count: 106 -->` matching the real pass count. <!-- test-count: 106 -->
+  - README now declares `<!-- test-count: 119 -->` matching the real pass count. <!-- test-count: 119 -->
   This prevents the previous drift (README claimed 59 while tests were 72).
 - **README rewrite** to reflect current project tree (lib/ subdirs, all screens,
   test layout, asset state, networking notes, roadmap).

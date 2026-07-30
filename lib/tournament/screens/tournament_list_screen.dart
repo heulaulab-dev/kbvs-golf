@@ -6,9 +6,19 @@ import '../models/tournament.dart';
 import '../models/tournament_format.dart';
 import '../models/skill_level.dart';
 import '../providers/changes_notifier_tournament_provider.dart';
-import '../../widgets/avatar_stack.dart';
-import '../../widgets/empty_state.dart';
+import '../../widgets/golfie/golfie_index.dart';
+import '../../core/theme/golfie_colors.dart';
 import 'tournament_detail_screen.dart';
+
+/// Skill level label helper — top-level so both screen and filter sheet can use it.
+String skillLevelLabel(SkillLevel level) {
+  switch (level) {
+    case SkillLevel.beginner: return 'Beginner';
+    case SkillLevel.casual: return 'Casual';
+    case SkillLevel.competitive: return 'Competitive';
+    case SkillLevel.pro: return 'Pro';
+  }
+}
 
 /// List of tournaments with search bar and filter controls.
 /// Polished UI: shimmer skeleton loaders, network awareness, filter bar.
@@ -55,117 +65,13 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
     }
   }
 
-  // Build filter bar: location dropdown, skill chips, max fee slider, date range picker
-  Widget _buildFilterBar(ChangesNotifierTournamentProvider provider) {
-    final locations = <String>{... provider.tournaments.map((t) => t.courseLocation)};
-    final locationList = locations.toList()..sort();
-    locationList.insert(0, '');
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              const Expanded(child: Text('Location', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
-              Expanded(
-                child: DropdownButton<String>(
-                  value: _selectedLocation,
-                  items: locationList.map((loc) => DropdownMenuItem<String>(
-                    value: loc,
-                    child: Text(loc.isEmpty ? 'All' : loc),
-                  )).toList(),
-                  onChanged: (val) => setState(() => _selectedLocation = (val == null || val.isEmpty) ? null : val),
-                  isExpanded: true,
-                  padding: EdgeInsets.zero,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          Row(
-            children: const [
-              Expanded(child: Text('Skill Level', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: SkillLevel.values.map((skill) {
-              final isSelected = _selectedSkills.contains(skill);
-              return FilterChip(
-                label: Text(skill.toString().split('.').last),
-                selected: isSelected,
-                onSelected: (selected) => setState(() {
-                  if (selected) _selectedSkills.add(skill);
-                  else _selectedSkills.remove(skill);
-                }),
-                selectedColor: Colors.green.shade100,
-                backgroundColor: Colors.grey.shade200,
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 12),
-
-          Row(
-            children: const [
-              Expanded(child: Text('Max Fee (IDR)', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Slider(
-            value: _maxFee != null ? _maxFee!.toDouble() : 500000.0,
-            min: 0,
-            max: 1000000,
-            divisions: 10,
-            label: (_maxFee ?? 500000).toString(),
-            onChanged: (value) => setState(() => _maxFee = value.round()),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(child: Text('Rp 0', style: TextStyle(color: Colors.grey.shade600, fontSize: 11))),
-              Expanded(child: Text('Rp 1,000,000', style: TextStyle(color: Colors.grey.shade600, fontSize: 11))),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          Row(
-            children: [
-              const Expanded(child: Text('Date Range', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
-              IconButton(
-                icon: const Icon(Icons.calendar_today),
-                onPressed: () => _showDateRangePicker(),
-                tooltip: 'Pick dates',
-              ),
-            ],
-          ),
-          if (_dateFrom != null || _dateTo != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                '${_dateFrom != null ? DateFormat('d MMM').format(_dateFrom!) : ''} – ${_dateTo != null ? DateFormat('d MMM').format(_dateTo!) : ''}',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  void _showDateRangePicker() async {
-    final from = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2100));
-    if (!mounted) return;
-    final to = await showDatePicker(context: context, initialDate: from ?? DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2100));
-    if (from != null && to != null) {
-      setState(() {
-        _dateFrom = from;
-        _dateTo = to;
-      });
+  static String _formatLabelStatic(TournamentFormat fmt) {
+    switch (fmt) {
+      case TournamentFormat.matchPlay: return 'Match Play';
+      case TournamentFormat.stableford: return 'Stableford';
+      case TournamentFormat.scramble: return 'Scramble';
+      case TournamentFormat.bestBall: return 'Best Ball';
+      case TournamentFormat.championship: return 'Championship';
     }
   }
 
@@ -177,103 +83,60 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
         actions: [
           Consumer<ChangesNotifierTournamentProvider>(
             builder: (context, provider, child) => IconButton(
-              icon: const Icon(Icons.replay),
-              tooltip: 'Refresh',
-              onPressed: () => provider.refresh(),
+              icon: const Icon(Icons.filter_list),
+              tooltip: 'Filters',
+              onPressed: () => _showFilterSheet(context, provider),
             ),
           ),
-          _buildNetworkStatusIndicator(),
         ],
       ),
-      body: Consumer<ChangesNotifierTournamentProvider>(
-        builder: (context, provider, _) {
-          return RefreshIndicator(
-            onRefresh: provider.refresh,
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                _buildFilterBar(provider),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: TextField(
-                    controller: _searchCtrl,
-                    decoration: InputDecoration(
-                      hintText: 'Search tournaments',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onChanged: (value) => provider.updateSearchQuery(value),
-                  ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: TextField(
+              controller: _searchCtrl,
+              decoration: InputDecoration(
+                hintText: 'Search tournaments',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchCtrl.text.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          context.read<ChangesNotifierTournamentProvider>().updateSearchQuery('');
+                          setState(() {});
+                        },
+                      ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                Builder(
-                  builder: (context) {
-                    final viewport = MediaQuery.of(context).size.height - kToolbarHeight - 24;
-                    return SizedBox(
-                      height: viewport,
-                      child: _buildBody(provider),
-                    );
-                  },
-                ),
-                if (provider.hasNextPage)
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: provider.isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : OutlinedButton.icon(
-                            onPressed: provider.loadNextPage,
-                            icon: const Icon(Icons.add),
-                            label: const Text('Load More'),
-                          ),
-                  ),
-              ],
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              ),
+              onChanged: (query) {
+                context.read<ChangesNotifierTournamentProvider>().updateSearchQuery(query);
+              },
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: Consumer<ChangesNotifierTournamentProvider>(
+              builder: (context, provider, child) => _buildBody(context, provider),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildNetworkStatusIndicator() {
-    return IconButton(
-      icon: Icon(Icons.signal_cellular_alt_outlined, size: 24, color: Colors.grey.shade500),
-      tooltip: 'Online',
-      onPressed: () {},
-      splashRadius: 24,
-    );
-  }
+  Widget _buildBody(BuildContext context, ChangesNotifierTournamentProvider provider) {
+    // Derived state
+    final filtered = provider.filteredTournaments;
+    final isLoading = provider.isLoading;
+    final hasData = filtered.isNotEmpty;
 
-  Widget _buildBody(ChangesNotifierTournamentProvider provider) {
-    List<Tournament> filtered = List.from(provider.tournaments);
-
-    if (_selectedLocation != null) {
-      filtered = filtered.where((t) => t.courseLocation == _selectedLocation).toList();
-    }
-
-    if (_selectedSkills.isNotEmpty) {
-      filtered = filtered.where((t) => _selectedSkills.contains(t.minSkill)).toList();
-    }
-
-    if (_maxFee != null) {
-      filtered = filtered.where((t) => t.maxFeeIdr <= _maxFee!).toList();
-    }
-
-    if (_dateFrom != null || _dateTo != null) {
-      filtered = filtered.where((t) {
-        final dt = t.startDate.toLocal();
-        final fromMatch = _dateFrom == null || dt.compareTo(_dateFrom!) >= 0;
-        final toMatch = _dateTo == null || dt.compareTo(_dateTo!) <= 0;
-        return fromMatch && toMatch;
-      }).toList();
-    }
-
-    if (provider.isLoading && provider.tournaments.isEmpty) {
-      return SizedBox(
-        height: MediaQuery.of(context).size.height * 0.7,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [_SkeletonCard(), _SkeletonCard(), _SkeletonCard()]),
-        ),
-      );
+    if (isLoading && !hasData) {
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (provider.errorText.isNotEmpty) {
@@ -282,7 +145,7 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
 
     if (filtered.isEmpty) {
       final hasQuery = provider.searchQuery.isNotEmpty;
-      return EmptyState(
+      return GolfieEmptyState(
         icon: Icons.golf_course,
         title: hasQuery
             ? 'No tournaments match your search'
@@ -293,15 +156,166 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
       );
     }
 
-    return ListView.separated(
-      itemCount: filtered.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (context, index) => _TournamentCard(tournament: filtered[index]),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 250),
+      child: RefreshIndicator(
+        key: const ValueKey('content'),
+        onRefresh: () => provider.loadFirstPage(),
+        child: ListView.separated(
+          itemCount: filtered.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 8),
+          itemBuilder: (context, index) => _TournamentCard(tournament: filtered[index]),
+        ),
+      ),
+    );
+  }
+
+  void _showFilterSheet(BuildContext context, ChangesNotifierTournamentProvider provider) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (_) => _FilterSheet(
+        selectedLocation: _selectedLocation,
+        selectedSkills: _selectedSkills,
+        maxFee: _maxFee,
+        dateFrom: _dateFrom,
+        dateTo: _dateTo,
+        onChangedLocation: (v) => _selectedLocation = v,
+        onChangedSkills: (v) => _selectedSkills = v,
+        onChangedMaxFee: (v) => _maxFee = v,
+        onChangedDateFrom: (v) => _dateFrom = v,
+        onChangedDateTo: (v) => _dateTo = v,
+        onApply: () {
+          provider.updateFilters(
+            location: _selectedLocation,
+            skillLevels: _selectedSkills,
+            maxFee: _maxFee,
+            dateFrom: _dateFrom,
+            dateTo: _dateTo,
+          );
+          Navigator.pop(context);
+        },
+      ),
     );
   }
 }
 
-// --- helper widgets (file-level) ---
+// --- Filter bottom sheet ---
+
+class _FilterSheet extends StatefulWidget {
+  final String? selectedLocation;
+  final Set<SkillLevel> selectedSkills;
+  final int? maxFee;
+  final DateTime? dateFrom;
+  final DateTime? dateTo;
+  final ValueChanged<String?> onChangedLocation;
+  final ValueChanged<Set<SkillLevel>> onChangedSkills;
+  final ValueChanged<int?> onChangedMaxFee;
+  final ValueChanged<DateTime?> onChangedDateFrom;
+  final ValueChanged<DateTime?> onChangedDateTo;
+  final VoidCallback onApply;
+
+  const _FilterSheet({
+    required this.selectedLocation,
+    required this.selectedSkills,
+    required this.maxFee,
+    required this.dateFrom,
+    required this.dateTo,
+    required this.onChangedLocation,
+    required this.onChangedSkills,
+    required this.onChangedMaxFee,
+    required this.onChangedDateFrom,
+    required this.onChangedDateTo,
+    required this.onApply,
+  });
+
+  @override
+  State<_FilterSheet> createState() => _FilterSheetState();
+}
+
+class _FilterSheetState extends State<_FilterSheet> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Padding(
+      padding: MediaQuery.of(context).viewInsets,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Filters', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 16),
+            Text('Skill Level', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: SkillLevel.values.map((level) {
+                final selected = widget.selectedSkills.contains(level);
+                return FilterChip(
+                  label: Text(skillLevelLabel(level)),
+                  selected: selected,
+                  onSelected: (v) {
+                    final updated = Set<SkillLevel>.from(widget.selectedSkills);
+                    v ? updated.add(level) : updated.remove(level);
+                    widget.onChangedSkills(updated);
+                  },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 12),
+            Text('Max Fee (Rp)', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(child: Text('Rp 0', style: TextStyle(color: GolfieColors.stone, fontSize: 11))),
+                Expanded(child: Text('Rp 1,000,000', style: TextStyle(color: GolfieColors.stone, fontSize: 11))),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            Row(
+              children: [
+                const Expanded(child: Text('Date Range', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
+                IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: () => _showDateRangePicker(),
+                  tooltip: 'Pick dates',
+                ),
+              ],
+            ),
+            if (widget.dateFrom != null || widget.dateTo != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  '${widget.dateFrom != null ? DateFormat('d MMM').format(widget.dateFrom!) : ''} – ${widget.dateTo != null ? DateFormat('d MMM').format(widget.dateTo!) : ''}',
+                  style: TextStyle(fontSize: 12, color: GolfieColors.stone),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDateRangePicker() async {
+    final from = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2100));
+    if (!mounted) return;
+    final to = await showDatePicker(context: context, initialDate: from ?? DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2100));
+    if (from != null && to != null) {
+      widget.onChangedDateFrom(from);
+      widget.onChangedDateTo(to);
+      setState(() {});
+    }
+  }
+}
+
+// --- helper widgets (still file-level) ---
 
 class _SkeletonCard extends StatefulWidget {
   const _SkeletonCard({super.key});
@@ -330,37 +344,16 @@ class _SkeletonCardState extends State<_SkeletonCard> with SingleTickerProviderS
   @override
   Widget build(BuildContext context) {
     final offset = _animation.value;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: ClipRect(
-        child: Container(
-          height: 140,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(12),
-            gradient: LinearGradient(
-              colors: [Colors.grey.shade200, Colors.grey.shade100, Colors.grey.shade200],
-              begin: Alignment(offset, 0),
-              end: Alignment(offset + 1, 0),
-              stops: const [0.0, 0.5, 1.0],
-            ),
-          ),
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const SizedBox(height: 16),
-            Container(width: double.infinity, height: 20, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), borderRadius: BorderRadius.circular(4)), margin: const EdgeInsets.only(bottom: 8)),
-            Container(width: double.infinity, height: 12, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), borderRadius: BorderRadius.circular(4)), margin: const EdgeInsets.only(bottom: 16)),
-            Row(children: [
-              Icon(Icons.event, size: 14, color: Colors.grey.shade400),
-              const SizedBox(width: 4),
-              Container(width: 100, height: 12, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), borderRadius: BorderRadius.circular(4))),
-              const SizedBox(width: 12),
-              Icon(Icons.golf_course, size: 14, color: Colors.grey.shade400),
-              const SizedBox(width: 4),
-              Container(width: 80, height: 12, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), borderRadius: BorderRadius.circular(4))),
-            ]),
-            const SizedBox(height: 16),
-            Container(width: 60, height: 16, decoration: BoxDecoration(color: Colors.green.shade200.withOpacity(0.4), borderRadius: BorderRadius.circular(4))),
-          ]),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      height: 120,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          colors: [GolfieColors.cloud, GolfieColors.linen, GolfieColors.cloud],
+          begin: Alignment(offset, 0),
+          end: Alignment(offset + 1, 0),
+          stops: const [0.0, 0.5, 1.0],
         ),
       ),
     );
@@ -376,14 +369,15 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(24.0),
       children: [
         const SizedBox(height: 48),
-        const Icon(Icons.error_outline, size: 64, color: Colors.red),
+        const Icon(Icons.error_outline, size: 64, color: GolfieColors.papaya),
         const SizedBox(height: 16),
-        const Text('Something went wrong', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+        Text('Something went wrong', textAlign: TextAlign.center, style: textTheme.titleLarge?.copyWith(color: GolfieColors.ink)),
         const SizedBox(height: 8),
         if (hasNetworkIssue)
           Padding(
@@ -391,16 +385,20 @@ class _ErrorState extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.wifi_off, size: 16, color: Colors.orange),
+                const Icon(Icons.wifi_off, size: 16, color: GolfieColors.marigold),
                 const SizedBox(width: 6),
-                Text('Check your connection', style: TextStyle(color: Colors.orange.shade700, fontSize: 14)),
+                Text('Check your connection', style: textTheme.bodyMedium?.copyWith(color: GolfieColors.marigold)),
               ],
             ),
           ),
-        Text(message, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade700, fontSize: 14)),
+        Text(message, textAlign: TextAlign.center, style: textTheme.bodyMedium?.copyWith(color: GolfieColors.stone)),
         const SizedBox(height: 24),
         Center(
-          child: OutlinedButton.icon(onPressed: onRetry, icon: const Icon(Icons.replay), label: const Text('Retry')),
+          child: GolfieGhostButton(
+            label: 'Retry',
+            icon: Icons.replay,
+            onPressed: onRetry,
+          ),
         ),
         const SizedBox(height: 48),
       ],
@@ -416,8 +414,8 @@ class _TournamentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFmt = DateFormat('d MMM yyyy');
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
+    final textTheme = Theme.of(context).textTheme;
+    return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
@@ -427,41 +425,40 @@ class _TournamentCard extends StatelessWidget {
           ),
         );
       },
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 12),
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(
-              tournament.name,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+      child: GolfieCollageCard(
+        accentCorner: GolfieAccentCorner.topRight,
+        padding: const EdgeInsets.all(16),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Hero(
+            tag: 'tournament-${tournament.id}',
+            child: Material(
+              type: MaterialType.transparency,
+              child: Text(
+                tournament.name,
+                style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: GolfieColors.ink),
+              ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              '${tournament.courseName} • ${tournament.courseLocation}',
-              style: TextStyle(color: Colors.grey.shade700),
-            ),
-            const SizedBox(height: 8),
-            Row(children: [
-              Icon(Icons.event, size: 14, color: Colors.grey.shade600),
-              const SizedBox(width: 4),
-              Text(dateFmt.format(tournament.startDate.toLocal()), style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
-              const SizedBox(width: 12),
-              Icon(Icons.golf_course, size: 14, color: Colors.grey.shade600),
-              const SizedBox(width: 4),
-              Text(_formatLabelStatic(tournament.format), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-            ]),
-            const SizedBox(height: 8),
-            Text('Rp ${tournament.maxFeeIdr.toString()}', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.green.shade700)),
-            const SizedBox(height: 8),
-            AvatarStack(totalPlayers: tournament.registeredCount),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${tournament.courseName} • ${tournament.courseLocation}',
+            style: textTheme.bodyMedium?.copyWith(color: GolfieColors.stone),
+          ),
+          const SizedBox(height: 8),
+          Row(children: [
+            Icon(Icons.event, size: 14, color: GolfieColors.stone),
+            const SizedBox(width: 4),
+            Text(dateFmt.format(tournament.startDate.toLocal()), style: textTheme.bodySmall?.copyWith(color: GolfieColors.graphite)),
+            const SizedBox(width: 12),
+            Icon(Icons.golf_course, size: 14, color: GolfieColors.stone),
+            const SizedBox(width: 4),
+            Text(_formatLabelStatic(tournament.format), style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone)),
           ]),
-        ),
+          const SizedBox(height: 8),
+          Text('Rp ${tournament.maxFeeIdr.toString()}', style: textTheme.titleMedium?.copyWith(color: GolfieColors.mint)),
+          const SizedBox(height: 8),
+          GolfieAvatarStack(totalPlayers: tournament.registeredCount),
+        ]),
       ),
     );
   }

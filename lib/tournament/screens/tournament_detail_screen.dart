@@ -8,7 +8,8 @@ import '../models/tournament.dart';
 import '../models/tournament_format.dart';
 import '../models/tournament_status.dart';
 import '../providers/changes_notifier_tournament_provider.dart';
-import '../../widgets/avatar_stack.dart';
+import '../../widgets/golfie/golfie_index.dart';
+import '../../core/theme/golfie_colors.dart';
 
 /// Screen showing detailed information about a single tournament.
 /// Polished UI: shimmer skeleton for hero image, avatar stack, tabs, collapsible caddy tips, registration flow.
@@ -37,11 +38,11 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
       errorBuilder: (context, error, stackTrace) => Container(
         height: 250,
         decoration: BoxDecoration(
-          color: Colors.grey[50],
-          border: Border.all(color: Colors.grey.shade300),
+          color: GolfieColors.linen,
+          border: Border.all(color: GolfieColors.ash),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
+        child: const Center(child: Icon(Icons.broken_image, color: GolfieColors.stone)),
       ),
     );
   }
@@ -50,11 +51,10 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
     if (tournament.isFull) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        child: OutlinedButton.icon(
+        child: GolfiePillButton(
+          label: 'Full Capacity',
+          icon: Icons.people,
           onPressed: null,
-          icon: const Icon(Icons.people),
-          label: const Text('Full Capacity'),
-          style: OutlinedButton.styleFrom(foregroundColor: Colors.grey.shade500),
         ),
       );
     }
@@ -62,14 +62,12 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
     if (_isRegistered) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        child: FilledButton.icon(
+        child: GolfiePillButton(
+          label: "You're In",
+          icon: Icons.check,
           onPressed: () {},
-          icon: const Icon(Icons.check),
-          label: const Text("You're In"),
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all<Color>(Colors.green.shade100),
-            foregroundColor: WidgetStateProperty.all<Color>(Colors.grey.shade900),
-          ),
+          backgroundColor: GolfieColors.mint,
+          foregroundColor: GolfieColors.ink,
         ),
       );
     }
@@ -77,7 +75,9 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
     // Normal active register button
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
-      child: FilledButton.icon(
+      child: GolfiePillButton(
+        label: _registrationPending ? '' : 'Register Now',
+        icon: _registrationPending ? null : Icons.person_add,
         onPressed: _registrationPending ? null : () async {
           setState(() => _registrationPending = true);
           try {
@@ -85,59 +85,48 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
             if (mounted) {
               setState(() => _isRegistered = true);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Successfully registered for ${tournament.name}!'), backgroundColor: Colors.green),
+                SnackBar(content: Text('Successfully registered for ${tournament.name}!'), backgroundColor: GolfieColors.mint),
               );
             }
           } catch (e) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Registration failed: $e'), backgroundColor: Colors.red),
+                SnackBar(content: Text('Registration failed: $e'), backgroundColor: GolfieColors.papaya),
               );
             }
           } finally {
             if (mounted) setState(() => _registrationPending = false);
           }
         },
-        icon: const Icon(Icons.person_add),
-        label: _registrationPending
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Text('Register Now'),
-        style: ButtonStyle(
-          overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-            if (states.contains(WidgetState.pressed)) return Colors.blue.withOpacity(0.2);
-            return null;
-          }),
-        ),
       ),
     );
   }
 
   Widget _buildCaddyTipsCard() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(side: BorderSide(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(12)),
-      child: const ExpansionTile(
-        leading: Icon(Icons.lightbulb_outline),
-        title: Text('Caddy Tips'),
-        subtitle: Text('Practical advice for your round'),
-        children: [
-          ListTile(
-            title: Text('Check pin position on hole 7'),
-            subtitle: Text('Avoid the water hazard on the right'),
-          ),
-          ListTile(
-            title: Text('Wind direction matters today'),
-            subtitle: Text('Club up by one on the long par-4'),
-          ),
-          ListTile(
-            title: Text('Watch out for the green slope'),
-            subtitle: Text('Ball runs towards the back left'),
-          ),
-        ],
+    final textTheme = Theme.of(context).textTheme;
+    return GolfieCollageCard(
+      padding: const EdgeInsets.all(0),
+      child: Material(
+        type: MaterialType.transparency,
+        child: ExpansionTile(
+          leading: Icon(Icons.lightbulb_outline, color: GolfieColors.marigold),
+          title: Text('Caddy Tips', style: textTheme.titleMedium?.copyWith(color: GolfieColors.ink)),
+          subtitle: Text('Practical advice for your round', style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone)),
+          children: [
+            ListTile(
+              title: Text('Check pin position on hole 7', style: textTheme.bodyMedium?.copyWith(color: GolfieColors.ink)),
+              subtitle: Text('Avoid the water hazard on the right', style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone)),
+            ),
+            ListTile(
+              title: Text('Wind direction matters today', style: textTheme.bodyMedium?.copyWith(color: GolfieColors.ink)),
+              subtitle: Text('Club up by one on the long par-4', style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone)),
+            ),
+            ListTile(
+              title: Text('Watch out for the green slope', style: textTheme.bodyMedium?.copyWith(color: GolfieColors.ink)),
+              subtitle: Text('Ball runs towards the back left', style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -146,6 +135,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
   Widget build(BuildContext context) {
     final tournament = ModalRoute.of(context)?.settings.arguments as Tournament;
     final provider = Provider.of<ChangesNotifierTournamentProvider>(context);
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -153,7 +143,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
         actions: [
           if (tournament.isFeatured)
             IconButton(
-              icon: const Icon(Icons.star, color: Colors.amber),
+              icon: const Icon(Icons.star, color: GolfieColors.marigold),
               tooltip: 'Featured',
               onPressed: () {},
             ),
@@ -164,30 +154,46 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            // Periwinkle accent strip
+            Container(
+              height: 8,
+              decoration: const BoxDecoration(
+                color: GolfieColors.periwinkle,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+              ),
+            ),
+            const SizedBox(height: 4),
+
             // Hero area
             _buildHero(tournament),
             const SizedBox(height: 16),
 
-            // Tournament name
-            Text(tournament.name, style: Theme.of(context).textTheme.displayLarge?.copyWith(fontWeight: FontWeight.w700)),
+            // Tournament name (with Hero)
+            Hero(
+              tag: 'tournament-${tournament.id}',
+              child: Material(
+                type: MaterialType.transparency,
+                child: Text(tournament.name, style: textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w700, color: GolfieColors.ink)),
+              ),
+            ),
             const SizedBox(height: 8),
 
             // Info row
             Row(
               children: [
-                Expanded(child: Text('${DateFormat('d MMM yyyy').format(tournament.startDate.toLocal())} – ${DateFormat('d MMM yyyy').format(tournament.endDate.toLocal())}', style: TextStyle(color: Colors.grey.shade600))),
+                Expanded(child: Text('${DateFormat('d MMM yyyy').format(tournament.startDate.toLocal())} – ${DateFormat('d MMM yyyy').format(tournament.endDate.toLocal())}', style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone))),
                 const SizedBox(width: 16),
-                Expanded(child: Text(tournament.courseLocation, style: TextStyle(color: Colors.grey.shade600))),
+                Expanded(child: Text(tournament.courseLocation, style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone))),
                 const SizedBox(width: 16),
-                Expanded(child: Text(_formatFormat(tournament.format), style: TextStyle(color: Colors.grey.shade600))),
+                Expanded(child: Text(_formatFormat(tournament.format), style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone))),
                 const SizedBox(width: 16),
-                Expanded(child: Text('Rp ${tournament.maxFeeIdr.toString()}', style: TextStyle(color: Colors.grey.shade600))),
+                Expanded(child: Text('Rp ${tournament.maxFeeIdr.toString()}', style: textTheme.bodySmall?.copyWith(color: GolfieColors.stone))),
               ],
             ),
             const SizedBox(height: 16),
 
             // Avatar stack
-            AvatarStack(totalPlayers: tournament.registeredCount),
+            GolfieAvatarStack(totalPlayers: tournament.registeredCount),
             const SizedBox(height: 16),
 
             // CTA button
@@ -204,24 +210,24 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                 children: [
                   // Details tab
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('Description', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                    Text('Description', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600, color: GolfieColors.ink)),
                     const SizedBox(height: 8),
-                    Text('No description available.', style: Theme.of(context).textTheme.bodyMedium),
+                    Text('No description available.', style: textTheme.bodyMedium?.copyWith(color: GolfieColors.graphite)),
                   ]),
                   // Players tab
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('Registered Players', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                    Text('Registered Players', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600, color: GolfieColors.ink)),
                     const SizedBox(height: 8),
-                    AvatarStack(totalPlayers: tournament.registeredCount),
+                    GolfieAvatarStack(totalPlayers: tournament.registeredCount),
                     const SizedBox(height: 8),
                     if (tournament.registeredCount > 0)
-                      const ListTile(leading: Icon(Icons.person), title: Text('Simulated player list...')),
+                      ListTile(leading: Icon(Icons.person, color: GolfieColors.periwinkle), title: Text('Simulated player list...', style: textTheme.bodyMedium?.copyWith(color: GolfieColors.ink))),
                   ]),
                   // Rules tab
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('Tournament Rules', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                    Text('Tournament Rules', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600, color: GolfieColors.ink)),
                     const SizedBox(height: 8),
-                    Text('Rules will be displayed here.', style: Theme.of(context).textTheme.bodyMedium),
+                    Text('Rules will be displayed here.', style: textTheme.bodyMedium?.copyWith(color: GolfieColors.graphite)),
                   ]),
                 ],
               ),
@@ -280,10 +286,10 @@ class _HeroSkeletonState extends State<_HeroSkeleton> with SingleTickerProviderS
       child: Container(
         height: 250,
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(color: GolfieColors.ash),
           borderRadius: BorderRadius.circular(16),
           gradient: LinearGradient(
-            colors: [Colors.grey.shade200, Colors.grey.shade100, Colors.grey.shade200],
+            colors: [GolfieColors.cloud, GolfieColors.linen, GolfieColors.cloud],
             begin: Alignment(offset, 0),
             end: Alignment(offset + 1, 0),
             stops: const [0.0, 0.5, 1.0],

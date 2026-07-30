@@ -7,7 +7,7 @@
 // and the regression is caught at the next `flutter test` run.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kbvs_golf/berita/screens/berita_webview_screen.dart';
+import 'package:golfie/berita/screens/berita_webview_screen.dart';
 
 void main() {
   test('BeritaWebviewScreen is exported', () {

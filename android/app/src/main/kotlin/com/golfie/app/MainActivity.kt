@@ -1,4 +1,4 @@
-package com.kbvs.kbvs_golf
+package com.golfie.app
 
 import io.flutter.embedding.android.FlutterActivity
 

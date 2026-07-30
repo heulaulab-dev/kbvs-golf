@@ -8,7 +8,7 @@
 
 ## Overview
 
-Implementation of the **Caddy Tips fee calculator** feature for `kbvs_golf_flutter`. Phase 2 covered T1 (calculator logic), T2 (UI scaffold), T3 (state integration), and T5 (self-review).
+Implementation of the **Caddy Tips fee calculator** feature for `golfie`. Phase 2 covered T1 (calculator logic), T2 (UI scaffold), T3 (state integration), and T5 (self-review).
 
 ---
 

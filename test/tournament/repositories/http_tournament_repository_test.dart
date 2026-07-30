@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kbvs_golf/tournament/repositories/http_tournament_repository.dart';
-import 'package:kbvs_golf/tournament/services/http_client.dart';
+import 'package:golfie/tournament/repositories/http_tournament_repository.dart';
+import 'package:golfie/tournament/services/http_client.dart';
 
 /// Fake [HttpClient] that returns canned responses for testing.
 class FakeHttpClient implements HttpClient {
