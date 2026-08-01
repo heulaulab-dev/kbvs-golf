@@ -194,10 +194,7 @@ class AuthProvider with ChangeNotifier {
           _errorMessage = 'Too many requests. Please try again later.';
           break;
         default:
-          _errorMessage = e.message;
-          if (_errorMessage == null) {
-            _errorMessage = 'Something went wrong.';
-          }
+          _errorMessage ??= e.message;
       }
     } else if (e is String) {
       _errorMessage = e;

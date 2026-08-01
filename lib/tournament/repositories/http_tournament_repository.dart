@@ -62,7 +62,7 @@ class HttpTournamentRepository implements TournamentRepository {
       return Tournament.fromJson(resp);
     } on HttpException catch (e) {
       if (e.statusCode == 404) {
-        throw FormatException('Not found');
+        throw const FormatException('Not found');
       }
       rethrow;
     }

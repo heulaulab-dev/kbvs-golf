@@ -13,6 +13,7 @@ class ResetPasswordScreen extends StatefulWidget {
 }
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -120,7 +121,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Enter new password';
-                  if (value!.length < 6) return 'Must be at least 6 characters';
+                  if (value.length < 6) return 'Must be at least 6 characters';
                   return null;
                 },
               ),
@@ -165,7 +166,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   // Note: resetPassword method needs the email as well — you'd typically store it
                   // from the original reset request or include it in the deep link.
                   await auth.resetPassword(
-                    email: _emailController.text ?? '', // Placeholder — need to obtain actual email
+                    email: _emailController.text, // Placeholder — need to obtain actual email
                     newPassword: _passwordController.text,
                     token: _token!,
                   );
@@ -190,6 +191,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   void dispose() {
+    _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();

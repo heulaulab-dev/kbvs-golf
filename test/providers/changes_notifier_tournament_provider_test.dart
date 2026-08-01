@@ -29,8 +29,7 @@ void main() {
 
   /// Repo that always throws to test error paths.
   TournamentRepository _throwingRepo() {
-    final inner = MockTournamentRepository(sampleTournaments);
-    return _ThrowingRepository(inner);
+    return _ThrowingRepository();
   }
 
   group('ChangesNotifierTournamentProvider', () {
@@ -112,7 +111,7 @@ void main() {
 
       test('handles repository failure gracefully', () async {
         // Create a throwing repo
-        final throwingRepo = _ThrowingRepository(MockTournamentRepository([]));
+        final throwingRepo = _ThrowingRepository();
         final provider = ChangesNotifierTournamentProvider(repository: throwingRepo);
         await provider.loadFirstPage(); // Populate initial state
 
@@ -139,8 +138,7 @@ void main() {
 
 /// Test repo that wraps a Mock repo and rethrows exceptions on every call.
 class _ThrowingRepository implements TournamentRepository {
-  final MockTournamentRepository _inner;
-  _ThrowingRepository(this._inner);
+  _ThrowingRepository();
 
   Never _fail() => throw const FormatException('repo exploded');
 

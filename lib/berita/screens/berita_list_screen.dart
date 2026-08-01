@@ -71,7 +71,6 @@ class _BeritaListScreenState extends State<BeritaListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('News'),

@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../providers/app_state.dart';
 import '../core/theme/golfie_colors.dart';
-import '../core/theme/golfie_typography.dart';
-import '../widgets/golfie/golfie_index.dart';
 
 class CaddyTipsScreen extends StatelessWidget {
   const CaddyTipsScreen({super.key});

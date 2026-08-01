@@ -8,7 +8,6 @@ import 'features/auth/screens/splash_screen.dart';
 import 'features/onboarding/providers/onboarding_provider.dart';
 import 'core/theme/golfie_theme.dart';
 import 'providers/app_state.dart';
-import 'screens/home_screen.dart';
 import 'tournament/providers/changes_notifier_tournament_provider.dart';
 import 'tournament/repositories/http_tournament_repository.dart';
 import 'berita/providers/berita_provider.dart';

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/golfie_colors.dart';
-import '../../../core/theme/golfie_typography.dart';
 import '../../../core/theme/golfie_radii.dart';
 import '../providers/auth_provider.dart';
 
@@ -81,7 +80,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Enter password';
-                  if (value!.length < 6) return 'Password must be at least 6 chars';
+                  if (value.length < 6) return 'Password must be at least 6 chars';
                   return null;
                 },
               ),

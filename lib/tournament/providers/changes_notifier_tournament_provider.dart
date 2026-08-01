@@ -131,18 +131,15 @@ class ChangesNotifierTournamentProvider extends ChangeNotifier {
 
     try {
       List<Tournament> items;
-      int total = 0;
       bool hasNext = false;
 
       if (_state.searchQuery.isNotEmpty) {
         final result = await repository.search(_state.searchQuery);
         items = result.$1;
-        total = result.$2;
         hasNext = result.$3;
       } else {
-        final (itemsFull, totalFull, hasNextFull) = await repository.getFirstPage();
+        final (itemsFull, _, hasNextFull) = await repository.getFirstPage();
         items = itemsFull;
-        total = totalFull;
         hasNext = hasNextFull;
       }
 
