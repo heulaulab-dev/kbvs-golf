@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/golfie_colors.dart';
 import '../../../core/theme/golfie_radii.dart';
+import '../../../features/onboarding/providers/onboarding_provider.dart';
+import '../../../features/onboarding/screens/onboarding_welcome_screen.dart';
 import '../../../screens/home_screen.dart';
 import '../providers/auth_provider.dart';
 
@@ -104,9 +106,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           password: _passwordController.text,
                         );
                         if (!auth.hasError && auth.isAuthenticated && ctx.mounted) {
+                          final onboard = ctx.read<OnboardingProvider>();
                           Navigator.pushReplacement(
                             ctx,
-                            MaterialPageRoute(builder: (_) => const HomeScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => onboard.completed
+                                  ? const HomeScreen()
+                                  : const OnboardingWelcomeScreen(),
+                            ),
                           );
                         } else if (ctx.mounted) {
                           ScaffoldMessenger.of(ctx).showSnackBar(
