@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/golfie_colors.dart';
 import '../providers/auth_provider.dart';
-import '../../features/onboarding/providers/onboarding_provider.dart'; // Correct relative path
+import '../../../features/onboarding/providers/onboarding_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

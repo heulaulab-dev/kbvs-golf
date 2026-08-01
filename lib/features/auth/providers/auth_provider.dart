@@ -152,10 +152,14 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Step 1: Sign in with the OTP token from the reset link
-      await _client.auth.signInWithOtp(token: token);
+      // Step 1: Verify the OTP token from the reset link
+      await _client.auth.verifyOTP(
+        email: email,
+        token: token,
+        type: OtpType.recovery,
+      );
 
-      // Step 2: Update password after successful sign-in
+      // Step 2: Update password after successful verification
       final userUpdate = UserAttributes(password: newPassword);
       await _client.auth.updateUser(userUpdate);
 

@@ -15,8 +15,8 @@ dependencies:
   shared_preferences: ^2.2.2
   url_launcher: ^6.2.0
   flutter_secure_storage: ^10.0.0 # For auth token persistence
-  connectivity_plus: ^5.0.0       # Network detection for auth
-  fluttertoast: ^8.2.4            # Toast notifications for auth errors/successes
+  connectivity_plus: ^7.0.0       # Network detection for auth
+  fluttertoast: ^10.0.0            # Toast notifications for auth errors/successes
 
   # State management
   provider: ^6.0.5
