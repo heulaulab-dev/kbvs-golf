@@ -96,15 +96,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       foregroundColor: GolfieColors.white,
                     ),
                     onPressed: auth.loading ? null : () async {
+                      final ctx = context;
                       if (_formKey.currentState!.validate()) {
                         await auth.signIn(
                           email: _emailController.text.trim(),
                           password: _passwordController.text,
                         );
-                        if (!auth.hasError && auth.isAuthenticated) {
-                          Navigator.pushReplacementNamed(context, '/home');
-                        } else if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                        if (!auth.hasError && auth.isAuthenticated && ctx.mounted) {
+                          Navigator.pushReplacementNamed(ctx, '/home');
+                        } else if (ctx.mounted) {
+                          ScaffoldMessenger.of(ctx).showSnackBar(
                             SnackBar(content: Text(auth.errorMessage ?? 'Login failed'), backgroundColor: GolfieColors.marigold),
                           );
                         }
