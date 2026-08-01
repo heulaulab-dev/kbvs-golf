@@ -78,8 +78,14 @@ class GolfieApp extends StatelessWidget {
         // NEW: Auth provider — wraps Supabase auth state
         ChangeNotifierProvider(
           create: (_) {
-            // Ensure Supabase client is initialized before creating AuthProvider
+            // Ensure Supabase client is initialized before creating AuthProvider.
+            // In debug without env vars, fall back to demo mode so the app
+            // boots to the login screen instead of crashing.
             if (!SupabaseWrapper.initialized) {
+              if (kDebugMode) {
+                print('⚠ Supabase not initialized — running without auth (demo mode).');
+                return AuthProvider.demo();
+              }
               throw Exception('Supabase not initialized. Check environment variables.');
             }
             return AuthProvider(SupabaseWrapper.client)
