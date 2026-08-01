@@ -5,8 +5,8 @@
 #   tool/run_dev.sh                    # development (default)
 #   tool/run_dev.sh staging            # staging
 #   tool/run_dev.sh production         # production
-#   tool/run_dev.sh -d emulator-5554   # dev + device flag
-#   tool/run_dev.sh --release          # dev + release build
+#   tool/run_dev.sh development -d emulator-5554   # dev + device flag
+#   tool/run_dev.sh staging --release  # staging + release build
 #
 # Requires: .env.<env> at repo root. Values are passed via --dart-define
 # because flutter_dotenv cannot read files at runtime (assets are bundled
@@ -15,13 +15,21 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ENV_NAME="${1:-development}"
-ENV_FILE="$ROOT/.env.$ENV_NAME"
 
-if [[ "$1" =~ ^- ]]; then
-  ENV_NAME="development"
-  ENV_FILE="$ROOT/.env.development"
-fi
+# Parse args: first non-flag arg is ENV (development/staging/production)
+ENV_NAME="development"
+FLUTTER_ARGS=()
+for arg in "$@"; do
+  if [[ "$arg" == -* ]]; then
+    FLUTTER_ARGS+=("$arg")
+  elif [[ "$arg" =~ ^(development|staging|production)$ ]]; then
+    ENV_NAME="$arg"
+  else
+    FLUTTER_ARGS+=("$arg")
+  fi
+done
+
+ENV_FILE="$ROOT/.env.$ENV_NAME"
 
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "⚠ Missing $ENV_FILE — create it (copy .env.example and fill values)." >&2
@@ -36,4 +44,4 @@ done < "$ENV_FILE"
 
 cd "$ROOT"
 echo "▶ Running Golfie ($ENV_NAME)"
-exec flutter run "${DEFINES[@]}" "$@"
+exec flutter run "${DEFINES[@]}" "${FLUTTER_ARGS[@]}"
