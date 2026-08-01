@@ -7,6 +7,58 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — date groupe
 
 ## [Unreleased]
 
+### Environment Configuration System
+
+- **`lib/core/config/`** new package:
+  - `app_environment.dart` — `AppEnvironment` enum (development, staging, production) resolved from `--dart-define=ENV=`.
+  - `app_config.dart` — `AppConfig` singleton: typed accessors, required-variable validation at boot (fails fast if `SUPABASE_URL`, `APP_NAME`, `TOURNAMENT_API_BASE_URL`, etc. missing), single source of truth for all env-dependent config.
+  - `config.dart` — barrel export.
+- **`flutter_dotenv`** integration (v6.0.1): loads `.env.development` / `.env.staging` / `.env.production` assets bundled at compile time.
+- **`.env.development` / `.env.staging` / `.env.production`** + `.env.example` — registered as pubspec assets. Real secrets stay in CI/secrets; committed files use placeholders.
+- **`tool/run_dev.sh`** — selects env file, injects `--dart-define` flags, runs `flutter run`. Usage: `tool/run_dev.sh development|staging|production [-d <device>] [--release]`.
+
+### Multi-Environment Build Support
+
+- **`main.dart`** refactored: loads `AppConfig` before `runApp()`, initializes Supabase + API base URLs from config. No more compile-time `String.fromEnvironment` for runtime values.
+- **`HttpTournamentRepository` / `ApiClient`** now consume `AppConfig.instance.tournamentApiBaseUrl`, `.newsApiBaseUrl`, `.caddyApiBaseUrl` — no hardcoded URLs.
+- **Demo mode fallback** in `AuthProvider` when Supabase env vars missing (debug builds without env vars boot to login screen instead of crashing).
+
+### Auth & Onboarding Flow Fixes
+
+- **`login_screen.dart`** — after successful sign-in, now checks `OnboardingProvider.completed` and routes to `OnboardingWelcomeScreen` when onboarding not finished (previously went straight to `HomeScreen`).
+- **`splash_screen.dart`** — routes logged-in users to onboarding when `completed == false`.
+- **`forgot_password_screen.dart`** — uses correct Supabase `resetPasswordForEmail()` instead of wrong `resend()`.
+- **`reset_password_screen.dart`** — `verifyOTP()` + `updateUser()` flow for token-based password reset.
+- **Email confirmation tracking** in `AuthProvider`: `emailConfirmed` getter checks `user.emailConfirmedAt` from Supabase session.
+- **Deprecated API cleanup** in `submit_tournament_screen.dart`: replaced `Radio(groupValue/onChanged)` with `RadioGroup` + `initialValue` (Flutter 3.32+); removed dead code.
+- **BuildContext async gaps** fixed in `login_screen.dart`, `forgot_password_screen.dart`, `signup_screen.dart`, `reset_password_screen.dart` — capture context/state before `await`, guard with `mounted`.
+
+### Lint & Code Quality Sweep
+
+- `flutter analyze` — **0 issues** (was 13 warnings + 1 error).
+- Removed unused imports/variables in 7 files (`home_screen`, `berita_list`, `berita_webview`, `caddy_tips`, `tournament_detail`, `mock_tournament_repository`, `changes_notifier_tournament_provider`).
+- Applied `dart fix --apply` for `prefer_const_constructors`, `prefer_conditional_assignment`, `unnecessary_cast`, `sort_child_properties_last`, `dead_code`, `no_leading_underscores_for_local_identifiers`.
+- Updated dependencies: `intl ^0.20.3`, `google_fonts ^8.2.1`, `flutter_lints ^6.0.0`; kept `mockito ^5.7.0` (5.8.0 conflicts with Flutter SDK `meta`).
+
+### Routing Modernization
+
+- Replaced all `pushReplacementNamed('/route')` with direct `MaterialPageRoute` navigation — no `routes` table needed.
+- Added missing screen imports across auth + onboarding screens.
+
+### Tests
+
+- **9 new unit tests** for `AppEnvironment` + `AppConfig` (validation, typed accessors, missing-var detection).
+- Total: **128 tests passing** (was 119).
+
+### Git & CI
+
+- `.gitignore`: only `.env` (secret) ignored; `.env.development/.staging/.production` committed as assets.
+- 11 focused commits on `fix/launch` branch.
+
+---
+
+## [Unreleased] — Auth + Onboarding System (previous)
+
 ### Auth + Onboarding System
 
 - **`lib/features/auth/`** new package:
@@ -111,7 +163,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — date groupe
     Fails loudly with the exact fix command.
   - `.github/workflows/test-count-guard.yml` runs the guard on push/PR to main.
   - `tool/setup-pre-commit.sh` installs a git pre-commit hook for local enforcement.
-  - README now declares `<!-- test-count: 119 -->` matching the real pass count. <!-- test-count: 119 -->
+  - README now declares `<!-- test-count: 128 -->` matching the real pass count. <!-- test-count: 128 -->
   This prevents the previous drift (README claimed 59 while tests were 72).
 - **README rewrite** to reflect current project tree (lib/ subdirs, all screens,
   test layout, asset state, networking notes, roadmap).

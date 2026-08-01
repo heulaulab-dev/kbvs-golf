@@ -1,7 +1,7 @@
 # Golfie — Jakarta Golf Tournament Companion
 
 **Status:** Flutter app for caddy tips, shot analysis, tournament tracking, and golf news.
-Target: Android (no iOS project yet). <!-- test-count: 119 -->
+Target: Android (no iOS project yet). <!-- test-count: 128 -->
 
 ## Current State
 
@@ -11,7 +11,7 @@ Target: Android (no iOS project yet). <!-- test-count: 119 -->
 - **Golf News feed** (`lib/berita/`) — trending + search, in-app WebView reader, pluggable repo (mock or HTTP)
 - Shot analysis placeholder screen (AI integration pending — see `docs/backlog/AI_INTEGRATION.md`)
 - All providers wired via `MultiProvider` in `main.dart`
-- 119/119 tests passing across all layers <!-- test-count: 119 -->
+- 128/128 tests passing across all layers <!-- test-count: 128 -->
 
 ## Project Structure
 
@@ -127,7 +127,7 @@ Implement remaining Phase 5+ features from PRD:
 cd /home/kiyaya/kiyadev/kbvs-golf
 flutter pub get
 flutter run # or flutter run -d <device>
-flutter test # 119/119 pass
+flutter test # 128/128 pass
 
 # Tell the app to use the news HTTP repo (otherwise mock is used):
 flutter run --dart-define=GOLFIE_API_BASE=http://api-local.kbvalbury.com:9200
