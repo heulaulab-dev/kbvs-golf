@@ -120,6 +120,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 onPressed: auth.loading || !_formKey.currentState!.validate() || _showConfirmWarning
                     ? null
                     : () async {
+                        final ctx = context;
                         if (_formKey.currentState!.validate() && !_showConfirmWarning) {
                           await auth.signUp(
                             email: _emailController.text.trim(),
@@ -127,12 +128,12 @@ class _SignupScreenState extends State<SignupScreen> {
                           );
                           if (!auth.hasError && auth.isAuthenticated) {
                             // Email verification handled by Supabase — user should check inbox
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            ScaffoldMessenger.of(ctx).showSnackBar(
                               SnackBar(content: Text('Check email for verification link'), backgroundColor: GolfieColors.mint),
                             );
-                            Navigator.pushReplacementNamed(context, '/login');
-                          } else if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            Navigator.pushReplacementNamed(ctx, '/login');
+                          } else if (ctx.mounted) {
+                            ScaffoldMessenger.of(ctx).showSnackBar(
                               SnackBar(content: Text(auth.errorMessage ?? 'Signup failed'), backgroundColor: GolfieColors.marigold),
                             );
                           }
