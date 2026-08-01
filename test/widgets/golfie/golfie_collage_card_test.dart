@@ -13,8 +13,8 @@ void main() {
 
   testWidgets('renders Periwinkle accent when accentCorner=topRight', (tester) async {
     await tester.pumpWidget(wrap(const GolfieCollageCard(
-      child: Text('hello'),
       accentCorner: GolfieAccentCorner.topRight,
+      child: Text('hello'),
     )));
     final containers = tester.widgetList<Container>(find.byType(Container));
     final hasPeriwinkle = containers.any((c) {

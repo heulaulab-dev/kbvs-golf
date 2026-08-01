@@ -13,7 +13,7 @@ import 'package:golfie/tournament/models/tournament_format.dart';
 import 'package:golfie/tournament/models/tournament_status.dart';
 
 void main() {
-  Tournament _t(String id, String name) => Tournament(
+  Tournament t(String id, String name) => Tournament(
         id: id,
         name: name,
         courseName: 'Course',
@@ -53,8 +53,8 @@ void main() {
   testWidgets('renders tournament cards once data is loaded', (tester) async {
     final provider = ChangesNotifierTournamentProvider(
       repository: MockTournamentRepository([
-        _t('t1', 'Scramble Pro'),
-        _t('t2', 'Match Play Champ'),
+        t('t1', 'Scramble Pro'),
+        t('t2', 'Match Play Champ'),
       ]),
     );
 
@@ -67,7 +67,7 @@ void main() {
 
   testWidgets('search field updates provider search query', (tester) async {
     final provider = ChangesNotifierTournamentProvider(
-      repository: MockTournamentRepository([_t('t1', 'X')]),
+      repository: MockTournamentRepository([t('t1', 'X')]),
     );
 
     await pumpScreen(tester, provider: provider);
@@ -114,7 +114,7 @@ void main() {
 
   testWidgets('retry button on error re-triggers loadFirstPage', (tester) async {
     final provider = ChangesNotifierTournamentProvider(
-      repository: MockTournamentRepository([_t('t1', 'After Retry')]),
+      repository: MockTournamentRepository([t('t1', 'After Retry')]),
     );
     // Seed an error condition directly so the error widget is visible.
     try {

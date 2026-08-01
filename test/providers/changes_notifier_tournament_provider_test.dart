@@ -28,7 +28,7 @@ void main() {
   ];
 
   /// Repo that always throws to test error paths.
-  TournamentRepository _throwingRepo() {
+  TournamentRepository throwingRepo0() {
     return _ThrowingRepository();
   }
 
@@ -57,7 +57,7 @@ void main() {
 
     test('loadFirstPage captures repo exception into errorText', () async {
       final provider = ChangesNotifierTournamentProvider(
-        repository: _throwingRepo(),
+        repository: throwingRepo0(),
       );
       await provider.loadFirstPage();
       expect(provider.isLoading, false);

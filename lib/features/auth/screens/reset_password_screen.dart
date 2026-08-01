@@ -165,17 +165,18 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   // For now, calling AuthProvider's resetPassword which expects the token.
                   // Note: resetPassword method needs the email as well — you'd typically store it
                   // from the original reset request or include it in the deep link.
+                  final ctx = context;
                   await auth.resetPassword(
                     email: _emailController.text, // Placeholder — need to obtain actual email
                     newPassword: _passwordController.text,
                     token: _token!,
                   );
 
-                  if (!auth.hasError && mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Password updated successfully'), backgroundColor: GolfieColors.mint));
-                    Navigator.pushReplacementNamed(context, '/login');
-                  } else if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(auth.errorMessage ?? 'Failed'), backgroundColor: GolfieColors.marigold));
+                  if (!auth.hasError && ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Password updated successfully'), backgroundColor: GolfieColors.mint));
+                    Navigator.pushReplacementNamed(ctx, '/login');
+                  } else if (ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(auth.errorMessage ?? 'Failed'), backgroundColor: GolfieColors.marigold));
                   }
                 },
                 child: auth.loading

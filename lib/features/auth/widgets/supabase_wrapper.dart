@@ -12,7 +12,7 @@ class SupabaseWrapper {
   static bool _initialized = false;
 
   /// Initialize once at app startup
-  static init({required String baseUrl, required String anonKey}) {
+  static void init({required String baseUrl, required String anonKey}) {
     if (_initialized) return; // Already initialized
 
     _instance = SupabaseClient(baseUrl, anonKey);
