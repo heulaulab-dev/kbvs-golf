@@ -126,7 +126,7 @@ class _SubmitTournamentScreenState extends State<SubmitTournamentScreen> {
     required ValueChanged<T?> onSelect,
   }) {
     return DropdownButtonFormField<T>(
-      value: selectedValue,
+      initialValue: selectedValue,
       items: items.map((item) => DropdownMenuItem(
         value: item,
         child: Text(labelProvider(item)),
@@ -191,7 +191,6 @@ class _SubmitTournamentScreenState extends State<SubmitTournamentScreen> {
                   case TournamentFormat.bestBall: return 'Best Ball';
                   case TournamentFormat.championship: return 'Championship';
                 }
-                return '';
               },
               onSelect: (value) => setState(() => _format = value),
             ),
@@ -202,18 +201,27 @@ class _SubmitTournamentScreenState extends State<SubmitTournamentScreen> {
               children: [
                 const Text('Min Skill Level:', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 16,
-                  children: [
-                    Radio<SkillLevel>(value: SkillLevel.beginner, groupValue: _minSkill, onChanged: (v) => setState(() => _minSkill = v)),
-                    const Text('Beginner'),
-                    Radio<SkillLevel>(value: SkillLevel.casual, groupValue: _minSkill, onChanged: (v) => setState(() => _minSkill = v)),
-                    const Text('Casual'),
-                    Radio<SkillLevel>(value: SkillLevel.competitive, groupValue: _minSkill, onChanged: (v) => setState(() => _minSkill = v)),
-                    const Text('Competitive'),
-                    Radio<SkillLevel>(value: SkillLevel.pro, groupValue: _minSkill, onChanged: (v) => setState(() => _minSkill = v)),
-                    const Text('Pro'),
-                  ],
+                RadioGroup<SkillLevel>(
+                  groupValue: _minSkill,
+                  onChanged: (v) => setState(() => _minSkill = v),
+                  child: Wrap(
+                    spacing: 16,
+                    children: SkillLevel.values.map((level) {
+                      final label = switch (level) {
+                        SkillLevel.beginner => 'Beginner',
+                        SkillLevel.casual => 'Casual',
+                        SkillLevel.competitive => 'Competitive',
+                        SkillLevel.pro => 'Pro',
+                      };
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Radio<SkillLevel>(value: level),
+                          Text(label),
+                        ],
+                      );
+                    }).toList(),
+                  ),
                 ),
               ],
             ),
