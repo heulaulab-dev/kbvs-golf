@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/golfie_colors.dart';
 import '../../../core/theme/golfie_radii.dart';
 import '../providers/auth_provider.dart';
+import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -131,7 +132,10 @@ class _SignupScreenState extends State<SignupScreen> {
                             ScaffoldMessenger.of(state.context).showSnackBar(
                               SnackBar(content: Text('Check email for verification link'), backgroundColor: GolfieColors.mint),
                             );
-                            Navigator.pushReplacementNamed(state.context, '/login');
+                            Navigator.pushReplacement(
+                              state.context,
+                              MaterialPageRoute(builder: (_) => const LoginScreen()),
+                            );
                           } else if (state.mounted) {
                             ScaffoldMessenger.of(state.context).showSnackBar(
                               SnackBar(content: Text(auth.errorMessage ?? 'Signup failed'), backgroundColor: GolfieColors.marigold),

@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/golfie_colors.dart';
 import '../providers/auth_provider.dart';
 import '../../../features/onboarding/providers/onboarding_provider.dart';
+import '../../../features/onboarding/screens/onboarding_welcome_screen.dart';
+import '../../../screens/home_screen.dart';
+import '../screens/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -39,20 +42,29 @@ class _SplashScreenState extends State<SplashScreen> {
       if (auth.isAuthenticated) {
         // User is logged in — check onboarding status
         if (onboard.completed) {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+          );
         } else {
-          Navigator.pushReplacementNamed(context, '/onboarding');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const OnboardingWelcomeScreen()),
+          );
         }
       } else {
         // Not authenticated — go to login
-        Navigator.pushReplacementNamed(context, '/login');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading auth state'), backgroundColor: Colors.red),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
         );
-        Navigator.pushReplacementNamed(context, '/login');
       }
     }
   }

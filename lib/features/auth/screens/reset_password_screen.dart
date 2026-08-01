@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/golfie_colors.dart';
 import '../../../core/theme/golfie_radii.dart';
 import '../providers/auth_provider.dart';
+import 'login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -174,7 +175,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
                   if (!auth.hasError && ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Password updated successfully'), backgroundColor: GolfieColors.mint));
-                    Navigator.pushReplacementNamed(ctx, '/login');
+                    Navigator.pushReplacement(
+                      ctx,
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    );
                   } else if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(auth.errorMessage ?? 'Failed'), backgroundColor: GolfieColors.marigold));
                   }

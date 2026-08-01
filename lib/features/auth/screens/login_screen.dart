@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/golfie_colors.dart';
 import '../../../core/theme/golfie_radii.dart';
+import '../../../screens/home_screen.dart';
 import '../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -103,7 +104,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           password: _passwordController.text,
                         );
                         if (!auth.hasError && auth.isAuthenticated && ctx.mounted) {
-                          Navigator.pushReplacementNamed(ctx, '/home');
+                          Navigator.pushReplacement(
+                            ctx,
+                            MaterialPageRoute(builder: (_) => const HomeScreen()),
+                          );
                         } else if (ctx.mounted) {
                           ScaffoldMessenger.of(ctx).showSnackBar(
                             SnackBar(content: Text(auth.errorMessage ?? 'Login failed'), backgroundColor: GolfieColors.marigold),
