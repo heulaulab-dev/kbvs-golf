@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/golfie_colors.dart';
 import '../../../core/theme/golfie_radii.dart';
 import '../providers/auth_provider.dart';
+import 'login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -13,6 +14,7 @@ class ResetPasswordScreen extends StatefulWidget {
 }
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -120,7 +122,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Enter new password';
-                  if (value!.length < 6) return 'Must be at least 6 characters';
+                  if (value.length < 6) return 'Must be at least 6 characters';
                   return null;
                 },
               ),
@@ -164,17 +166,21 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   // For now, calling AuthProvider's resetPassword which expects the token.
                   // Note: resetPassword method needs the email as well — you'd typically store it
                   // from the original reset request or include it in the deep link.
+                  final ctx = context;
                   await auth.resetPassword(
-                    email: _emailController.text ?? '', // Placeholder — need to obtain actual email
+                    email: _emailController.text, // Placeholder — need to obtain actual email
                     newPassword: _passwordController.text,
                     token: _token!,
                   );
 
-                  if (!auth.hasError && mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Password updated successfully'), backgroundColor: GolfieColors.mint));
-                    Navigator.pushReplacementNamed(context, '/login');
-                  } else if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(auth.errorMessage ?? 'Failed'), backgroundColor: GolfieColors.marigold));
+                  if (!auth.hasError && ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Password updated successfully'), backgroundColor: GolfieColors.mint));
+                    Navigator.pushReplacement(
+                      ctx,
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    );
+                  } else if (ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(auth.errorMessage ?? 'Failed'), backgroundColor: GolfieColors.marigold));
                   }
                 },
                 child: auth.loading
@@ -190,6 +196,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   void dispose() {
+    _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();

@@ -6,11 +6,25 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// Loads session on init, listens to auth state stream, and provides
 /// methods for sign-in, sign-up, password reset, and sign-out.
 class AuthProvider with ChangeNotifier {
-  final SupabaseClient _client;
+  final SupabaseClient? _client;
   User? _user;
   bool _loading = true;
   bool _hasError = false;
   String? _errorMessage;
+
+  /// Demo mode — used when Supabase env vars are not configured (debug builds).
+  ///
+  /// Skips the auth stream, immediately finishes loading, and exposes
+  /// [demoMode] so screens can show a hint instead of failing.
+  factory AuthProvider.demo() => AuthProvider._demo();
+
+  AuthProvider._demo() : _client = null {
+    _loading = false;
+    _user = null;
+  }
+
+  /// True when running without Supabase (no env vars) in debug builds.
+  bool get demoMode => _client == null;
 
   /// Loading state while checking initial session
   bool get loading => _loading;
@@ -24,24 +38,31 @@ class AuthProvider with ChangeNotifier {
   /// Human-readable error message (for UI display)
   String? get errorMessage => _errorMessage;
 
-  AuthProvider(this._client) {
+  AuthProvider(SupabaseClient client) : _client = client {
     init();
   }
 
   /// Initialize: load existing session from storage and set up state stream.
   void init() {
+    final client = _client;
+    if (client == null) return;
     _loading = true;
     notifyListeners();
 
     // Load initial user
-    _user = _client.auth.currentUser;
+    _user = client.auth.currentUser;
 
     // Listen for auth state changes (sign-in, sign-out, token refresh, etc.)
-    _client.auth.onAuthStateChange.listen((AuthState state) {
+    client.auth.onAuthStateChange.listen((AuthState state) {
       _user = state.session?.user;
       _loading = false;
       _hasError = false;
       _errorMessage = null;
+
+      // Check if email needs verification
+      final user = state.session?.user;
+      _emailVerified = user != null && user.emailConfirmedAt != null;
+
       notifyListeners();
     }).onError((error) {
       _hasError = true;
@@ -61,16 +82,18 @@ class AuthProvider with ChangeNotifier {
 
   /// Sign up a new user with email and password
   Future<void> signUp({required String email, required String password}) async {
+    final client = _client;
+    if (client == null) return _demoAction();
     _resetErrorState();
     _loading = true;
     notifyListeners();
 
     try {
-      await _client.auth.signUp(
+      await client.auth.signUp(
         email: email,
         password: password,
       );
-      _user = _client.auth.currentUser;
+      _user = client.auth.currentUser;
     } catch (e) {
       _handleSupabaseError(e);
     } finally {
@@ -81,16 +104,18 @@ class AuthProvider with ChangeNotifier {
 
   /// Existing user signs in with email/password
   Future<void> signIn({required String email, required String password}) async {
+    final client = _client;
+    if (client == null) return _demoAction();
     _resetErrorState();
     _loading = true;
     notifyListeners();
 
     try {
-      await _client.auth.signInWithPassword(
+      await client.auth.signInWithPassword(
         email: email,
         password: password,
       );
-      _user = _client.auth.currentUser;
+      _user = client.auth.currentUser;
     } catch (e) {
       _handleSupabaseError(e);
     } finally {
@@ -101,12 +126,14 @@ class AuthProvider with ChangeNotifier {
 
   /// Signs out the current user and clears secure storage
   Future<void> signOut() async {
+    final client = _client;
+    if (client == null) return _demoAction();
     _resetErrorState();
     _loading = true;
     notifyListeners();
 
     try {
-      await _client.auth.signOut();
+      await client.auth.signOut();
       _user = null;
     } catch (e) {
       _user = null;
@@ -119,18 +146,16 @@ class AuthProvider with ChangeNotifier {
 
   /// Sends a password reset link to the provided email
   Future<void> forgotPassword(String email) async {
+    final client = _client;
+    if (client == null) return _demoAction();
     _resetErrorState();
     _loading = true;
     notifyListeners();
 
     try {
-      await _client.auth.resend(
-        email: email,
-        type: OtpType.recovery,
-      );
+      await client.auth.resetPasswordForEmail(email);
     } catch (e) {
-      _errorMessage = 'Could not send reset link. Please check your email and try again.';
-      _hasError = true;
+      _handleSupabaseError(e);
     } finally {
       _loading = false;
       notifyListeners();
@@ -147,25 +172,38 @@ class AuthProvider with ChangeNotifier {
   ///   3. First sign in with OTP: `_client.auth.signInWithOtp(token)`
   ///   4. Then update password: `_client.auth.updateUser(UserAttributes(password:))`
   Future<void> resetPassword({required String email, required String newPassword, required String token}) async {
+    final client = _client;
+    if (client == null) return _demoAction();
     _resetErrorState();
     _loading = true;
     notifyListeners();
 
     try {
-      // Step 1: Sign in with the OTP token from the reset link
-      await _client.auth.signInWithOtp(token: token);
+      // Step 1: Verify the OTP token from the reset link
+      await client.auth.verifyOTP(
+        email: email,
+        token: token,
+        type: OtpType.recovery,
+      );
 
-      // Step 2: Update password after successful sign-in
+      // Step 2: Update password after successful verification
       final userUpdate = UserAttributes(password: newPassword);
-      await _client.auth.updateUser(userUpdate);
+      await client.auth.updateUser(userUpdate);
 
-      _user = _client.auth.currentUser;
+      _user = client.auth.currentUser;
     } catch (e) {
       _handleSupabaseError(e);
     } finally {
       _loading = false;
       notifyListeners();
     }
+  }
+
+  /// Demo-mode no-op for auth actions when Supabase is unavailable.
+  Future<void> _demoAction() async {
+    _errorMessage = 'Auth unavailable — set SUPABASE_URL and SUPABASE_ANON_KEY to enable.';
+    _hasError = true;
+    notifyListeners();
   }
 
   /// Internal method to convert Supabase errors into user-friendly messages
@@ -190,10 +228,7 @@ class AuthProvider with ChangeNotifier {
           _errorMessage = 'Too many requests. Please try again later.';
           break;
         default:
-          _errorMessage = e.message;
-          if (_errorMessage == null) {
-            _errorMessage = 'Something went wrong.';
-          }
+          _errorMessage ??= e.message;
       }
     } else if (e is String) {
       _errorMessage = e;
@@ -213,4 +248,10 @@ class AuthProvider with ChangeNotifier {
 
   /// Checks if the user's email is set
   bool get isEmailVerified => _user?.email != null;
+
+  /// Checks if the user's email has been confirmed via verification link
+  bool get emailConfirmed => _emailVerified;
+
+  /// Private state for email confirmation tracking
+  bool _emailVerified = false;
 }

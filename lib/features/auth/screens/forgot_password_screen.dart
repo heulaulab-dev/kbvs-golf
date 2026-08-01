@@ -75,17 +75,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       foregroundColor: GolfieColors.white,
                     ),
                     onPressed: auth.loading ? null : () async {
+                      final ctx = context;
                       if (_formKey.currentState!.validate()) {
                         await auth.forgotPassword(_emailController.text.trim());
-                        if (!auth.hasError && mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                        if (!auth.hasError && ctx.mounted) {
+                          ScaffoldMessenger.of(ctx).showSnackBar(
                             SnackBar(content: Text('Reset link sent to your email'), backgroundColor: GolfieColors.mint),
                           );
+                          final ctx2 = ctx;
                           Future.delayed(const Duration(seconds: 3), () {
-                            if (mounted) Navigator.pop(context);
+                            if (ctx2.mounted) Navigator.pop(ctx2);
                           });
-                        } else if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                        } else if (ctx.mounted) {
+                          ScaffoldMessenger.of(ctx).showSnackBar(
                             SnackBar(content: Text(auth.errorMessage ?? 'Could not send link'), backgroundColor: GolfieColors.marigold),
                           );
                         }

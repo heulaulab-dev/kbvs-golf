@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'dart:async';
 
-import '../models/skill_level.dart';
 import '../models/tournament.dart';
 import '../models/tournament_format.dart';
-import '../models/tournament_status.dart';
 import '../providers/changes_notifier_tournament_provider.dart';
 import '../../widgets/golfie/golfie_index.dart';
 import '../../core/theme/golfie_colors.dart';
@@ -255,7 +252,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
 
 // Shimmering skeleton for hero image – animated gradient overlay
 class _HeroSkeleton extends StatefulWidget {
-  const _HeroSkeleton({super.key});
+  const _HeroSkeleton();
 
   @override
   State<_HeroSkeleton> createState() => _HeroSkeletonState();

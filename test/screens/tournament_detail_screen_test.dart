@@ -11,7 +11,7 @@ import 'package:golfie/tournament/repositories/mock_tournament_repository.dart';
 import 'package:golfie/tournament/screens/tournament_detail_screen.dart';
 
 void main() {
-  Tournament _t(String name) => Tournament(
+  Tournament t(String name) => Tournament(
         id: 'test-123',
         name: name,
         courseName: 'Green Valley',
@@ -57,34 +57,34 @@ void main() {
   }
 
   testWidgets('displays tournament name in appbar and body', (tester) async {
-    await pumpDetail(tester, _t('Pro Scramble Open'));
+    await pumpDetail(tester, t('Pro Scramble Open'));
     expect(find.text('Pro Scramble Open'), findsAtLeastNWidgets(1));
   });
 
   testWidgets('displays course location', (tester) async {
-    await pumpDetail(tester, _t('Course Challenge'));
+    await pumpDetail(tester, t('Course Challenge'));
     expect(find.text('Bandung'), findsOneWidget);
   });
 
   testWidgets('displays fee label', (tester) async {
-    await pumpDetail(tester, _t('Cheap One'));
+    await pumpDetail(tester, t('Cheap One'));
     expect(find.text('Rp 150000'), findsOneWidget);
   });
 
   testWidgets('displays format as formatted string', (tester) async {
-    await pumpDetail(tester, _t('Format Test'));
+    await pumpDetail(tester, t('Format Test'));
     expect(find.text('Scramble'), findsOneWidget);
   });
 
   testWidgets('renders details, players, and rules tabs', (tester) async {
-    await pumpDetail(tester, _t('Tab Test'));
+    await pumpDetail(tester, t('Tab Test'));
     expect(find.text('Details'), findsOneWidget);
     expect(find.text('Players'), findsOneWidget);
     expect(find.text('Rules'), findsOneWidget);
   });
 
   testWidgets('displays register CTA', (tester) async {
-    await pumpDetail(tester, _t('Reg Test'));
+    await pumpDetail(tester, t('Reg Test'));
     expect(find.text('Register Now'), findsOneWidget);
   });
 }

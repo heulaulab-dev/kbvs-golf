@@ -55,25 +55,6 @@ class _TournamentListScreenState extends State<TournamentListScreen> {
     super.dispose();
   }
 
-  String _formatLabel(TournamentFormat fmt) {
-    switch (fmt) {
-      case TournamentFormat.matchPlay: return 'Match Play';
-      case TournamentFormat.stableford: return 'Stableford';
-      case TournamentFormat.scramble: return 'Scramble';
-      case TournamentFormat.bestBall: return 'Best Ball';
-      case TournamentFormat.championship: return 'Championship';
-    }
-  }
-
-  static String _formatLabelStatic(TournamentFormat fmt) {
-    switch (fmt) {
-      case TournamentFormat.matchPlay: return 'Match Play';
-      case TournamentFormat.stableford: return 'Stableford';
-      case TournamentFormat.scramble: return 'Scramble';
-      case TournamentFormat.bestBall: return 'Best Ball';
-      case TournamentFormat.championship: return 'Championship';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -318,7 +299,7 @@ class _FilterSheetState extends State<_FilterSheet> with AutomaticKeepAliveClien
 // --- helper widgets (still file-level) ---
 
 class _SkeletonCard extends StatefulWidget {
-  const _SkeletonCard({super.key});
+  const _SkeletonCard();
   @override
   State<_SkeletonCard> createState() => _SkeletonCardState();
 }
@@ -365,7 +346,7 @@ class _ErrorState extends StatelessWidget {
   final VoidCallback onRetry;
   final bool hasNetworkIssue;
 
-  const _ErrorState({super.key, required this.message, required this.onRetry, this.hasNetworkIssue = false});
+  const _ErrorState({required this.message, required this.onRetry, this.hasNetworkIssue = false});
 
   @override
   Widget build(BuildContext context) {
@@ -409,7 +390,7 @@ class _ErrorState extends StatelessWidget {
 class _TournamentCard extends StatelessWidget {
   final Tournament tournament;
 
-  const _TournamentCard({super.key, required this.tournament});
+  const _TournamentCard({required this.tournament});
 
   @override
   Widget build(BuildContext context) {

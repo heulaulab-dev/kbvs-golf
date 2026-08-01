@@ -57,7 +57,6 @@ ios/**/*.mode2v3
 ios/**/*.mode3v3
 ios/.last_build_id
 ios/Pods/
-ios/Runner.xcworkspace/xcuserdata/
 ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
 
 # Web related
@@ -67,3 +66,10 @@ lib/generated_plugin_registrant.dart
 !**/ios/**/default.mode1v3
 !**/ios/**/default.mode2v3
 !**/ios/**/default.mode3v3
+
+# Local env (Supabase keys) — never commit
+/.env
+
+# NOTE: .env.development/.env.staging/.env.production ARE committed
+# they are pubspec assets required for the build. Keep real secrets
+# out; use placeholders or CI-injected values instead.

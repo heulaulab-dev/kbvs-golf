@@ -38,7 +38,7 @@ class MockTournamentRepository implements TournamentRepository {
     }
     // Return a copy to prevent external mutation
     return Tournament.fromJson(
-      _store.firstWhere((t) => t.id == id).toJson() as Map<String, dynamic>,
+      _store.firstWhere((t) => t.id == id).toJson(),
     );
   }
 

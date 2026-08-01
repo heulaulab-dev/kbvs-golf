@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/golfie_colors.dart';
 import '../../../core/theme/golfie_radii.dart';
+import '../../../screens/home_screen.dart';
 import '../providers/onboarding_provider.dart';
 import '../widgets/progress_indicator.dart';
 
@@ -236,7 +237,10 @@ class _OnboardingPreferencesScreenState extends State<OnboardingPreferencesScree
       // Navigate to home screen after brief delay
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+          );
         }
       });
     }

@@ -11,9 +11,9 @@ class HttpTournamentRepository implements TournamentRepository {
 
   HttpTournamentRepository({
     HttpClient? client,
-    String baseUrl = 'api-local.kbvalbury.com:9100',
+    String? baseUrl,
   }) : _client = client ?? DioHttpClient(),
-        _baseUrl = baseUrl;
+        _baseUrl = baseUrl ?? 'api-local.kbvalbury.com:9100';
 
   factory HttpTournamentRepository.withClient(HttpClient client, String baseUrl) {
     return HttpTournamentRepository(client: client, baseUrl: baseUrl);
@@ -62,7 +62,7 @@ class HttpTournamentRepository implements TournamentRepository {
       return Tournament.fromJson(resp);
     } on HttpException catch (e) {
       if (e.statusCode == 404) {
-        throw FormatException('Not found');
+        throw const FormatException('Not found');
       }
       rethrow;
     }

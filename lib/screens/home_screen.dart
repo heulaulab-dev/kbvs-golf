@@ -14,7 +14,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Golfie'),
@@ -64,8 +63,8 @@ class HomeScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (_) => const SubmitTournamentScreen()));
         },
-        child: const Icon(Icons.add),
         tooltip: 'Submit New Tournament',
+        child: const Icon(Icons.add),
       ),
       body: SingleChildScrollView(
         child: Column(

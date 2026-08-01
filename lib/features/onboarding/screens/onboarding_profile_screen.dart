@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart' hide ProgressIndicator;
 import 'package:provider/provider.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/golfie_colors.dart';
@@ -166,7 +165,7 @@ class _OnboardingProfileScreenState extends State<OnboardingProfileScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (_nameController.text.length > 0 && _nameController.text.length < 2)
+              if (_nameController.text.isNotEmpty && _nameController.text.length < 2)
                 Text(
                   'Minimum 2 characters',
                   style: GoogleFonts.inter(
@@ -187,16 +186,6 @@ class _OnboardingProfileScreenState extends State<OnboardingProfileScreen> {
     );
   }
 
-  Future<void> _pickAvatar(BuildContext context) async {
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Avatar picker coming soon in Phase 2'),
-        backgroundColor: GolfieColors.marigold,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
 
   @override
   void dispose() {

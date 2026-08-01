@@ -7,7 +7,7 @@ import 'package:golfie/tournament/models/tournament_format.dart';
 import 'package:golfie/tournament/models/tournament_status.dart';
 
 void main() {
-  final _sampleTournaments = [
+  final sampleTournaments = [
     Tournament(
       id: 't1',
       name: 'Scramble Pro',
@@ -55,13 +55,13 @@ void main() {
     ),
   ];
 
-  MockTournamentRepository _createMock([List<Tournament>? data]) {
-    return MockTournamentRepository(data ?? _sampleTournaments);
+  MockTournamentRepository createMock([List<Tournament>? data]) {
+    return MockTournamentRepository(data ?? sampleTournaments);
   }
 
   group('MockTournamentRepository.getFirstPage', () {
     test('returns all tournaments when no filter', () async {
-      final repo = _createMock();
+      final repo = createMock();
       final (tournaments, total, hasNext) = await repo.getFirstPage();
 
       expect(tournaments, hasLength(3));
@@ -70,7 +70,7 @@ void main() {
     });
 
     test('correctly sorts by ID (alphabetical order from list)', () async {
-      final repo = _createMock();
+      final repo = createMock();
       final (tournaments, _, _) = await repo.getFirstPage();
 
       expect(tournaments[0].id, 't1');
@@ -79,7 +79,7 @@ void main() {
     });
 
     test('return empty when no data provided', () async {
-      final repo = _createMock([]);
+      final repo = createMock([]);
       final (tournaments, _, _) = await repo.getFirstPage();
       expect(tournaments, isEmpty);
     });
@@ -87,7 +87,7 @@ void main() {
 
   group('MockTournamentRepository.search', () {
     test('filters by name case-insensitively', () async {
-      final repo = _createMock();
+      final repo = createMock();
       final (tournaments, _, _) = await repo.search('scramble');
 
       expect(tournaments, hasLength(1));
@@ -95,19 +95,19 @@ void main() {
     });
 
     test('search returns empty when no match', () async {
-      final repo = _createMock();
+      final repo = createMock();
       final (tournaments, _, _) = await repo.search('unknown-term');
       expect(tournaments, isEmpty);
     });
 
     test('trimmed whitespace handled correctly', () async {
-      final repo = _createMock();
+      final repo = createMock();
       final (tournaments, _, _) = await repo.search('  scramble  ');
       expect(tournaments, hasLength(1));
     });
 
     test('empty query returns all tournaments', () async {
-      final repo = _createMock();
+      final repo = createMock();
       final (tournaments, _, _) = await repo.search('');
       expect(tournaments, hasLength(3));
     });
@@ -115,7 +115,7 @@ void main() {
 
   group('MockTournamentRepository.nextPage/prevPage', () {
     test('cursors return same set (simplified - no pagination offset)', () async {
-      final repo = _createMock();
+      final repo = createMock();
       final (t1, _, _) = await repo.getFirstPage();
       final (t2, _, _) = await repo.nextPage(cursor: 'any-cursor');
 
@@ -123,7 +123,7 @@ void main() {
     });
 
     test('prevPage without cursor returns empty', () async {
-      final repo = _createMock();
+      final repo = createMock();
       final (result, _, _) = await repo.prevPage();
       expect(result, isEmpty);
     });
@@ -131,14 +131,14 @@ void main() {
 
   group('MockTournamentRepository.getById', () {
     test('returns tournament by matching ID', () async {
-      final repo = _createMock();
+      final repo = createMock();
       final t = await repo.getById('t1');
       expect(t.id, 't1');
       expect(t.name, 'Scramble Pro');
     });
 
     test('throws FormatException for non-existent ID', () async {
-      final repo = _createMock();
+      final repo = createMock();
       expect(() => repo.getById('fake-id'), throwsA(isA<FormatException>()));
     });
   });
@@ -147,7 +147,7 @@ void main() {
     late MockTournamentRepository repo;
 
     setUp(() {
-      repo = _createMock();
+      repo = createMock();
     });
 
     test('increments registeredCount for specified tournament', () async {

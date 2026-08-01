@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
+import 'core/config.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/widgets/supabase_wrapper.dart';
 import 'features/auth/screens/splash_screen.dart';
 import 'features/onboarding/providers/onboarding_provider.dart';
 import 'core/theme/golfie_theme.dart';
 import 'providers/app_state.dart';
-import 'screens/home_screen.dart';
 import 'tournament/providers/changes_notifier_tournament_provider.dart';
 import 'tournament/repositories/http_tournament_repository.dart';
 import 'berita/providers/berita_provider.dart';
@@ -16,32 +16,19 @@ import 'berita/repositories/berita_repository.dart';
 import 'berita/repositories/http_berita_repository.dart';
 import 'berita/repositories/mock_berita_repository.dart';
 
-// Read Supabase config from environment variables at compile time
-final _supabaseUrl = String.fromEnvironment(
-  'SUPABASE_URL',
-  defaultValue: '',
-);
-final _anonKey = String.fromEnvironment(
-  'SUPABASE_ANON_KEY',
-  defaultValue: '',
-);
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-void main() {
-  // Initialize Supabase with environment variables BEFORE runApp
-  // This ensures the client is ready when providers request it
-  if (_supabaseUrl.isNotEmpty && _anonKey.isNotEmpty) {
-    // Initialize SupabaseWrapper with env values
-    SupabaseWrapper.init(
-      baseUrl: _supabaseUrl,
-      anonKey: _anonKey,
-    );
-  } else {
-    // Fallback for development without env vars — print warning
-    if (kDebugMode) {
-      print('⚠ SUPABASE_URL and SUPABASE_ANON_KEY not set in environment.');
-      print('Run with: dart run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...');
-    }
-  }
+  // Load environment config BEFORE runApp.
+  // Validates required vars — app refuses to boot with missing config.
+  final config = await AppConfig.load();
+  debugPrint('⚙ Golfie running in ${config.envName} (${config.appName})');
+
+  // Initialize Supabase with config values.
+  SupabaseWrapper.init(
+    baseUrl: config.supabaseUrl,
+    anonKey: config.supabaseAnonKey,
+  );
 
   runApp(const GolfieApp());
 }
@@ -56,16 +43,18 @@ class GolfieApp extends StatelessWidget {
         // Existing app state
         ChangeNotifierProvider(create: (_) => AppState()),
 
-        // Tournament provider (unchanged)
+        // Tournament provider — base URL from AppConfig
         ChangeNotifierProvider(
           create: (_) => ChangesNotifierTournamentProvider(
-            repository: HttpTournamentRepository(),
+            repository: HttpTournamentRepository(
+              baseUrl: AppConfig.instance.tournamentApiBaseUrl,
+            ),
           ),
         ),
 
         // Berita repository with env-based resolution
         Provider<BeritaRepository>(
-          create: (_) => const _ResolveBeritaRepository()(),
+          create: (_) => _ResolveBeritaRepository()(),
         ),
         ChangeNotifierProxyProvider<BeritaRepository,
             ChangesNotifierBeritaProvider>(
@@ -76,11 +65,15 @@ class GolfieApp extends StatelessWidget {
               prev ?? ChangesNotifierBeritaProvider(repository: repo),
         ),
 
-        // NEW: Auth provider — wraps Supabase auth state
+        // Auth provider — wraps Supabase auth state
         ChangeNotifierProvider(
           create: (_) {
-            // Ensure Supabase client is initialized before creating AuthProvider
+            // Ensure Supabase client is initialized before creating AuthProvider.
             if (!SupabaseWrapper.initialized) {
+              if (kDebugMode) {
+                debugPrint('⚠ Supabase not initialized — running without auth (demo mode).');
+                return AuthProvider.demo();
+              }
               throw Exception('Supabase not initialized. Check environment variables.');
             }
             return AuthProvider(SupabaseWrapper.client)
@@ -88,7 +81,7 @@ class GolfieApp extends StatelessWidget {
           },
         ),
 
-        // NEW: Onboarding provider — tracks step progression
+        // Onboarding provider — tracks step progression
         ChangeNotifierProvider(
           create: (_) => OnboardingProvider(),
         ),
@@ -112,12 +105,7 @@ class _ResolveBeritaRepository {
   const _ResolveBeritaRepository();
 
   BeritaRepository call() {
-    // const String.fromEnvironment is the only way to read compile-time
-    // config without pulling in dart:mirrors or a JSON file.
-    const base = String.fromEnvironment(
-      'GOLFIE_API_BASE',
-      defaultValue: '',
-    );
+    final base = AppConfig.instance.newsApiBaseUrl;
     if (base.isNotEmpty) {
       return HttpBeritaRepository(baseUrl: base);
     }
