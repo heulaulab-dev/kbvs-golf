@@ -42,6 +42,11 @@ class AuthProvider with ChangeNotifier {
       _loading = false;
       _hasError = false;
       _errorMessage = null;
+
+      // Check if email needs verification
+      final user = state.session?.user;
+      _emailVerified = user != null && user.emailConfirmedAt != null;
+
       notifyListeners();
     }).onError((error) {
       _hasError = true;
@@ -124,13 +129,9 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      await _client.auth.resend(
-        email: email,
-        type: OtpType.recovery,
-      );
+      await _client.auth.resetPasswordForEmail(email);
     } catch (e) {
-      _errorMessage = 'Could not send reset link. Please check your email and try again.';
-      _hasError = true;
+      _handleSupabaseError(e);
     } finally {
       _loading = false;
       notifyListeners();
@@ -214,4 +215,10 @@ class AuthProvider with ChangeNotifier {
 
   /// Checks if the user's email is set
   bool get isEmailVerified => _user?.email != null;
+
+  /// Checks if the user's email has been confirmed via verification link
+  bool get emailConfirmed => _emailVerified;
+
+  /// Private state for email confirmation tracking
+  bool _emailVerified = false;
 }
