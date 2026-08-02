@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/golfie_colors.dart';
 import '../../../core/theme/golfie_radii.dart';
+import '../../../core/theme/golfie_shadows.dart';
+import '../../../core/theme/golfie_typography.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/auth_password_field.dart';
 import 'login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
@@ -48,27 +50,43 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   padding: const EdgeInsets.only(bottom: 24),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(GolfieRadii.xxxl),
-                    child: Container(
-                      color: GolfieColors.white,
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Reset Password', style: GoogleFonts.lora(fontSize: 46, color: GolfieColors.ink)),
-                          const SizedBox(height: 16),
-                          Text('Link expired or invalid. Please go back to Forgot Password screen and request a new reset link.', style: GoogleFonts.inter(color: GolfieColors.stone)),
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: Size(double.infinity, 48),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(GolfieRadii.pill)),
-                              backgroundColor: GolfieColors.ink,
-                              foregroundColor: GolfieColors.white,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: GolfieColors.white,
+                        boxShadow: GolfieShadows.xl,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Reset Password',
+                              style: GolfieTypography.textTheme.displaySmall!
+                                  .copyWith(color: GolfieColors.ink),
                             ),
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Go Back'),
-                          ),
-                        ],
+                            const SizedBox(height: 16),
+                            Text(
+                              'Link expired or invalid. Please go back to Forgot Password screen and request a new reset link.',
+                              style: GolfieTypography.textTheme.bodyLarge!
+                                  .copyWith(color: GolfieColors.stone),
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: Size(double.infinity, 48),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(GolfieRadii.pill),
+                                ),
+                                backgroundColor: GolfieColors.ink,
+                                foregroundColor: GolfieColors.white,
+                              ),
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Go Back'),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -100,52 +118,66 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       padding: const EdgeInsets.only(bottom: 24),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(GolfieRadii.xxxl),
-        child: Container(
-          color: GolfieColors.white,
-          padding: const EdgeInsets.all(24),
-          child: Form(key: _formKey, child: Column(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: GolfieColors.white,
+            boxShadow: GolfieShadows.xl,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Form(key: _formKey, child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Create new password', style: GoogleFonts.lora(fontSize: 46, color: GolfieColors.ink)),
-              const SizedBox(height: 8),
-              Text('Set a new secure password below', style: GoogleFonts.inter(color: GolfieColors.graphite)),
-              const SizedBox(height: 32),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(GolfieRadii.xl), borderSide: BorderSide(color: GolfieColors.ash)),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(GolfieRadii.xl), borderSide: BorderSide(color: GolfieColors.ink, width: 1.5)),
-                  errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(GolfieRadii.xl), borderSide: const BorderSide(color: Color(0xFFDD6B6B))),
-                  hintText: 'New Password',
+              Text(
+                'Create new password',
+                style: GolfieTypography.textTheme.displaySmall!.copyWith(
+                  color: GolfieColors.ink,
                 ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Set a new secure password below',
+                style: GolfieTypography.textTheme.bodyLarge!.copyWith(
+                  color: GolfieColors.graphite,
+                ),
+              ),
+              const SizedBox(height: 32),
+              AuthPasswordField(
+                controller: _passwordController,
+                hintText: 'New Password',
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Enter new password';
+                  if (value == null || value.isEmpty) {
+                    return 'Enter new password';
+                  }
                   if (value.length < 6) return 'Must be at least 6 characters';
                   return null;
                 },
               ),
               const SizedBox(height: 20),
-              TextFormField(
+              AuthPasswordField(
                 controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(GolfieRadii.xl), borderSide: BorderSide(color: GolfieColors.ash)),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(GolfieRadii.xl), borderSide: BorderSide(color: GolfieColors.ink, width: 1.5)),
-                  errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(GolfieRadii.xl), borderSide: const BorderSide(color: Color(0xFFDD6B6B))),
-                  hintText: 'Confirm New Password',
-                ),
+                hintText: 'Confirm New Password',
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Confirm password';
-                  if (value != _passwordController.text) return 'Passwords do not match';
+                  if (value == null || value.isEmpty) {
+                    return 'Confirm password';
+                  }
+                  if (value != _passwordController.text) {
+                    return 'Passwords do not match';
+                  }
                   return null;
                 },
               ),
-              if (auth.hasError && auth.errorMessage != null && _formKey.currentState!.validate())
+              if (auth.hasError &&
+                  auth.errorMessage != null &&
+                  _formKey.currentState!.validate())
                 Padding(
                   padding: const EdgeInsets.only(top: 8, bottom: 16),
-                  child: Text(auth.errorMessage!, style: GoogleFonts.inter(color: Color(0xFF8A2525), fontSize: 13)),
+                  child: Text(
+                    auth.errorMessage!,
+                    style: GolfieTypography.textTheme.bodySmall!
+                        .copyWith(color: const Color(0xFF8A2525)),
+                  ),
                 ),
               const SizedBox(height: 28),
               ElevatedButton(
@@ -188,7 +220,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     : const Text('Reset Password'),
               ),
             ],
-          )),
+            )),
+          ),
         ),
       ),
     );
