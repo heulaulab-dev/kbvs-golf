@@ -24,12 +24,16 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <!-- Deep link: golfie:// (Supabase auth callbacks) -->
-            <intent-filter>
+            <!-- App Links: golfie.heulaulab.xyz (Supabase auth callbacks) -->
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="golfie"/>
+                <data
+                    android:scheme="https"
+                    android:host="golfie.heulaulab.xyz"
+                    android:pathPrefix="/callback"
+                />
             </intent-filter>
         </activity>
         <meta-data

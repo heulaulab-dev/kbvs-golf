@@ -92,7 +92,7 @@ class AuthProvider with ChangeNotifier {
       await client.auth.signUp(
         email: email,
         password: password,
-        emailRedirectTo: 'golfie://callback',
+        emailRedirectTo: 'https://golfie.heulaulab.xyz/callback',
       );
       _user = client.auth.currentUser;
     } catch (e) {
@@ -137,7 +137,7 @@ class AuthProvider with ChangeNotifier {
       await client.auth.resend(
         email: email,
         type: OtpType.signup,
-        emailRedirectTo: 'golfie://callback',
+        emailRedirectTo: 'https://golfie.heulaulab.xyz/callback',
       );
       _errorMessage = null;
     } catch (e) {
