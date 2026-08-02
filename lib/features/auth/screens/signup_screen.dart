@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/golfie_colors.dart';
@@ -274,21 +275,11 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildLogo() {
-    // TODO: swap Icons.golf_course for the actual brand mark asset.
     return Center(
-      child: Container(
+      child: SvgPicture.asset(
+        'assets/images/golfie-icon-only.svg',
         width: 72,
         height: 72,
-        decoration: BoxDecoration(
-          color: GolfieColors.ink,
-          borderRadius: BorderRadius.circular(GolfieRadii.xl),
-          boxShadow: GolfieShadows.xl,
-        ),
-        child: const Icon(
-          Icons.golf_course,
-          color: GolfieColors.white,
-          size: 32,
-        ),
       ),
     );
   }

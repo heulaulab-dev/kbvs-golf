@@ -35,21 +35,31 @@ dependencies:
   # Network & API
   dio: ^5.4.0
   flutter_dotenv: ^6.0.1
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
   mockito: ^5.7.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/
+    - assets/images/golfie-icon.jpg
+    - assets/images/golfie-icon-only.svg
     - assets/fonts/
     - assets/data/
     # Environment config files (loaded via flutter_dotenv)
     - .env.development
     - .env.staging
     - .env.production
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/images/golfie-icon.jpg
+  adaptive_icon_background: assets/images/golfie-icon.jpg
+  adaptive_icon_foreground: assets/images/golfie-icon.jpg
