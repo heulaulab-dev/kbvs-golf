@@ -143,7 +143,11 @@ class OnboardingWelcomeScreen extends StatelessWidget {
                     letterSpacing: -0.24,
                   ),
                 ),
-                onPressed: () => onboardChild.nextStep(),
+                onPressed: () {
+                  debugPrint('🟢 [ONBOARD] Get Started button tapped — step: ${onboardChild.currentStep}, completed: ${onboardChild.completed}');
+                  onboardChild.nextStep();
+                  debugPrint('🟢 [ONBOARD] after nextStep() — step: ${onboardChild.currentStep}');
+                },
                 child: const Text('Get Started'),
               ),
             );

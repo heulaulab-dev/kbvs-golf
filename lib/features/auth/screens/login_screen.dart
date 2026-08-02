@@ -123,12 +123,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ForgotPasswordScreen(),
-                          ),
-                        ),
+                        onPressed: () {
+                          debugPrint('🔴 [AUTH] Forgot password? link tapped');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ForgotPasswordScreen(),
+                            ),
+                          );
+                        },
                         child: Text(
                           'Forgot password?',
                           style: GolfieTypography.textTheme.bodyMedium!
@@ -158,16 +161,20 @@ class _LoginScreenState extends State<LoginScreen> {
                         foregroundColor: GolfieColors.white,
                       ),
                       onPressed: auth.loading ? null : () async {
+                        debugPrint('🔴 [AUTH] Sign In button tapped');
                         final ctx = context;
                         if (_formKey.currentState!.validate()) {
+                          debugPrint('🔴 [AUTH] Sign In form valid — calling auth.signIn()');
                           await auth.signIn(
                             email: _emailController.text.trim(),
                             password: _passwordController.text,
                           );
+                          debugPrint('🔴 [AUTH] signIn() done — hasError: ${auth.hasError}, isAuthenticated: ${auth.isAuthenticated}, errorMessage: ${auth.errorMessage}');
                           if (!auth.hasError &&
                               auth.isAuthenticated &&
                               ctx.mounted) {
                             final onboard = ctx.read<OnboardingProvider>();
+                            debugPrint('🔴 [AUTH] login OK — onboarding completed: ${onboard.completed}');
                             Navigator.pushReplacement(
                               ctx,
                               MaterialPageRoute(
@@ -204,12 +211,15 @@ class _LoginScreenState extends State<LoginScreen> {
                               .copyWith(color: GolfieColors.graphite),
                         ),
                         GestureDetector(
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const SignupScreen(),
-                            ),
-                          ),
+                          onTap: () {
+                            debugPrint('🔴 [AUTH] "Create one" link tapped');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const SignupScreen(),
+                              ),
+                            );
+                          },
                           child: Text(
                             'Create one',
                             style: GolfieTypography.textTheme.bodyMedium!

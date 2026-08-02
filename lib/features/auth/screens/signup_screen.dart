@@ -153,13 +153,16 @@ class _SignupScreenState extends State<SignupScreen> {
                   onPressed: auth.loading
                       ? null
                       : () async {
+                          debugPrint('🔴 [AUTH] Get Started (signup) button tapped');
                           final state = this;
                           if (_formKey.currentState!.validate() &&
                               !_showConfirmWarning) {
+                            debugPrint('🔴 [AUTH] signup form valid — calling auth.signUp()');
                             await auth.signUp(
                               email: _emailController.text.trim(),
                               password: _passwordController.text,
                             );
+                            debugPrint('🔴 [AUTH] signUp() done — hasError: ${auth.hasError}, isAuthenticated: ${auth.isAuthenticated}, errorMessage: ${auth.errorMessage}');
                             if (!auth.hasError &&
                                 auth.isAuthenticated &&
                                 state.mounted) {
@@ -205,12 +208,15 @@ class _SignupScreenState extends State<SignupScreen> {
                           .copyWith(color: GolfieColors.graphite),
                     ),
                     GestureDetector(
-                      onTap: () => Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const LoginScreen(),
-                        ),
-                      ),
+                      onTap: () {
+                        debugPrint('🔴 [AUTH] "Sign in" link tapped from signup');
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(),
+                          ),
+                        );
+                      },
                       child: Text(
                         'Sign in',
                         style: GolfieTypography.textTheme.bodyMedium!
