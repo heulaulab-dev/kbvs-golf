@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/golfie_colors.dart';
+import '../../../core/theme/golfie_spacing.dart';
+import '../../../widgets/golfie/golfie_index.dart';
 import '../providers/auth_provider.dart';
 import '../../../features/onboarding/providers/onboarding_provider.dart';
 import '../../../features/onboarding/screens/onboarding_welcome_screen.dart';
@@ -77,6 +79,11 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            GolfieHero(
+              title: 'Golfie',
+              subtitle: 'Jakarta golf tournaments',
+            ),
+            const SizedBox(height: GolfieSpacing.s32),
             CircularProgressIndicator(color: GolfieColors.mint),
           ],
         ),
