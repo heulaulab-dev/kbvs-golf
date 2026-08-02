@@ -330,26 +330,27 @@ class _LoginScreenState extends State<LoginScreen> {
             ? null
             : () async {
                 debugPrint('🔴 [AUTH] Google sign-in tapped');
+                final ctx = context;
                 await auth.signInWithGoogle();
                 if (!auth.hasError &&
                     auth.isAuthenticated &&
-                    context.mounted) {
-                  final onboard = context.read<OnboardingProvider>();
+                    ctx.mounted) {
+                  final onboard = ctx.read<OnboardingProvider>();
                   if (onboard.completed) {
                     Navigator.pushReplacement(
-                      context,
+                      ctx,
                       MaterialPageRoute(builder: (_) => const HomeScreen()),
                     );
                   } else {
                     Navigator.pushReplacement(
-                      context,
+                      ctx,
                       MaterialPageRoute(
                         builder: (_) => const OnboardingWelcomeScreen(),
                       ),
                     );
                   }
-                } else if (auth.hasError && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                } else if (auth.hasError && ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
                         auth.errorMessage ?? 'Google sign-in failed',
