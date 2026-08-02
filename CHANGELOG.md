@@ -7,6 +7,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — date groupe
 
 ## [Unreleased]
 
+### Bug Fixes
+
+- **Auth signup network error** — Fixed `SupabaseWrapper` to use `Supabase.initialize()` instead of raw `SupabaseClient()`. The direct `SupabaseClient()` call bypassed PKCE async storage setup (required since gotrue 2.x), causing `_generatePKCECodeChallenge()` to fail with an assertion error that surfaced as generic "Network error". Signup requests never reached the server. Now properly wires `SharedPreferencesGotrueAsyncStorage` for PKCE flow, session persistence, and deep link handling.
+
 ### Auth + Onboarding System
 
 - **`lib/features/auth/`** new package:

@@ -25,7 +25,7 @@ Future<void> main() async {
   debugPrint('⚙ Golfie running in ${config.envName} (${config.appName})');
 
   // Initialize Supabase with config values.
-  SupabaseWrapper.init(
+  await SupabaseWrapper.init(
     baseUrl: config.supabaseUrl,
     anonKey: config.supabaseAnonKey,
   );

@@ -1,6 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Centralized Supabase client initialization.
+/// Centralized Supabase client initialization via supabase_flutter's Supabase.initialize().
 ///
 /// Reads environment variables at compile time:
 /// - SUPABASE_URL
@@ -8,23 +8,26 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 ///
 /// Provides a singleton client instance accessible throughout the app.
 class SupabaseWrapper {
-  static SupabaseClient? _instance;
   static bool _initialized = false;
 
-  /// Initialize once at app startup
-  static void init({required String baseUrl, required String anonKey}) {
+  /// Initialize once at app startup using supabase_flutter's initialize()
+  /// This sets up proper PKCE async storage for auth flows.
+  static Future<void> init({required String baseUrl, required String anonKey}) async {
     if (_initialized) return; // Already initialized
 
-    _instance = SupabaseClient(baseUrl, anonKey);
+    await Supabase.initialize(
+      url: baseUrl,
+      publishableKey: anonKey,
+    );
     _initialized = true;
   }
 
   /// Get the singleton client instance
   static SupabaseClient get client {
-    if (_instance == null) {
+    if (!_initialized) {
       throw Exception('Supabase not initialized. Call SupabaseWrapper.init() first.');
     }
-    return _instance!;
+    return Supabase.instance.client;
   }
 
   /// Check if already initialized
@@ -33,7 +36,7 @@ class SupabaseWrapper {
 
 /// Extension to easily call init from main without exposing parameters
 extension SupabaseWrapperExtension on SupabaseWrapper {
-  static void initWithEnv() {
+  static Future<void> initWithEnv() async {
     final baseUrl = String.fromEnvironment(
       'SUPABASE_URL',
       defaultValue: '',
@@ -47,7 +50,7 @@ extension SupabaseWrapperExtension on SupabaseWrapper {
       throw SupabaseInitError('SUPABASE_URL and SUPABASE_ANON_KEY must be set via --dart-define at build time.');
     }
 
-    SupabaseWrapper.init(baseUrl: baseUrl, anonKey: anonKey);
+    await SupabaseWrapper.init(baseUrl: baseUrl, anonKey: anonKey);
   }
 }
 
