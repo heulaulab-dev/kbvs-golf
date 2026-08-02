@@ -215,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 24),
                     _buildDivider(),
                     const SizedBox(height: 20),
-                    _buildSocialRow(),
+                    _buildGoogleButton(auth),
                     const SizedBox(height: 28),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -314,47 +314,79 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildSocialRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _socialButton(
-            icon: Icons.g_mobiledata,
-            onTap: () {
-              debugPrint('🔴 [AUTH] Continue with Google tapped');
-              // TODO: wire up Google sign-in.
-            }),
-        const SizedBox(width: 16),
-        _socialButton(
-            icon: Icons.apple,
-            onTap: () {
-              debugPrint('🔴 [AUTH] Continue with Apple tapped');
-              // TODO: wire up Apple sign-in.
-            }),
-        const SizedBox(width: 16),
-        _socialButton(
-            icon: Icons.facebook,
-            onTap: () {
-              debugPrint('🔴 [AUTH] Continue with Facebook tapped');
-              // TODO: wire up Facebook sign-in.
-            }),
-      ],
-    );
-  }
-
-  Widget _socialButton({required IconData icon, required VoidCallback onTap}) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(GolfieRadii.pill),
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: GolfieColors.white,
-          border: Border.all(color: GolfieColors.ash),
+  Widget _buildGoogleButton(AuthProvider auth) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(GolfieRadii.pill),
+          ),
+          side: const BorderSide(color: GolfieColors.ash),
+          backgroundColor: GolfieColors.white,
         ),
-        child: Icon(icon, color: GolfieColors.ink),
+        onPressed: auth.loading
+            ? null
+            : () async {
+                debugPrint('🔴 [AUTH] Google sign-in tapped');
+                await auth.signInWithGoogle();
+                if (!auth.hasError &&
+                    auth.isAuthenticated &&
+                    context.mounted) {
+                  final onboard = context.read<OnboardingProvider>();
+                  if (onboard.completed) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HomeScreen()),
+                    );
+                  } else {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const OnboardingWelcomeScreen(),
+                      ),
+                    );
+                  }
+                } else if (auth.hasError && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        auth.errorMessage ?? 'Google sign-in failed',
+                      ),
+                      backgroundColor: GolfieColors.ink,
+                    ),
+                  );
+                }
+              },
+        child: auth.loading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: GolfieColors.ink,
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    'assets/images/google-logo.svg',
+                    width: 20,
+                    height: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Continue with Google',
+                    style: TextStyle(
+                      color: GolfieColors.ink,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }
