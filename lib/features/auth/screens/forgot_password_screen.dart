@@ -75,7 +75,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(GolfieRadii.pill),
                         ),
-                        backgroundColor: GolfieColors.marigold,
+                        backgroundColor: GolfieColors.ink,
                         foregroundColor: GolfieColors.white,
                         elevation: 0,
                       ),
@@ -110,7 +110,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                     SnackBar(
                                       content: Text(auth.errorMessage ??
                                           'Could not send link'),
-                                      backgroundColor: GolfieColors.marigold,
+                                      backgroundColor: GolfieColors.ink,
                                     ),
                                   );
                                 }

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/golfie_colors.dart';
 import '../../../core/theme/golfie_radii.dart';
-import '../../../core/theme/golfie_shadows.dart';
 import '../../../core/theme/golfie_typography.dart';
 import '../../../features/onboarding/providers/onboarding_provider.dart';
 import '../../../features/onboarding/screens/onboarding_welcome_screen.dart';
@@ -143,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             'Forgot password?',
                             style:
                                 GolfieTypography.textTheme.bodyMedium!.copyWith(
-                              color: GolfieColors.marigold,
+                              color: GolfieColors.ink,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -157,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(GolfieRadii.pill),
                         ),
-                        backgroundColor: GolfieColors.marigold,
+                        backgroundColor: GolfieColors.ink,
                         foregroundColor: GolfieColors.white,
                         elevation: 0,
                       ),
@@ -196,7 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       content: Text(
                                         auth.errorMessage ?? 'Login failed',
                                       ),
-                                      backgroundColor: GolfieColors.marigold,
+                                      backgroundColor: GolfieColors.ink,
                                     ),
                                   );
                                 }

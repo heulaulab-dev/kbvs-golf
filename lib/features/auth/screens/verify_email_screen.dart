@@ -139,7 +139,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                                     auth.errorMessage ??
                                         'Failed to resend. Try again.',
                                   ),
-                                  backgroundColor: GolfieColors.marigold,
+                                  backgroundColor: GolfieColors.ink,
                                 ),
                               );
                             } else {

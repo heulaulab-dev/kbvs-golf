@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/golfie_colors.dart';
 import '../../../core/theme/golfie_radii.dart';
-import '../../../core/theme/golfie_shadows.dart';
 import '../../../core/theme/golfie_typography.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_password_field.dart';
@@ -168,7 +167,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(GolfieRadii.pill),
                         ),
-                        backgroundColor: GolfieColors.marigold,
+                        backgroundColor: GolfieColors.ink,
                         foregroundColor: GolfieColors.white,
                         elevation: 0,
                       ),
@@ -208,7 +207,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                       content: Text(
                                         auth.errorMessage ?? 'Signup failed',
                                       ),
-                                      backgroundColor: GolfieColors.marigold,
+                                      backgroundColor: GolfieColors.ink,
                                     ),
                                   );
                                 }

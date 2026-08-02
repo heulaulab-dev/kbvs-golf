@@ -62,7 +62,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(GolfieRadii.pill),
                 ),
-                backgroundColor: GolfieColors.marigold,
+                backgroundColor: GolfieColors.ink,
                 foregroundColor: GolfieColors.white,
                 elevation: 0,
               ),
@@ -149,7 +149,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(GolfieRadii.pill),
                     ),
-                    backgroundColor: GolfieColors.marigold,
+                    backgroundColor: GolfieColors.ink,
                     foregroundColor: GolfieColors.white,
                     elevation: 0,
                   ),
