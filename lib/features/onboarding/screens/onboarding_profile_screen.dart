@@ -8,6 +8,7 @@ import '../../../widgets/golfie/golfie_index.dart';
 import '../providers/onboarding_provider.dart';
 import '../widgets/progress_indicator.dart';
 import '../../../tournament/models/skill_level.dart';
+import 'onboarding_skill_screen.dart';
 
 /// Profile screen — collects user's name and profile picture.
 class OnboardingProfileScreen extends StatefulWidget {
@@ -56,7 +57,7 @@ class _OnboardingProfileScreenState extends State<OnboardingProfileScreen> {
                         _buildAvatarSection(onboard),
                         const SizedBox(height: 24),
                         _buildNameField(context),
-                        const Spacer(),
+                        const SizedBox(height: 28),
                         Consumer<OnboardingProvider>(
                           builder: (context, onboardChild, _) {
                             final canProceed = _nameController.text.trim().length >= 2;
@@ -71,7 +72,22 @@ class _OnboardingProfileScreenState extends State<OnboardingProfileScreen> {
                                   backgroundColor: canProceed ? GolfieColors.ink : GolfieColors.stone,
                                   foregroundColor: canProceed ? GolfieColors.white : GolfieColors.ink,
                                 ),
-                                onPressed: canProceed ? () => onboardChild.setProfileInfo(name: _nameController.text.trim(), level: SkillLevel.beginner) : null,
+                                onPressed: canProceed
+                                    ? () {
+                                        debugPrint('🟢 [ONBOARD] Profile Next — step: ${onboardChild.currentStep}');
+                                        onboardChild.setProfileInfo(
+                                          name: _nameController.text.trim(),
+                                          level: SkillLevel.beginner,
+                                        );
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                const OnboardingSkillScreen(),
+                                          ),
+                                        );
+                                      }
+                                    : null,
                                 child: const Text('Next'),
                               ),
                             );

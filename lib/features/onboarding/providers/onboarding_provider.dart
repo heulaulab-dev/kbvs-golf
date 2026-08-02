@@ -101,17 +101,30 @@ class OnboardingProvider with ChangeNotifier {
     nextStep();
   }
 
-  /// Set location at preferences step
-  void setLocation(String location) {
-    _location = location.isNotEmpty ? location : null;
-    nextStep();
+  /// Set skill level only (skill screen selection).
+  void setSkillLevel(SkillLevel level) {
+    _skillLevel = level;
+    _saveToPrefs();
   }
 
-  /// Set preference toggles at preferences step
-  void setPreferences({required bool showNearby, required bool emailNotifications}) {
+  /// Set location at preferences step (does not complete onboarding)
+  void setLocationAndPreferences({
+    required String location,
+    required bool showNearby,
+    required bool emailNotifications,
+  }) {
+    _location = location.isNotEmpty ? location : null;
     _showNearby = showNearby;
     _emailNotifications = emailNotifications;
-    completeOnboarding();
+    _saveToPrefs();
+  }
+
+  /// Complete onboarding process
+  void finishOnboarding() {
+    if (!_completed) {
+      _completed = true;
+      _saveToPrefs();
+    }
   }
 
   /// Reset onboarding state (for testing/recovery)

@@ -87,7 +87,7 @@ class _OnboardingPreferencesScreenState extends State<OnboardingPreferencesScree
                         _buildPreferenceToggle('Show me nearby tournaments', _showNearby, (value) => _toggleNearby(value, onboard)),
                         const SizedBox(height: 16),
                         _buildPreferenceToggle('Email notifications for new tournaments', _emailNotifications, (value) => _toggleEmail(value, onboard)),
-                        const Spacer(),
+                        const SizedBox(height: 28),
 
                         // Finish button — ink filled pill
                         Consumer<OnboardingProvider>(
@@ -204,16 +204,12 @@ class _OnboardingPreferencesScreenState extends State<OnboardingPreferencesScree
     setState(() {
       _showNearby = value;
     });
-    // Update provider immediately so state persists across rebuilds
-    onboard.setPreferences(showNearby: _showNearby, emailNotifications: _emailNotifications);
   }
 
   void _toggleEmail(bool value, OnboardingProvider onboard) {
     setState(() {
       _emailNotifications = value;
     });
-    // Update provider immediately
-    onboard.setPreferences(showNearby: _showNearby, emailNotifications: _emailNotifications);
   }
 
   // Handle finish — complete onboarding and navigate to HomeScreen
@@ -222,8 +218,12 @@ class _OnboardingPreferencesScreenState extends State<OnboardingPreferencesScree
     final location = _locationController.text.trim();
 
     // Save all preferences BEFORE completing onboarding
-    onboard.setLocation(location);
-    onboard.setPreferences(showNearby: _showNearby, emailNotifications: _emailNotifications);
+    onboard.setLocationAndPreferences(
+      location: location,
+      showNearby: _showNearby,
+      emailNotifications: _emailNotifications,
+    );
+    onboard.finishOnboarding();
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

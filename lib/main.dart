@@ -92,6 +92,27 @@ class GolfieApp extends StatelessWidget {
         theme: GolfieTheme.light(),
         // New splash screen replaces HomeScreen as initial route
         home: const SplashScreen(),
+        // Deep links (Supabase auth callbacks) land on "/?code=..." — route
+        // them back to the splash, which resolves auth + routes correctly.
+        onGenerateRoute: (settings) {
+          final uri = Uri.tryParse(settings.name ?? '');
+          // Supabase PKCE/oauth callbacks arrive as "/?code=...".
+          if (uri != null && (uri.queryParameters.containsKey('code') ||
+              uri.queryParameters.containsKey('token') ||
+              uri.queryParameters.containsKey('access_token'))) {
+            return MaterialPageRoute(
+              settings: const RouteSettings(name: '/'),
+              builder: (_) => const SplashScreen(),
+            );
+          }
+          return MaterialPageRoute(
+            builder: (_) => const SplashScreen(),
+          );
+        },
+        onUnknownRoute: (settings) => MaterialPageRoute(
+          settings: const RouteSettings(name: '/'),
+          builder: (_) => const SplashScreen(),
+        ),
       ),
     );
   }

@@ -7,6 +7,7 @@ import '../../../core/theme/golfie_radii.dart';
 import '../providers/onboarding_provider.dart';
 import '../widgets/progress_indicator.dart';
 import '../../../tournament/models/skill_level.dart';
+import 'onboarding_preferences_screen.dart';
 
 /// Skill screen — lets user select their golf skill level from predefined options.
 class OnboardingSkillScreen extends StatelessWidget {
@@ -60,7 +61,7 @@ class OnboardingSkillScreen extends StatelessWidget {
 
                       // Skill selection grid — 3 cards in a row (responsive)
                       _buildSkillGrid(context, onboard),
-                      const Spacer(),
+                      const SizedBox(height: 28),
 
                       // Next button — enabled only when a skill is selected
                       Consumer<OnboardingProvider>(
@@ -83,7 +84,7 @@ class OnboardingSkillScreen extends StatelessWidget {
                                   letterSpacing: -0.24,
                                 ),
                               ),
-                              onPressed: hasSelection ? () => _handleNext(onboardChild) : null,
+                              onPressed: hasSelection ? () => _handleNext(context, onboardChild) : null,
                               child: const Text('Next'),
                             ),
                           );
@@ -196,10 +197,17 @@ class OnboardingSkillScreen extends StatelessWidget {
   }
 
   void _selectSkill(SkillLevel skill, OnboardingProvider onboard) {
-    onboard.setProfileInfo(name: onboard.userName ?? '', level: skill);
+    onboard.setSkillLevel(skill);
   }
 
-  void _handleNext(OnboardingProvider onboard) {
-    // Already handled via setProfileInfo calling nextStep() internally
+  void _handleNext(BuildContext context, OnboardingProvider onboard) {
+    debugPrint('🟢 [ONBOARD] Skill Next — step: ${onboard.currentStep}');
+    onboard.nextStep();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const OnboardingPreferencesScreen(),
+      ),
+    );
   }
 }

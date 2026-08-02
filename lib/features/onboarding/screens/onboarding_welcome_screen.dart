@@ -7,6 +7,7 @@ import '../../../core/theme/golfie_radii.dart';
 import '../../../widgets/golfie/golfie_index.dart';
 import '../providers/onboarding_provider.dart';
 import '../widgets/progress_indicator.dart';
+import 'onboarding_profile_screen.dart';
 
 /// Welcome screen — first step of onboarding flow.
 class OnboardingWelcomeScreen extends StatelessWidget {
@@ -147,6 +148,12 @@ class OnboardingWelcomeScreen extends StatelessWidget {
                   debugPrint('🟢 [ONBOARD] Get Started button tapped — step: ${onboardChild.currentStep}, completed: ${onboardChild.completed}');
                   onboardChild.nextStep();
                   debugPrint('🟢 [ONBOARD] after nextStep() — step: ${onboardChild.currentStep}');
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const OnboardingProfileScreen(),
+                    ),
+                  );
                 },
                 child: const Text('Get Started'),
               ),
