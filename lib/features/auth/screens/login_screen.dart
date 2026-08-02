@@ -23,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _rememberMe = false;
 
   @override
   Widget build(BuildContext context) {
@@ -30,74 +31,40 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: GolfieColors.canvas,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [_buildCard(context)],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCard(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, auth, child) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 24),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(GolfieRadii.xxxl),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: GolfieColors.white,
-                boxShadow: GolfieShadows.xl,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Form(key: _formKey, child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Consumer<AuthProvider>(
+            builder: (context, auth, child) {
+              return Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    const SizedBox(height: 24),
+                    _buildLogo(),
+                    const SizedBox(height: 20),
                     Text(
-                          'Welcome back!',
+                      'Welcome back!',
+                      textAlign: TextAlign.center,
                       style: GolfieTypography.textTheme.displaySmall!.copyWith(
                         color: GolfieColors.ink,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Sign in to your account',
+                      textAlign: TextAlign.center,
                       style: GolfieTypography.textTheme.bodyLarge!.copyWith(
                         color: GolfieColors.graphite,
                       ),
                     ),
                     const SizedBox(height: 32),
+                    _buildLabel('Email'),
+                    const SizedBox(height: 8),
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(GolfieRadii.xl),
-                          borderSide: BorderSide(color: GolfieColors.ash),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(GolfieRadii.xl),
-                          borderSide: BorderSide(
-                            color: GolfieColors.ink,
-                            width: 1.5,
-                          ),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(GolfieRadii.xl),
-                          borderSide:
-                              const BorderSide(color: Color(0xFFDD6B6B)),
-                        ),
-                        hintText: 'Email',
-                      ),
+                      decoration: _fieldDecoration('Enter your email'),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Enter email';
@@ -110,6 +77,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                     ),
                     const SizedBox(height: 20),
+                    _buildLabel('Password'),
+                    const SizedBox(height: 8),
                     AuthPasswordField(
                       controller: _passwordController,
                       textInputAction: TextInputAction.done,
@@ -120,80 +89,134 @@ class _LoginScreenState extends State<LoginScreen> {
                         return null;
                       },
                     ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          debugPrint('🔴 [AUTH] Forgot password? link tapped');
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const ForgotPasswordScreen(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          'Forgot password?',
-                          style: GolfieTypography.textTheme.bodyMedium!
-                              .copyWith(color: GolfieColors.graphite),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () =>
+                              setState(() => _rememberMe = !_rememberMe),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: Checkbox(
+                                  value: _rememberMe,
+                                  activeColor: GolfieColors.ink,
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  visualDensity: VisualDensity.compact,
+                                  onChanged: (value) => setState(
+                                    () => _rememberMe = value ?? false,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Remember me',
+                                style: GolfieTypography.textTheme.bodyMedium!
+                                    .copyWith(color: GolfieColors.graphite),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          onPressed: () {
+                            debugPrint(
+                                '🔴 [AUTH] Forgot password? link tapped');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ForgotPasswordScreen(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            'Forgot password?',
+                            style:
+                                GolfieTypography.textTheme.bodyMedium!.copyWith(
+                              color: GolfieColors.marigold,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                      if (auth.hasError &&
-                          auth.errorMessage != null &&
-                            _formKey.currentState!.validate())
                     const SizedBox(height: 28),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 48),
+                        minimumSize: const Size(double.infinity, 52),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(GolfieRadii.pill),
                         ),
-                        backgroundColor: GolfieColors.ink,
+                        backgroundColor: GolfieColors.marigold,
                         foregroundColor: GolfieColors.white,
+                        elevation: 0,
                       ),
-                      onPressed: auth.loading ? null : () async {
-                        debugPrint('🔴 [AUTH] Sign In button tapped');
-                        final ctx = context;
-                        if (_formKey.currentState!.validate()) {
-                          debugPrint('🔴 [AUTH] Sign In form valid — calling auth.signIn()');
-                          await auth.signIn(
-                            email: _emailController.text.trim(),
-                            password: _passwordController.text,
-                          );
-                          debugPrint('🔴 [AUTH] signIn() done — hasError: ${auth.hasError}, isAuthenticated: ${auth.isAuthenticated}, errorMessage: ${auth.errorMessage}');
-                          if (!auth.hasError &&
-                              auth.isAuthenticated &&
-                              ctx.mounted) {
-                            final onboard = ctx.read<OnboardingProvider>();
-                            debugPrint('🔴 [AUTH] login OK — onboarding completed: ${onboard.completed}');
-                            Navigator.pushReplacement(
-                              ctx,
-                              MaterialPageRoute(
-                                builder: (_) => onboard.completed
-                                    ? const HomeScreen()
-                                    : const OnboardingWelcomeScreen(),
-                              ),
-                            );
-                          } else if (ctx.mounted) {
-                            ScaffoldMessenger.of(ctx).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  auth.errorMessage ?? 'Login failed',
-                                ),
-                                backgroundColor: GolfieColors.marigold,
-                              ),
-                            );
-                          }
-                        }
-                      },
+                      onPressed: auth.loading
+                          ? null
+                          : () async {
+                              debugPrint('🔴 [AUTH] Sign In button tapped');
+                              final ctx = context;
+                              if (_formKey.currentState!.validate()) {
+                                debugPrint(
+                                    '🔴 [AUTH] Sign In form valid — calling auth.signIn()');
+                                await auth.signIn(
+                                  email: _emailController.text.trim(),
+                                  password: _passwordController.text,
+                                );
+                                debugPrint(
+                                    '🔴 [AUTH] signIn() done — hasError: ${auth.hasError}, isAuthenticated: ${auth.isAuthenticated}, errorMessage: ${auth.errorMessage}');
+                                if (!auth.hasError &&
+                                    auth.isAuthenticated &&
+                                    ctx.mounted) {
+                                  final onboard =
+                                      ctx.read<OnboardingProvider>();
+                                  debugPrint(
+                                      '🔴 [AUTH] login OK — onboarding completed: ${onboard.completed}');
+                                  Navigator.pushReplacement(
+                                    ctx,
+                                    MaterialPageRoute(
+                                      builder: (_) => onboard.completed
+                                          ? const HomeScreen()
+                                          : const OnboardingWelcomeScreen(),
+                                    ),
+                                  );
+                                } else if (ctx.mounted) {
+                                  ScaffoldMessenger.of(ctx).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        auth.errorMessage ?? 'Login failed',
+                                      ),
+                                      backgroundColor: GolfieColors.marigold,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
                       child: auth.loading
-                          ? const CircularProgressIndicator(
-                              color: GolfieColors.white,
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                color: GolfieColors.white,
+                                strokeWidth: 2.5,
+                              ),
                             )
-                          : const Text('Sign In'),
+                          : const Text('Login'),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
+                    _buildDivider(),
+                    const SizedBox(height: 20),
+                    _buildSocialRow(),
+                    const SizedBox(height: 28),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -214,8 +237,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           child: Text(
                             'Create one',
-                            style: GolfieTypography.textTheme.bodyMedium!
-                                .copyWith(
+                            style:
+                                GolfieTypography.textTheme.bodyMedium!.copyWith(
                               color: GolfieColors.ink,
                               fontWeight: FontWeight.w600,
                             ),
@@ -224,12 +247,125 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                   ],
-                )),
-              ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogo() {
+    // TODO: swap Icons.golf_course for the actual brand mark asset.
+    return Center(
+      child: Container(
+        width: 72,
+        height: 72,
+        decoration: BoxDecoration(
+          color: GolfieColors.ink,
+          borderRadius: BorderRadius.circular(GolfieRadii.xl),
+          boxShadow: GolfieShadows.xl,
+        ),
+        child: const Icon(
+          Icons.golf_course,
+          color: GolfieColors.white,
+          size: 32,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: GolfieTypography.textTheme.bodyMedium!.copyWith(
+        color: GolfieColors.ink,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
+  InputDecoration _fieldDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: GolfieColors.white,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(GolfieRadii.xl),
+        borderSide: BorderSide(color: GolfieColors.ash),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(GolfieRadii.xl),
+        borderSide: const BorderSide(color: GolfieColors.ink, width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(GolfieRadii.xl),
+        borderSide: const BorderSide(color: Color(0xFFDD6B6B)),
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Row(
+      children: [
+        Expanded(child: Divider(color: GolfieColors.ash)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            'Or continue with',
+            style: GolfieTypography.textTheme.bodySmall!.copyWith(
+              color: GolfieColors.graphite,
             ),
           ),
-        );
-      },
+        ),
+        Expanded(child: Divider(color: GolfieColors.ash)),
+      ],
+    );
+  }
+
+  Widget _buildSocialRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _socialButton(
+            icon: Icons.g_mobiledata,
+            onTap: () {
+              debugPrint('🔴 [AUTH] Continue with Google tapped');
+              // TODO: wire up Google sign-in.
+            }),
+        const SizedBox(width: 16),
+        _socialButton(
+            icon: Icons.apple,
+            onTap: () {
+              debugPrint('🔴 [AUTH] Continue with Apple tapped');
+              // TODO: wire up Apple sign-in.
+            }),
+        const SizedBox(width: 16),
+        _socialButton(
+            icon: Icons.facebook,
+            onTap: () {
+              debugPrint('🔴 [AUTH] Continue with Facebook tapped');
+              // TODO: wire up Facebook sign-in.
+            }),
+      ],
+    );
+  }
+
+  Widget _socialButton({required IconData icon, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(GolfieRadii.pill),
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: GolfieColors.white,
+          border: Border.all(color: GolfieColors.ash),
+        ),
+        child: Icon(icon, color: GolfieColors.ink),
+      ),
     );
   }
 
