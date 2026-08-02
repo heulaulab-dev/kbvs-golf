@@ -124,6 +124,51 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// Re-sends the email verification link after signup.
+  Future<void> sendVerificationEmailAgain(String email) async {
+    final client = _client;
+    if (client == null) return _demoAction();
+    _resetErrorState();
+    _loading = true;
+    notifyListeners();
+
+    try {
+      await client.auth.resend(
+        email: email,
+        type: OtpType.signup,
+      );
+      _errorMessage = null;
+    } catch (e) {
+      _handleSupabaseError(e);
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Polls the server for a session without user interaction.
+  ///
+  /// Used by the verify-email screen: after the user clicks the confirmation
+  /// link in a browser, the local client has no session until it talks to the
+  /// server again. `refreshSession()` triggers a token refresh (or the initial
+  /// exchange for a PKCE session) and surfaces the new session if one exists.
+  Future<void> refreshSessionSilently() async {
+    final client = _client;
+    if (client == null) return;
+    try {
+      await client.auth.refreshSession();
+      _user = client.auth.currentUser;
+      if (_user != null) {
+        _hasError = false;
+        _errorMessage = null;
+      }
+      notifyListeners();
+    } catch (e) {
+      // No session yet — expected while waiting for confirmation.
+      // Keep previous state; do not surface an error.
+    }
+  }
+
   /// Signs out the current user and clears secure storage
   Future<void> signOut() async {
     final client = _client;

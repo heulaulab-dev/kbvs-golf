@@ -7,6 +7,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — date groupe
 
 ## [Unreleased]
 
+### Auth — Email Verification Flow
+
+- **`lib/features/auth/screens/verify_email_screen.dart`** — new screen shown after signup: tells the user to check their inbox, polls the server every 5s (`auth.refreshSession()`), and auto-navigates to `OnboardingWelcomeScreen` once the email is confirmed and a session exists. Includes "Resend verification email" (`auth.resend(type: OtpType.signup)`) and "Back to sign in".
+- **`lib/features/auth/providers/auth_provider.dart`** — added `sendVerificationEmailAgain(email)` and `refreshSessionSilently()`.
+- **`lib/features/auth/screens/signup_screen.dart`** — success now routes to `VerifyEmailScreen` instead of showing a snackbar + login.
+
 ### Bug Fixes
 
 - **Auth signup network error** — Fixed `SupabaseWrapper` to use `Supabase.initialize()` instead of raw `SupabaseClient()`. The direct `SupabaseClient()` call bypassed PKCE async storage setup (required since gotrue 2.x), causing `_generatePKCECodeChallenge()` to fail with an assertion error that surfaced as generic "Network error". Signup requests never reached the server. Now properly wires `SharedPreferencesGotrueAsyncStorage` for PKCE flow, session persistence, and deep link handling.

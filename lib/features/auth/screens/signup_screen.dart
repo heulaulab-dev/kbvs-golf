@@ -9,6 +9,7 @@ import '../../../core/theme/golfie_typography.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_password_field.dart';
 import 'login_screen.dart';
+import 'verify_email_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -193,18 +194,12 @@ class _SignupScreenState extends State<SignupScreen> {
                                 // their email before authenticating, so success
                                 // is `!hasError`, not `isAuthenticated`.
                                 if (!auth.hasError && ctx.mounted) {
-                                  ScaffoldMessenger.of(ctx).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Check email for verification link',
-                                      ),
-                                      backgroundColor: GolfieColors.mint,
-                                    ),
-                                  );
                                   Navigator.pushReplacement(
                                     ctx,
                                     MaterialPageRoute(
-                                      builder: (_) => const LoginScreen(),
+                                      builder: (_) => VerifyEmailScreen(
+                                        email: _emailController.text.trim(),
+                                      ),
                                     ),
                                   );
                                 } else if (ctx.mounted) {
