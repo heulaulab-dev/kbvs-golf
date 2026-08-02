@@ -50,6 +50,7 @@ flutter:
   assets:
     - assets/images/golfie-icon.jpg
     - assets/images/golfie-icon-only.svg
+    - assets/images/google-logo.svg
     - assets/fonts/
     - assets/data/
     # Environment config files (loaded via flutter_dotenv)
