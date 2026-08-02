@@ -189,9 +189,10 @@ class _SignupScreenState extends State<SignupScreen> {
                                 );
                                 debugPrint(
                                     '🔴 [AUTH] signUp() done — hasError: ${auth.hasError}, isAuthenticated: ${auth.isAuthenticated}, errorMessage: ${auth.errorMessage}');
-                                if (!auth.hasError &&
-                                    auth.isAuthenticated &&
-                                    ctx.mounted) {
+                                // Signup succeeded — user still needs to confirm
+                                // their email before authenticating, so success
+                                // is `!hasError`, not `isAuthenticated`.
+                                if (!auth.hasError && ctx.mounted) {
                                   ScaffoldMessenger.of(ctx).showSnackBar(
                                     const SnackBar(
                                       content: Text(
