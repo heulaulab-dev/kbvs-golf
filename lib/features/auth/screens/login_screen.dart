@@ -60,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Welcome back',
+                          'Welcome back!',
                       style: GolfieTypography.textTheme.displaySmall!.copyWith(
                         color: GolfieColors.ink,
                       ),
@@ -141,15 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                       if (auth.hasError &&
                           auth.errorMessage != null &&
-                          _formKey.currentState!.validate())
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8, bottom: 16),
-                          child: Text(
-                            auth.errorMessage!,
-                            style: GolfieTypography.textTheme.bodySmall!
-                                .copyWith(color: const Color(0xFF8A2525)),
-                          ),
-                        ),
+                            _formKey.currentState!.validate())
                     const SizedBox(height: 28),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
