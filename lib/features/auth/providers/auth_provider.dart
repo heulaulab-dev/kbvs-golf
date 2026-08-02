@@ -84,7 +84,6 @@ class AuthProvider with ChangeNotifier {
       await client.auth.signUp(
         email: email,
         password: password,
-        emailRedirectTo: 'https://golfie.heulaulab.xyz/callback',
       );
       _user = client.auth.currentUser;
     } catch (e) {
