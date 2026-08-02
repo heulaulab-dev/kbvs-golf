@@ -125,6 +125,35 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// Signs in with Google via Supabase OAuth (browser redirect).
+  ///
+  /// Launches external browser. Session arrives via deep link redirect
+  /// and is handled automatically by the auth state change listener.
+  Future<void> signInWithGoogle() async {
+    final client = _client;
+    if (client == null) return _demoAction();
+    _resetErrorState();
+    _loading = true;
+    notifyListeners();
+
+    try {
+      final launched = await client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'https://golfie.heulaulab.xyz/callback',
+      );
+
+      if (!launched) {
+        _hasError = true;
+        _errorMessage = 'Could not open Google sign-in. Please try again.';
+      }
+    } catch (e) {
+      _handleSupabaseError(e);
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
   /// Re-sends the email verification link after signup.
   Future<void> sendVerificationEmailAgain(String email) async {
     final client = _client;
