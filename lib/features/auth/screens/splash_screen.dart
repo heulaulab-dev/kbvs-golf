@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,9 +32,24 @@ class _SplashScreenState extends State<SplashScreen> {
       final auth = context.read<AuthProvider>();
       final onboard = context.read<OnboardingProvider>();
 
-      // Wait for auth state to stabilize
-      while (auth.loading && mounted) {
-        await Future.delayed(const Duration(milliseconds: 100));
+      // Wait for auth state to stabilize — bounded to 3 seconds so a cold
+      // start via deep link has time for the PKCE code exchange to finish,
+      // but we never hang the splash forever if the stream stays quiet.
+      if (auth.loading) {
+        final completer = Completer<void>();
+        late VoidCallback listener;
+        listener = () {
+          if (!auth.loading) {
+            auth.removeListener(listener);
+            if (!completer.isCompleted) completer.complete();
+          }
+        };
+        auth.addListener(listener);
+        await Future.any([
+          completer.future,
+          Future.delayed(const Duration(seconds: 3)),
+        ]);
+        auth.removeListener(listener);
       }
 
       if (!mounted) return;

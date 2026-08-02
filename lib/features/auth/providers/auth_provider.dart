@@ -70,14 +70,6 @@ class AuthProvider with ChangeNotifier {
       _loading = false;
       notifyListeners();
     });
-
-    // Finalize loading state after this event loop tick
-    Future.microtask(() {
-      if (_loading) {
-        _loading = false;
-        notifyListeners();
-      }
-    });
   }
 
   /// Sign up a new user with email and password
@@ -117,6 +109,35 @@ class AuthProvider with ChangeNotifier {
         password: password,
       );
       _user = client.auth.currentUser;
+    } catch (e) {
+      _handleSupabaseError(e);
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Signs in with Google via Supabase OAuth (browser redirect).
+  ///
+  /// Launches external browser. Session arrives via deep link redirect
+  /// and is handled automatically by the auth state change listener.
+  Future<void> signInWithGoogle() async {
+    final client = _client;
+    if (client == null) return _demoAction();
+    _resetErrorState();
+    _loading = true;
+    notifyListeners();
+
+    try {
+      final launched = await client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'https://golfie.heulaulab.xyz/callback',
+      );
+
+      if (!launched) {
+        _hasError = true;
+        _errorMessage = 'Could not open Google sign-in. Please try again.';
+      }
     } catch (e) {
       _handleSupabaseError(e);
     } finally {
