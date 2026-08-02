@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/golfie_colors.dart';
 import '../../../core/theme/golfie_radii.dart';
+import '../../../core/theme/golfie_shadows.dart';
+import '../../../core/theme/golfie_typography.dart';
 import '../providers/auth_provider.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -40,16 +41,30 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           padding: const EdgeInsets.only(bottom: 24),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(GolfieRadii.xxxl),
-            child: Container(
-              color: GolfieColors.white,
-              padding: const EdgeInsets.all(24),
-              child: Form(key: _formKey, child: Column(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: GolfieColors.white,
+                boxShadow: GolfieShadows.xl,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Form(key: _formKey, child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Reset your password', style: GoogleFonts.lora(fontSize: 46, color: GolfieColors.ink)),
+                  Text(
+                    'Forgot your password?',
+                    style: GolfieTypography.textTheme.displaySmall!.copyWith(
+                      color: GolfieColors.ink,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text('Enter email to receive reset link', style: GoogleFonts.inter()),
+                  Text(
+                    'Enter email to receive reset link',
+                    style: GolfieTypography.textTheme.bodyLarge!.copyWith(
+                      color: GolfieColors.graphite,
+                    ),
+                  ),
                   const SizedBox(height: 32),
                   TextFormField(
                     controller: _emailController,
@@ -98,7 +113,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         : const Text('Send Link'),
                   ),
                 ],
-              )),
+                )),
+              ),
             ),
           ),
         );
