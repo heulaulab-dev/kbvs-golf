@@ -61,5 +61,5 @@ flutter_launcher_icons:
   android: true
   ios: false
   image_path: assets/images/golfie-icon.jpg
-  adaptive_icon_background: assets/images/golfie-icon.jpg
+  adaptive_icon_background: '#41413F'
   adaptive_icon_foreground: assets/images/golfie-icon.jpg
