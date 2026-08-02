@@ -70,14 +70,6 @@ class AuthProvider with ChangeNotifier {
       _loading = false;
       notifyListeners();
     });
-
-    // Finalize loading state after this event loop tick
-    Future.microtask(() {
-      if (_loading) {
-        _loading = false;
-        notifyListeners();
-      }
-    });
   }
 
   /// Sign up a new user with email and password
