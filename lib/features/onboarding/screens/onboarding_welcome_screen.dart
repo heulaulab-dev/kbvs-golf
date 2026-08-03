@@ -101,71 +101,85 @@ class OnboardingWelcomeScreen extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context, OnboardingProvider onboard) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Subheading + description
-        const SizedBox(height: 8),
-        Text(
-          'Discover and join local golf tournaments in Jakarta',
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            color: GolfieColors.graphite,
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Share your journey, meet fellow golfers in your area, and level up your game.',
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            color: GolfieColors.stone,
-            height: 1.5,
-          ),
-        ),
-        const Spacer(),
-
-        // Get Started button — ink filled pill with haptic feedback
-        Consumer<OnboardingProvider>(
-          builder: (context, onboardChild, _) {
-            return SizedBox(
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(GolfieRadii.pill),
-                  ),
-                  backgroundColor: GolfieColors.ink,
-                  foregroundColor: GolfieColors.white,
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: -0.24,
-                  ),
-                ),
-                onPressed: () {
-                  debugPrint('🟢 [ONBOARD] Get Started button tapped — step: ${onboardChild.currentStep}, completed: ${onboardChild.completed}');
-                  onboardChild.nextStep();
-                  debugPrint('🟢 [ONBOARD] after nextStep() — step: ${onboardChild.currentStep}');
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const OnboardingProfileScreen(),
+    // IntrinsicHeight + ConstrainedBox keeps the button pinned to the bottom
+    // when the card is tall enough, and makes the content scrollable when the
+    // card is short (small screens) — prevents RenderFlex overflow.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Subheading + description
+                  const SizedBox(height: 8),
+                  Text(
+                    'Discover and join local golf tournaments in Jakarta',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      color: GolfieColors.graphite,
+                      height: 1.5,
                     ),
-                  );
-                },
-                child: const Text('Get Started'),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Share your journey, meet fellow golfers in your area, and level up your game.',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: GolfieColors.stone,
+                      height: 1.5,
+                    ),
+                  ),
+                  const Spacer(),
+
+                  // Get Started button — ink filled pill with haptic feedback
+                  Consumer<OnboardingProvider>(
+                    builder: (context, onboardChild, _) {
+                      return SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(GolfieRadii.pill),
+                            ),
+                            backgroundColor: GolfieColors.ink,
+                            foregroundColor: GolfieColors.white,
+                            textStyle: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: -0.24,
+                            ),
+                          ),
+                          onPressed: () {
+                            debugPrint('🟢 [ONBOARD] Get Started button tapped — step: ${onboardChild.currentStep}, completed: ${onboardChild.completed}');
+                            onboardChild.nextStep();
+                            debugPrint('🟢 [ONBOARD] after nextStep() — step: ${onboardChild.currentStep}');
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const OnboardingProfileScreen(),
+                              ),
+                            );
+                          },
+                          child: const Text('Get Started'),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Progress indicator at bottom
+                  ProgressIndicator(currentStep: onboard.currentStep, totalSteps: onboard.totalSteps),
+                ],
               ),
-            );
-          },
-        ),
-
-        const SizedBox(height: 20),
-
-        // Progress indicator at bottom
-        ProgressIndicator(currentStep: onboard.currentStep, totalSteps: onboard.totalSteps),
-      ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
