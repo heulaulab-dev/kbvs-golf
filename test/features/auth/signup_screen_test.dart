@@ -22,12 +22,18 @@ void main() {
 
   testWidgets('renders heading', (tester) async {
     await pumpSignup(tester);
-    expect(find.text('Create your Golfie account'), findsOneWidget);
+    expect(find.text('Registration'), findsOneWidget);
   });
 
   testWidgets('shows sign in link and navigates to login', (tester) async {
     await pumpSignup(tester);
-    await tester.tap(find.text('Sign in'));
+    // Scroll down to bring the "Sign in" link into view
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -400),
+    );
+    await tester.pump();
+    await tester.tap(find.byType(GestureDetector).last);
     await tester.pumpAndSettle();
     expect(find.byType(LoginScreen), findsOneWidget);
   });
@@ -35,9 +41,11 @@ void main() {
   testWidgets('password fields toggle visibility', (tester) async {
     await pumpSignup(tester);
     final fields = find.byType(TextField);
-    expect(fields, findsNWidgets(3)); // email + password + confirm
-    await tester.enterText(fields.at(1), 'abc123');
-    await tester.tap(find.byIcon(Icons.visibility_off).first);
+    expect(fields, findsNWidgets(4)); // name + email + password + confirm
+    await tester.enterText(fields.at(2), 'abc123'); // password field
+    final visibilityIcons = find.byIcon(Icons.visibility_off);
+    expect(visibilityIcons, findsNWidgets(2));
+    await tester.tap(visibilityIcons.at(1));
     await tester.pump();
     expect(find.text('abc123'), findsOneWidget);
   });

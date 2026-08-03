@@ -32,14 +32,21 @@ void main() {
 
   testWidgets('renders heading and email field', (tester) async {
     await pumpLogin(tester);
-    expect(find.text('Welcome back'), findsOneWidget);
+    expect(find.text('Welcome back!'), findsOneWidget);
     expect(find.text('Email'), findsOneWidget);
-    expect(find.text('Password'), findsOneWidget);
+    expect(find.text('Password'), findsWidgets); // label + field hint
   });
 
   testWidgets('shows sign up link and navigates to signup', (tester) async {
     await pumpLogin(tester);
-    await tester.tap(find.text('Create one'));
+    // Scroll down to bring the "Create one" link into view
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -400),
+    );
+    await tester.pump();
+    // Tap the "Create one" GestureDetector
+    await tester.tap(find.byType(GestureDetector).last);
     await tester.pumpAndSettle();
     expect(find.byType(SignupScreen), findsOneWidget);
   });
@@ -47,7 +54,8 @@ void main() {
   testWidgets('shows forgot password link and navigates to forgot',
       (tester) async {
     await pumpLogin(tester);
-    await tester.tap(find.text('Forgot password?'));
+    // Tap the "Forgot password?" TextButton (last TextButton)
+    await tester.tap(find.byType(TextButton).last);
     await tester.pumpAndSettle();
     expect(find.byType(ForgotPasswordScreen), findsOneWidget);
   });

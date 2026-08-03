@@ -7,6 +7,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — date groupe
 
 ## [Unreleased]
 
+### Test Fixes
+
+- **Auth widget tests** — Fixed 5 failing tests in `test/features/auth/`:
+  - `login_screen_test.dart` — "shows sign up link" and "shows forgot password link": added manual scroll (`tester.drag`) for off-screen bottom links, tapped correct widget types (`GestureDetector.last` for "Create one", `TextButton.last` for "Forgot password?").
+  - `signup_screen_test.dart` — "password fields toggle visibility": corrected TextField count from 3 to 4 (name + email + password + confirm), tapped correct password field (index 2) and visibility icon (index 1).
+  - `signup_screen_test.dart` — "shows sign in link": added manual scroll for off-screen link, tapped `GestureDetector.last`.
+
 ### Auth — Email Verification Flow
 
 - **`lib/features/auth/screens/verify_email_screen.dart`** — new screen shown after signup: tells the user to check their inbox, polls the server every 5s (`auth.refreshSession()`), and auto-navigates to `OnboardingWelcomeScreen` once the email is confirmed and a session exists. Includes "Resend verification email" (`auth.resend(type: OtpType.signup)`) and "Back to sign in".
