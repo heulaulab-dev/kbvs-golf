@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../berita/screens/berita_list_screen.dart';
 import '../core/theme/golfie_colors.dart';
+import '../courses/screens/courses_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
 import '../tournament/screens/tournament_list_screen.dart';
 import 'home_tab.dart';
@@ -26,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
           HomeTab(),
           BeritaListScreen(),
           TournamentListScreen(),
+          CoursesScreen(),
           ProfileScreen(),
         ],
       ),
@@ -49,6 +51,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.golf_course_outlined),
             selectedIcon: Icon(Icons.golf_course),
             label: 'Tournaments',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.map_outlined),
+            selectedIcon: Icon(Icons.map),
+            label: 'Courses',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),

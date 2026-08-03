@@ -11,6 +11,8 @@ import 'core/theme/golfie_theme.dart';
 import 'providers/app_state.dart';
 import 'tournament/providers/changes_notifier_tournament_provider.dart';
 import 'tournament/repositories/http_tournament_repository.dart';
+import 'courses/providers/courses_provider.dart';
+import 'courses/repositories/mock_course_repository.dart';
 import 'berita/providers/berita_provider.dart';
 import 'berita/repositories/berita_repository.dart';
 import 'berita/repositories/http_berita_repository.dart';
@@ -84,6 +86,13 @@ class GolfieApp extends StatelessWidget {
         // Onboarding provider — tracks step progression
         ChangeNotifierProvider(
           create: (_) => OnboardingProvider(),
+        ),
+
+        // Courses provider — mock repository for now, HTTP later
+        ChangeNotifierProvider(
+          create: (_) => CoursesProvider(
+            repository: MockCourseRepository(),
+          ),
         ),
       ],
       child: MaterialApp(
