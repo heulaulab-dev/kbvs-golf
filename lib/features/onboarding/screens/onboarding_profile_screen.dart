@@ -10,17 +10,39 @@ import '../widgets/progress_indicator.dart';
 import '../../../tournament/models/skill_level.dart';
 import 'onboarding_skill_screen.dart';
 
-/// Profile screen — collects user's name and profile picture.
+/// Profile screen — collects user's name.
+///
+/// Features:
+/// - Live validation (min 2 chars) with real-time Next button enable
+/// - Clean form UX with proper state handling
+/// - Golfie design system: ink pill CTA, mint accent, ash error
 class OnboardingProfileScreen extends StatefulWidget {
   const OnboardingProfileScreen({super.key});
 
   @override
-  State<OnboardingProfileScreen> createState() => _OnboardingProfileScreenState();
+  State<OnboardingProfileScreen> createState() =>
+      _OnboardingProfileScreenState();
 }
 
 class _OnboardingProfileScreenState extends State<OnboardingProfileScreen> {
-  final TextEditingController _nameController = TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // If provider already has name (back navigation), populate field
+    final onboard = context.read<OnboardingProvider>();
+    if (onboard.userName != null && onboard.userName!.isNotEmpty) {
+      _nameController.text = onboard.userName!;
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,15 +55,28 @@ class _OnboardingProfileScreenState extends State<OnboardingProfileScreen> {
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
+              // Card container with shadow
               Container(
                 decoration: BoxDecoration(
                   color: GolfieColors.white,
                   borderRadius: BorderRadius.circular(GolfieRadii.xxxl),
                   boxShadow: [
-                    BoxShadow(color: const Color(0x00000001), blurRadius: 50, offset: const Offset(50, 40)),
-                    BoxShadow(color: const Color(0x00000002), blurRadius: 50, offset: const Offset(50, 40)),
-                    BoxShadow(color: const Color(0x00000005), blurRadius: 20, offset: const Offset(20, 40)),
-                    BoxShadow(color: const Color(0x08000008), blurRadius: 3, offset: const Offset(3, 10)),
+                    BoxShadow(
+                        color: const Color(0x00000001),
+                        blurRadius: 50,
+                        offset: const Offset(50, 40)),
+                    BoxShadow(
+                        color: const Color(0x00000002),
+                        blurRadius: 50,
+                        offset: const Offset(50, 40)),
+                    BoxShadow(
+                        color: const Color(0x00000005),
+                        blurRadius: 20,
+                        offset: const Offset(20, 40)),
+                    BoxShadow(
+                        color: const Color(0x08000008),
+                        blurRadius: 3,
+                        offset: const Offset(3, 10)),
                   ],
                 ),
                 clipBehavior: Clip.hardEdge,
@@ -52,7 +87,8 @@ class _OnboardingProfileScreenState extends State<OnboardingProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ProgressIndicator(currentStep: onboard.currentStep, totalSteps: 4),
+                        ProgressIndicator(
+                            currentStep: onboard.currentStep, totalSteps: 4),
                         const SizedBox(height: 16),
                         _buildAvatarSection(onboard),
                         const SizedBox(height: 24),
@@ -60,21 +96,28 @@ class _OnboardingProfileScreenState extends State<OnboardingProfileScreen> {
                         const SizedBox(height: 28),
                         Consumer<OnboardingProvider>(
                           builder: (context, onboardChild, _) {
-                            final canProceed = _nameController.text.trim().length >= 2;
+                            final canProceed =
+                                _nameController.text.trim().length >= 2;
                             return SizedBox(
+                              width: double.infinity,
                               height: 48,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   minimumSize: const Size(double.infinity, 48),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(GolfieRadii.pill),
+                                    borderRadius:
+                                        BorderRadius.circular(GolfieRadii.pill),
                                   ),
-                                  backgroundColor: canProceed ? GolfieColors.ink : GolfieColors.stone,
-                                  foregroundColor: canProceed ? GolfieColors.white : GolfieColors.ink,
+                                  backgroundColor:
+                                      canProceed ? GolfieColors.ink : GolfieColors.stone,
+                                  foregroundColor:
+                                      canProceed ? GolfieColors.white : GolfieColors.ink,
+                                  elevation: 0,
                                 ),
                                 onPressed: canProceed
                                     ? () {
-                                        debugPrint('🟢 [ONBOARD] Profile Next — step: ${onboardChild.currentStep}');
+                                        debugPrint(
+                                            '🟢 [ONBOARD] Profile Next — step: ${onboardChild.currentStep}');
                                         onboardChild.setProfileInfo(
                                           name: _nameController.text.trim(),
                                           level: SkillLevel.beginner,
@@ -150,13 +193,21 @@ class _OnboardingProfileScreenState extends State<OnboardingProfileScreen> {
         TextFormField(
           controller: _nameController,
           decoration: InputDecoration(
+            filled: true,
+            fillColor: GolfieColors.white,
+            hintText: 'Enter your name',
+            hintStyle: GoogleFonts.inter(
+              fontSize: 14,
+              color: GolfieColors.stone,
+            ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(GolfieRadii.xl),
               borderSide: BorderSide(color: GolfieColors.ash),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(GolfieRadii.xl),
-              borderSide: BorderSide(color: GolfieColors.ink, width: 1.5),
+              borderSide:
+                  const BorderSide(color: GolfieColors.ink, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(GolfieRadii.xl),
@@ -164,48 +215,64 @@ class _OnboardingProfileScreenState extends State<OnboardingProfileScreen> {
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(GolfieRadii.xl),
-              borderSide: const BorderSide(color: Color(0xFFDD6B6B), width: 2),
+              borderSide:
+                  const BorderSide(color: Color(0xFFDD6B6B), width: 2),
             ),
-            hintStyle: GoogleFonts.inter(
-              fontSize: 14,
-              color: GolfieColors.stone,
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           ),
+          validator: (value) {
+            if (value == null || value.trim().length < 2) {
+              return 'Minimum 2 characters';
+            }
+            return null;
+          },
           onChanged: (value) {
-            if (context.mounted) {}
+            // Trigger rebuild of Consumer button when text length crosses threshold
+            setState(() {});
           },
         ),
-        SizedBox(
-          height: 16,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (_nameController.text.isNotEmpty && _nameController.text.length < 2)
-                Text(
-                  'Minimum 2 characters',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: Color(0xFF8A2525),
-                  ),
-                ),
-              if (_nameController.text.length >= 2)
-                Icon(
-                  Icons.check_circle,
-                  color: GolfieColors.mint,
-                  size: 16,
-                ),
-            ],
-          ),
+        const SizedBox(height: 8),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 150),
+          transitionBuilder: (child, animation) =>
+              FadeTransition(opacity: animation, child: child),
+          child: _nameController.text.isNotEmpty &&
+                  _nameController.text.trim().length < 2
+              ? Row(
+                  key: const ValueKey('error'),
+                  children: [
+                    Icon(Icons.info_outline,
+                        size: 14, color: const Color(0xFFDD6B6B)),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Minimum 2 characters',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: const Color(0xFFDD6B6B),
+                      ),
+                    ),
+                  ],
+                )
+              : _nameController.text.trim().length >= 2
+                  ? Row(
+                      key: const ValueKey('success'),
+                      children: [
+                        Icon(Icons.check_circle,
+                            size: 16, color: GolfieColors.mint),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Looks good',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: GolfieColors.mint,
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(key: ValueKey('empty')),
         ),
       ],
     );
-  }
-
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
   }
 }

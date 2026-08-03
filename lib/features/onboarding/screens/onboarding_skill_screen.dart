@@ -9,10 +9,15 @@ import '../widgets/progress_indicator.dart';
 import '../../../tournament/models/skill_level.dart';
 import 'onboarding_preferences_screen.dart';
 
-/// Skill screen — lets user select their golf skill level from predefined options.
-class OnboardingSkillScreen extends StatelessWidget {
+/// Skill screen — user selects golf skill level.
+class OnboardingSkillScreen extends StatefulWidget {
   const OnboardingSkillScreen({super.key});
 
+  @override
+  State<OnboardingSkillScreen> createState() => _OnboardingSkillScreenState();
+}
+
+class _OnboardingSkillScreenState extends State<OnboardingSkillScreen> {
   @override
   Widget build(BuildContext context) {
     final onboard = context.watch<OnboardingProvider>();
@@ -30,10 +35,22 @@ class OnboardingSkillScreen extends StatelessWidget {
                   color: GolfieColors.white,
                   borderRadius: BorderRadius.circular(GolfieRadii.xxxl),
                   boxShadow: [
-                    BoxShadow(color: const Color(0x00000001), blurRadius: 50, offset: const Offset(50, 40)),
-                    BoxShadow(color: const Color(0x00000002), blurRadius: 50, offset: const Offset(50, 40)),
-                    BoxShadow(color: const Color(0x00000005), blurRadius: 20, offset: const Offset(20, 40)),
-                    BoxShadow(color: const Color(0x08000008), blurRadius: 3, offset: const Offset(3, 10)),
+                    BoxShadow(
+                        color: const Color(0x00000001),
+                        blurRadius: 50,
+                        offset: const Offset(50, 40)),
+                    BoxShadow(
+                        color: const Color(0x00000002),
+                        blurRadius: 50,
+                        offset: const Offset(50, 40)),
+                    BoxShadow(
+                        color: const Color(0x00000005),
+                        blurRadius: 20,
+                        offset: const Offset(20, 40)),
+                    BoxShadow(
+                        color: const Color(0x08000008),
+                        blurRadius: 3,
+                        offset: const Offset(3, 10)),
                   ],
                 ),
                 clipBehavior: Clip.hardEdge,
@@ -42,11 +59,9 @@ class OnboardingSkillScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Progress indicator at top (step 2 of 4)
-                      ProgressIndicator(currentStep: onboard.currentStep, totalSteps: 4),
+                      ProgressIndicator(
+                          currentStep: onboard.currentStep, totalSteps: 4),
                       const SizedBox(height: 16),
-
-                      // Subheading
                       Text(
                         "What's your skill level?",
                         style: GoogleFonts.inter(
@@ -58,33 +73,41 @@ class OnboardingSkillScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 32),
-
-                      // Skill selection grid — 3 cards in a row (responsive)
                       _buildSkillGrid(context, onboard),
                       const SizedBox(height: 28),
-
-                      // Next button — enabled only when a skill is selected
                       Consumer<OnboardingProvider>(
                         builder: (context, onboardChild, _) {
                           final hasSelection = onboardChild.skillLevel != null;
-
                           return SizedBox(
+                            width: double.infinity,
                             height: 48,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 minimumSize: const Size(double.infinity, 48),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(GolfieRadii.pill),
+                                  borderRadius:
+                                      BorderRadius.circular(GolfieRadii.pill),
                                 ),
-                                backgroundColor: hasSelection ? GolfieColors.ink : GolfieColors.stone,
-                                foregroundColor: hasSelection ? GolfieColors.white : GolfieColors.ink,
-                                textStyle: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  letterSpacing: -0.24,
-                                ),
+                                backgroundColor:
+                                    hasSelection ? GolfieColors.ink : GolfieColors.stone,
+                                foregroundColor:
+                                    hasSelection ? GolfieColors.white : GolfieColors.ink,
+                                elevation: 0,
                               ),
-                              onPressed: hasSelection ? () => _handleNext(context, onboardChild) : null,
+                              onPressed: hasSelection
+                                  ? () {
+                                      debugPrint(
+                                          '🟢 [ONBOARD] Skill Next — step: ${onboardChild.currentStep}');
+                                      onboardChild.nextStep();
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const OnboardingPreferencesScreen(),
+                                        ),
+                                      );
+                                    }
+                                  : null,
                               child: const Text('Next'),
                             ),
                           );
@@ -122,30 +145,32 @@ class OnboardingSkillScreen extends StatelessWidget {
 
           return GestureDetector(
             onTap: () => _selectSkill(skill, onboard),
-            child: Container(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? GolfieColors.mint.withValues(alpha: 0.1)
-                    : GolfieColors.white,
+                color:
+                    isSelected ? GolfieColors.mint.withValues(alpha: 0.1) : GolfieColors.white,
                 borderRadius: BorderRadius.circular(GolfieRadii.lg),
                 border: Border.all(
                   color: isSelected ? GolfieColors.mint : GolfieColors.ash,
                   width: isSelected ? 2 : 1,
                 ),
                 boxShadow: [
-                  if (isSelected)
-                    BoxShadow(
-                      color: GolfieColors.mint.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
+                  BoxShadow(
+                    color: isSelected
+                        ? GolfieColors.mint.withValues(alpha: 0.15)
+                        : Colors.transparent,
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Emoji/icon for skill level
+                  // Icon
                   Icon(
                     _getSkillIcon(skill),
                     size: 40,
@@ -198,16 +223,5 @@ class OnboardingSkillScreen extends StatelessWidget {
 
   void _selectSkill(SkillLevel skill, OnboardingProvider onboard) {
     onboard.setSkillLevel(skill);
-  }
-
-  void _handleNext(BuildContext context, OnboardingProvider onboard) {
-    debugPrint('🟢 [ONBOARD] Skill Next — step: ${onboard.currentStep}');
-    onboard.nextStep();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const OnboardingPreferencesScreen(),
-      ),
-    );
   }
 }
