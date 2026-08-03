@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'secure_storage.dart';
+
 /// Centralized Supabase client initialization via supabase_flutter's Supabase.initialize().
 ///
 /// Reads environment variables at compile time:
@@ -15,9 +17,18 @@ class SupabaseWrapper {
   static Future<void> init({required String baseUrl, required String anonKey}) async {
     if (_initialized) return; // Already initialized
 
+    final persistSessionKey =
+        'sb-${Uri.parse(baseUrl).host.split('.').first}-auth-token';
+
     await Supabase.initialize(
       url: baseUrl,
       publishableKey: anonKey,
+      authOptions: FlutterAuthClientOptions(
+        localStorage: SecureStorageLocalStorage(
+          persistSessionKey: persistSessionKey,
+        ),
+        pkceAsyncStorage: SecureStorageGotrueAsyncStorage(),
+      ),
     );
     _initialized = true;
   }
