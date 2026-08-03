@@ -119,6 +119,17 @@ class OnboardingProvider with ChangeNotifier {
     _saveToPrefs();
   }
 
+  /// Update preference toggles without touching location or completing
+  /// onboarding. Used by the Profile screen settings section.
+  void updatePreferences({
+    required bool showNearby,
+    required bool emailNotifications,
+  }) {
+    _showNearby = showNearby;
+    _emailNotifications = emailNotifications;
+    _saveToPrefs();
+  }
+
   /// Complete onboarding process
   void finishOnboarding() {
     if (!_completed) {
